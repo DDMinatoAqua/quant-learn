@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>量化交易入门 · 从零开始的学习站</title>
+<meta name="description" content="面向初学者的量化交易入门教程:市场与数据、数学统计、Python 工具链、经典策略、回测陷阱、风险管理、学习路线与术语表。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<link rel="stylesheet" href="vendor/hljs/github.min.css" id="hljsLight">
+<link rel="stylesheet" href="vendor/hljs/github-dark.min.css" id="hljsDark" disabled>
+<link rel="stylesheet" href="style.css">
+<script>
+  (function(){var t=localStorage.getItem('ql-theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();
+</script>
+</head>
+<body>
+<header class="topbar">
+  <button class="icon-btn" id="menuBtn" aria-label="打开目录">☰</button>
+  <div class="brand">📈 量化交易<span>入门</span> <small style="font-weight:400;color:var(--muted);font-size:13px">Quant 101</small></div>
+  <div class="spacer"></div>
+  <div class="progress-wrap" title="学习进度(保存在本浏览器)"><div class="progress-bar"><div id="progressFill"></div></div><span id="progressText">0%</span></div>
+  <button class="icon-btn" id="themeBtn" aria-label="切换深色/浅色主题">🌙</button>
+</header>
+<div class="backdrop" id="backdrop"></div>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+  <a href="#home" data-page="home">🏠 首页</a>
+  <div class="group">核心章节</div>
+  <a href="#ch1" data-page="ch1">1. 什么是量化交易 <span class="check">✔</span></a>
+  <a href="#ch2" data-page="ch2">2. 金融市场与数据基础 <span class="check">✔</span></a>
+  <a href="#ch3" data-page="ch3">3. 必备数学统计 <span class="check">✔</span></a>
+  <a href="#ch4" data-page="ch4">4. Python 工具链 <span class="check">✔</span></a>
+  <a href="#ch5" data-page="ch5">5. 经典策略 <span class="check">✔</span></a>
+  <a href="#ch6" data-page="ch6">6. 回测与常见陷阱 <span class="check">✔</span></a>
+  <a href="#ch7" data-page="ch7">7. 风险管理与仓位 <span class="check">✔</span></a>
+  <a href="#ch8" data-page="ch8">8. 学习路线与资源 <span class="check">✔</span></a>
+  <div class="group">工具与附录</div>
+  <a href="#demo" data-page="demo">🧪 互动演示:均线交叉</a>
+  <a href="#glossary" data-page="glossary">📖 术语表</a>
+  <div class="group">进度</div>
+  <a href="#" id="resetProgress" style="color:var(--muted)">↺ 重置学习进度</a>
+</nav>
+<main id="main">
+
+<!-- ================= HOME ================= -->
+<section class="page" id="home">
+  <h1>量化交易入门 📈</h1>
+  <p class="lead">一个面向零基础同学的中文学习站:用数据和代码理解市场,学会把一个交易想法变成可检验、可复现的策略。</p>
+  <div class="callout warn"><b>免责声明:</b>本站内容仅用于学习交流,<b>不构成任何投资建议</b>。示例代码与互动演示中的数据均为教学用途(演示数据为程序随机生成的<b>模拟数据</b>),历史回测表现不代表未来收益。真实交易有亏损本金的风险。</div>
+
+  <h2>怎么用这个网站</h2>
+  <ul>
+    <li>按顺序阅读 1–8 章,每章末尾有一个<b>小测验</b>,答对全部题目(或点击“标记为已完成”)即算完成该章。</li>
+    <li>右上角的进度条会记录你的学习进度(只保存在你自己的浏览器 <code>localStorage</code> 里,不会上传)。</li>
+    <li>代码块右上角可以一键复制,示例代码均为 Python,可在本地 Jupyter 中运行。</li>
+    <li>在 <a href="#demo">互动演示</a> 里拖动参数,直观感受均线交叉策略、交易成本与回撤。</li>
+    <li>遇到不懂的词,查 <a href="#glossary">术语表</a>。右上角 🌙 可切换深色模式。</li>
+  </ul>
+
+  <h2>章节一览</h2>
+  <div class="grid">
+    <a class="card chap-card" href="#ch1"><div class="num">第 1 章</div><div class="t">什么是量化交易</div><div class="d">定义、与主观交易的区别、完整工作流</div></a>
+    <a class="card chap-card" href="#ch2"><div class="num">第 2 章</div><div class="t">金融市场与数据基础</div><div class="d">OHLCV、K 线、收益率、A 股/美股/加密市场、数据源</div></a>
+    <a class="card chap-card" href="#ch3"><div class="num">第 3 章</div><div class="t">必备数学统计</div><div class="d">均值方差、相关性、正态分布、夏普比率、最大回撤</div></a>
+    <a class="card chap-card" href="#ch4"><div class="num">第 4 章</div><div class="t">Python 工具链</div><div class="d">pandas、numpy、matplotlib、backtrader、vectorbt</div></a>
+    <a class="card chap-card" href="#ch5"><div class="num">第 5 章</div><div class="t">经典策略</div><div class="d">均线交叉、动量、布林带均值回归、配对交易、多因子</div></a>
+    <a class="card chap-card" href="#ch6"><div class="num">第 6 章</div><div class="t">回测与常见陷阱</div><div class="d">未来函数、过拟合、幸存者偏差、交易成本与滑点</div></a>
+    <a class="card chap-card" href="#ch7"><div class="num">第 7 章</div><div class="t">风险管理与仓位</div><div class="d">止损、凯利公式、波动率目标与仓位管理</div></a>
+    <a class="card chap-card" href="#ch8"><div class="num">第 8 章</div><div class="t">学习路线与资源</div><div class="d">分阶段路线图、经典书籍、平台与开源项目</div></a>
+    <a class="card chap-card" href="#demo"><div class="num">互动</div><div class="t">🧪 均线交叉演示</div><div class="d">在模拟价格上实时回测,调参数看效果</div></a>
+  </div>
+
+  <h2>你需要的基础</h2>
+  <p>会一点 Python(变量、函数、循环)就够了;高中数学水平即可读懂公式。不会也没关系,第 3、4 章会从头讲起。</p>
+</section>
+
+<!-- ================= CH1 ================= -->
+<section class="page" id="ch1" data-chapter>
+  <h1>第 1 章 · 什么是量化交易</h1>
+  <p class="lead">用数学模型和计算机程序,基于数据做出(并执行)交易决策。</p>
+
+  <h2>1.1 定义</h2>
+  <p><b>量化交易(Quantitative Trading)</b>是指把交易想法写成<b>明确的规则</b>(什么时候买、买多少、什么时候卖),再用<b>历史数据检验</b>这些规则,最后(可选)由程序<b>自动执行</b>的交易方式。核心特征是:</p>
+  <ul>
+    <li><b>规则化</b>:决策逻辑可以写成代码,同样的输入一定得到同样的输出。</li>
+    <li><b>可检验</b>:可以在历史数据上回测,用统计指标评估好坏。</li>
+    <li><b>系统化</b>:减少情绪干扰(恐惧、贪婪、侥幸),严格执行纪律。</li>
+  </ul>
+  <h3>量化交易 vs. 主观交易</h3>
+  <table>
+    <tr><th>维度</th><th>主观(discretionary)交易</th><th>量化(systematic)交易</th></tr>
+    <tr><td>决策依据</td><td>经验、直觉、新闻解读</td><td>数据 + 预先定义的规则/模型</td></tr>
+    <tr><td>可复现性</td><td>较难,同一个人不同时间判断也可能不同</td><td>高,代码就是规则</td></tr>
+    <tr><td>覆盖范围</td><td>精力有限,能盯的标的少</td><td>可同时扫描成百上千个标的</td></tr>
+    <tr><td>主要风险</td><td>情绪化、认知偏差</td><td>模型失效、过拟合、数据错误、技术故障</td></tr>
+  </table>
+  <div class="callout">常见相关概念:<b>算法交易(Algorithmic Trading)</b>多指用算法执行订单(如拆单减少冲击);<b>高频交易(HFT)</b>是持仓极短、依赖低延迟基础设施的一类量化交易。入门阶段我们关注的是<b>中低频</b>(日线级别)策略,个人电脑就能研究。</div>
+
+  <h2>1.2 量化交易的完整工作流</h2>
+  <div class="flow">
+    <span class="step">① 想法 Idea</span><span class="arrow">→</span>
+    <span class="step">② 数据 Data</span><span class="arrow">→</span>
+    <span class="step">③ 策略 Strategy</span><span class="arrow">→</span>
+    <span class="step">④ 回测 Backtest</span><span class="arrow">→</span>
+    <span class="step">⑤ 风控 Risk</span><span class="arrow">→</span>
+    <span class="step">⑥ 实盘 Live</span>
+  </div>
+  <ol>
+    <li><b>想法</b>:来自观察、论文、书籍或经济逻辑。例如“趋势会延续一段时间”“价格偏离均值后倾向回归”。好的想法最好有<b>可解释的原因</b>(为什么这个规律会存在?谁在亏钱给你?)。</li>
+    <li><b>数据</b>:获取并清洗所需数据(行情、财务、另类数据)。处理缺失值、复权、停牌、退市股票等问题。<i>垃圾进,垃圾出。</i></li>
+    <li><b>策略</b>:把想法翻译成精确的规则:入场信号、出场信号、仓位大小、调仓频率、交易标的池。</li>
+    <li><b>回测</b>:在历史数据上模拟执行规则,计算收益、波动、夏普比率、最大回撤等。必须考虑交易成本,并警惕未来函数和过拟合(见第 6 章)。</li>
+    <li><b>风控</b>:设定单笔/单日/总体亏损上限、仓位上限、分散化要求;思考策略在什么市场环境下会失效。</li>
+    <li><b>实盘</b>:先<b>模拟盘(paper trading)</b>,再小资金实盘,持续监控实盘与回测的偏差,定期复盘迭代。</li>
+  </ol>
+  <div class="callout good">这个流程是<b>循环</b>而不是直线:回测不理想就回到想法或数据;实盘偏离回测就要排查原因。大多数想法都会在回测阶段被淘汰,这很正常。</div>
+
+  <h2>1.3 量化策略的常见类型</h2>
+  <ul>
+    <li><b>趋势跟踪 / 动量</b>:涨的继续涨、跌的继续跌(第 5 章均线交叉、动量)。</li>
+    <li><b>均值回归</b>:价格偏离“合理水平”后回归(布林带、配对交易)。</li>
+    <li><b>多因子选股</b>:用价值、质量、动量、规模等因子给股票打分并构建组合。</li>
+    <li><b>套利</b>:利用相关资产之间的定价偏差(期现套利、跨市场套利等),通常对执行速度和成本要求高。</li>
+    <li><b>机器学习</b>:用模型从大量特征中学习预测关系,强大但更容易过拟合。</li>
+  </ul>
+
+  <h2>1.4 一个现实的预期</h2>
+  <p>量化不是“印钞机”。市场竞争激烈,公开、简单的策略往往收益有限甚至已经失效;回测漂亮的策略实盘亏损也很常见。学习量化最大的价值在于:<b>用科学方法看待市场</b>,学会区分“运气”和“真正的规律”。</p>
+
+  <div class="quiz" data-quiz="ch1"></div>
+</section>
+
+<!-- ================= CH2 ================= -->
+<section class="page" id="ch2" data-chapter>
+  <h1>第 2 章 · 金融市场与数据基础</h1>
+  <p class="lead">量化的原材料是数据。先搞清楚数据长什么样、市场有什么规则。</p>
+
+  <h2>2.1 OHLCV 与 K 线</h2>
+  <p>最常见的行情数据是按时间周期(1 分钟、1 小时、1 天……)汇总的 <b>OHLCV</b>:</p>
+  <table>
+    <tr><th>字段</th><th>含义</th></tr>
+    <tr><td>Open 开盘价</td><td>该周期第一笔成交价</td></tr>
+    <tr><td>High 最高价</td><td>该周期内最高成交价</td></tr>
+    <tr><td>Low 最低价</td><td>该周期内最低成交价</td></tr>
+    <tr><td>Close 收盘价</td><td>该周期最后的成交价(A 股收盘价由集合竞价产生)</td></tr>
+    <tr><td>Volume 成交量</td><td>该周期内的成交数量(股/手/张);<b>成交额(Amount)</b>是成交金额</td></tr>
+  </table>
+  <p><b>K 线(蜡烛图)</b>把一根 OHLC 画成一个“蜡烛”:实体表示开盘到收盘,上下影线表示最高、最低价。<b>注意颜色习惯:A 股/港股通常“红涨绿跌”,美股/欧美软件通常“绿涨红跌”。</b></p>
+  <svg viewBox="0 0 360 170" width="100%" style="max-width:420px" role="img" aria-label="K线示意图">
+    <g font-size="12" fill="currentColor">
+      <line x1="80" y1="15" x2="80" y2="155" stroke="#dc2626" stroke-width="2"/>
+      <rect x="60" y="45" width="40" height="70" fill="#dc2626"/>
+      <text x="108" y="20">最高价 High</text><text x="108" y="50">收盘价 Close</text>
+      <text x="108" y="118">开盘价 Open</text><text x="108" y="158">最低价 Low</text>
+      <text x="40" y="168">阳线(收&gt;开)</text>
+      <line x1="270" y1="15" x2="270" y2="155" stroke="#16a34a" stroke-width="2"/>
+      <rect x="250" y="45" width="40" height="70" fill="#16a34a"/>
+      <text x="230" y="168">阴线(收&lt;开)</text>
+      <text x="298" y="50">开</text><text x="298" y="118">收</text>
+    </g>
+  </svg>
+  <p class="disclaimer">上图按 A 股“红涨绿跌”配色。</p>
+
+  <h2>2.2 收益率</h2>
+  <p>研究策略时,我们通常分析<b>收益率</b>而不是价格本身(不同价格的股票才可比较)。</p>
+  <p><b>简单收益率</b>:</p>
+  $$R_t = \frac{P_t - P_{t-1}}{P_{t-1}} = \frac{P_t}{P_{t-1}} - 1$$
+  <p><b>对数收益率</b>:</p>
+  $$r_t = \ln\frac{P_t}{P_{t-1}} = \ln(1+R_t)$$
+  <ul>
+    <li>对数收益率<b>可以按时间直接相加</b>:多期对数收益 = 各期之和;简单收益率需要连乘:\( 1+R_{0\to T} = \prod_t (1+R_t) \)。</li>
+    <li>简单收益率<b>可以按资产加权相加</b>:组合收益 = \( \sum_i w_i R_i \)。</li>
+    <li>收益率较小时两者近似相等:\( r \approx R \)。</li>
+  </ul>
+  <h3>复权</h3>
+  <p>分红、送股、配股会让股价出现“跳空”,但持有者并没有真实亏损。回测必须使用<b>复权价格</b>:</p>
+  <ul>
+    <li><b>前复权</b>:以最新价格为基准,向前调整历史价格。当前价格与行情软件一致,适合看图和回测(但历史价格会随新的除权事件变化)。</li>
+    <li><b>后复权</b>:以上市首日为基准向后调整,历史价格不变,当前价格可能远高于实际价格。</li>
+  </ul>
+
+  <h2>2.3 主要市场基础</h2>
+  <table>
+    <tr><th></th><th>A 股(沪深北)</th><th>美股</th><th>加密货币</th></tr>
+    <tr><td>交易时间</td><td>工作日 9:30–11:30、13:00–15:00(北京时间),9:15 起有开盘集合竞价</td><td>常规时段美东 9:30–16:00,另有盘前盘后</td><td>7×24 小时不间断</td></tr>
+    <tr><td>交易制度</td><td><b>T+1</b>:当天买入的股票下一个交易日才能卖出</td><td>可日内买卖;证券结算周期为 T+1(2024 年 5 月起)</td><td>随时买卖,规则因交易所而异</td></tr>
+    <tr><td>涨跌幅限制</td><td>主板一般 ±10%,创业板/科创板 ±20%,ST 股 ±5%(新股上市初期等另有规定)</td><td>个股无日涨跌停,但有市场级熔断和个股波动暂停(LULD)机制</td><td>现货一般无限制</td></tr>
+    <tr><td>做空</td><td>融券门槛高、券源有限,个人普通账户基本只能做多</td><td>融券做空相对方便</td><td>永续合约等衍生品可做空(杠杆风险极高)</td></tr>
+    <tr><td>最小交易单位</td><td>买入通常以 100 股(1 手)为单位</td><td>1 股,部分券商支持碎股</td><td>可交易极小份额</td></tr>
+    <tr><td>主要成本</td><td>佣金(券商协商)、卖出印花税(2023 年 8 月起为 0.05%)、过户费等</td><td>多数券商零佣金,但存在买卖价差、监管费等</td><td>交易所手续费、价差、资金费率</td></tr>
+  </table>
+  <div class="callout warn">市场规则会调整,以上为写作时的一般情况,做真实研究请以交易所和券商的最新官方规则为准。</div>
+
+  <h2>2.4 常用数据源(Python)</h2>
+  <table>
+    <tr><th>数据源</th><th>覆盖</th><th>说明</th></tr>
+    <tr><td><b>AkShare</b></td><td>A 股、港股、美股、期货、基金、宏观等</td><td>开源免费,数据来自公开网站接口;接口名偶有变动,注意升级版本</td></tr>
+    <tr><td><b>Tushare Pro</b></td><td>以 A 股为主,含财务、指数、基金等</td><td>需注册获取 token,部分数据按积分开放</td></tr>
+    <tr><td><b>yfinance</b></td><td>美股、港股、指数、ETF、部分加密货币</td><td>非官方的 Yahoo Finance 接口,适合学习,可能受限流或接口变化影响</td></tr>
+    <tr><td><b>ccxt</b></td><td>主流加密货币交易所</td><td>统一封装各交易所 API,可获取 K 线数据</td></tr>
+  </table>
+<pre><code class="language-python"># pip install akshare yfinance
+import akshare as ak
+import yfinance as yf
+
+# A 股日线(平安银行 000001,前复权)
+df_a = ak.stock_zh_a_hist(symbol="000001", period="daily",
+                          start_date="20200101", end_date="20241231", adjust="qfq")
+print(df_a.head())   # 列名为中文:日期、开盘、收盘、最高、最低、成交量 ...
+
+# 美股日线(SPY ETF),auto_adjust=True 返回复权价格
+df_us = yf.download("SPY", start="2020-01-01", end="2024-12-31",
+                    auto_adjust=True, multi_level_index=False)
+print(df_us.tail())  # 列:Open High Low Close Volume
+
+# Tushare Pro(需要在官网注册获取 token)
+# import tushare as ts
+# pro = ts.pro_api("你的token")
+# df_ts = pro.daily(ts_code="000001.SZ", start_date="20200101", end_date="20241231")
+</code></pre>
+  <div class="callout">数据质量检查清单:是否复权?有无缺失日期/停牌?是否包含已退市股票(避免幸存者偏差)?时间戳是哪个时区?财务数据用的是<b>公告日</b>还是报告期(避免未来函数)?</div>
+
+  <div class="quiz" data-quiz="ch2"></div>
+</section>
+
+<!-- ================= CH3 ================= -->
+<section class="page" id="ch3" data-chapter>
+  <h1>第 3 章 · 必备数学统计</h1>
+  <p class="lead">不需要高深数学,但这几个概念必须吃透:它们是评价一切策略的语言。</p>
+
+  <h2>3.1 均值与方差</h2>
+  <p>设有 \(n\) 个收益率观测值 \(r_1,\dots,r_n\):</p>
+  $$\bar r = \frac{1}{n}\sum_{i=1}^{n} r_i \qquad s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(r_i-\bar r)^2 \qquad s=\sqrt{s^2}$$
+  <p>均值衡量“平均赚多少”,<b>标准差(波动率)</b>衡量“收益有多不稳定”,是最常用的风险度量。样本方差除以 \(n-1\)(贝塞尔校正)以得到无偏估计,pandas 的 <code>.std()</code> 默认就是这样。</p>
+  <h3>年化</h3>
+  <p>若日收益近似独立同分布,一年约 252 个交易日(A 股约 240–245 天,常近似为 252 或 250):</p>
+  $$\mu_{\text{年}} \approx 252\,\bar r_{\text{日}} \qquad \sigma_{\text{年}} \approx \sqrt{252}\;\sigma_{\text{日}}$$
+  <p>波动率按 \(\sqrt{T}\) 缩放,因为独立随机变量之和的<b>方差</b>按 \(T\) 线性增长。</p>
+
+  <h2>3.2 协方差与相关系数</h2>
+  $$\operatorname{Cov}(X,Y)=\frac{1}{n-1}\sum_{i}(x_i-\bar x)(y_i-\bar y) \qquad \rho_{XY}=\frac{\operatorname{Cov}(X,Y)}{s_X\,s_Y}\in[-1,1]$$
+  <ul>
+    <li>\(\rho=1\):完全同向;\(\rho=-1\):完全反向;\(\rho=0\):没有<b>线性</b>关系(不代表独立)。</li>
+    <li>两资产组合的方差:\( \sigma_p^2 = w_1^2\sigma_1^2 + w_2^2\sigma_2^2 + 2w_1w_2\rho\,\sigma_1\sigma_2 \)。相关性越低,分散化降低风险的效果越好。</li>
+    <li>相关性<b>不是</b>因果,而且在市场危机时资产间相关性往往会上升,分散化效果可能变差。</li>
+  </ul>
+
+  <h2>3.3 正态分布与“肥尾”</h2>
+  <p>正态分布 \(N(\mu,\sigma^2)\) 的概率密度为:</p>
+  $$f(x)=\frac{1}{\sigma\sqrt{2\pi}}\exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$$
+  <p>约 68% 的概率落在 \(\mu\pm1\sigma\),约 95% 在 \(\mu\pm2\sigma\),约 99.7% 在 \(\mu\pm3\sigma\)。</p>
+  <div class="callout warn">真实资产收益通常呈现<b>肥尾(fat tails)</b>和偏度:极端涨跌出现的频率远高于正态分布的预测。用正态假设计算风险(如 VaR)可能严重低估暴跌风险。可以用<b>峰度(kurtosis)</b>和<b>偏度(skewness)</b>来检查:正态分布的超额峰度为 0。</div>
+
+  <h2>3.4 夏普比率 Sharpe Ratio</h2>
+  <p>衡量<b>每承担一单位波动风险,获得多少超额收益</b>:</p>
+  $$\text{Sharpe} = \frac{E[R_p - R_f]}{\sigma(R_p - R_f)} \qquad \text{年化 Sharpe} \approx \sqrt{252}\times\frac{\overline{r_{\text{日}}-r_{f,\text{日}}}}{s_{\text{日}}}$$
+  <p>其中 \(R_f\) 为无风险利率。夏普比率越高,风险调整后收益越好。注意:</p>
+  <ul>
+    <li>样本短时夏普的估计误差很大;同一策略换个时间段可能差别很大。</li>
+    <li>它把上涨波动和下跌波动同等对待。只惩罚下行波动的版本叫 <b>Sortino 比率</b>。</li>
+    <li>回测中尝试了很多参数后挑出的最高夏普会被高估(见第 6 章过拟合)。</li>
+  </ul>
+
+  <h2>3.5 最大回撤 Maximum Drawdown</h2>
+  <p>设净值曲线为 \(V_t\),历史最高点 \(M_t = \max_{s\le t} V_s\):</p>
+  $$\text{DD}_t = \frac{V_t - M_t}{M_t} \qquad \text{MDD} = \min_t \text{DD}_t$$
+  <p>最大回撤表示“从最高点跌下来最多亏了多少”,直接反映持有策略时的心理痛苦和资金风险。还要关注<b>回撤持续时间</b>(多久才能回到前高)。<b>Calmar 比率</b> = 年化收益 / |最大回撤|。</p>
+  <div class="callout">回本的不对称性:亏损 \(x\) 后需要上涨 \(\frac{x}{1-x}\) 才能回本。亏 20% 需涨 25%,亏 50% 需涨 100%。这就是为什么风控要优先控制回撤。</div>
+
+  <h2>3.6 用代码计算这些指标</h2>
+<pre><code class="language-python">import numpy as np
+import pandas as pd
+
+def perf_stats(daily_ret: pd.Series, rf_annual: float = 0.0, periods: int = 252) -> dict:
+    """根据日收益率序列计算常用绩效指标"""
+    daily_ret = daily_ret.dropna()
+    excess = daily_ret - rf_annual / periods
+    equity = (1 + daily_ret).cumprod()                 # 净值曲线
+    years = len(daily_ret) / periods
+    cagr = equity.iloc[-1] ** (1 / years) - 1          # 年化复合收益
+    vol = daily_ret.std() * np.sqrt(periods)           # 年化波动率
+    sharpe = excess.mean() / excess.std() * np.sqrt(periods)
+    drawdown = equity / equity.cummax() - 1
+    return {
+        "年化收益": cagr, "年化波动": vol, "夏普比率": sharpe,
+        "最大回撤": drawdown.min(),
+        "偏度": daily_ret.skew(), "超额峰度": daily_ret.kurt(),
+    }
+
+# 用随机生成的模拟数据测试(非真实行情)
+rng = np.random.default_rng(42)
+fake = pd.Series(rng.normal(0.0004, 0.01, 1000))
+print(perf_stats(fake))
+</code></pre>
+
+  <div class="quiz" data-quiz="ch3"></div>
+</section>
+<!-- ================= CH4 ================= -->
+<section class="page" id="ch4" data-chapter>
+  <h1>第 4 章 · Python 工具链</h1>
+  <p class="lead">Python 是量化研究的事实标准。掌握下面几个库,就能完成 90% 的入门研究。</p>
+
+  <h2>4.1 环境准备</h2>
+<pre><code class="language-bash"># 推荐使用虚拟环境(conda 或 venv)
+python -m venv quant-env
+source quant-env/bin/activate        # Windows: quant-env\Scripts\activate
+pip install numpy pandas matplotlib jupyterlab yfinance akshare statsmodels
+pip install backtrader vectorbt      # 回测框架
+jupyter lab
+</code></pre>
+  <table>
+    <tr><th>库</th><th>用途</th></tr>
+    <tr><td><b>numpy</b></td><td>高效数组与数值计算</td></tr>
+    <tr><td><b>pandas</b></td><td>表格/时间序列处理:读写数据、滚动窗口、对齐、重采样</td></tr>
+    <tr><td><b>matplotlib</b></td><td>画图:价格、净值、回撤</td></tr>
+    <tr><td><b>statsmodels</b></td><td>统计检验与回归(如协整检验)</td></tr>
+    <tr><td><b>backtrader</b></td><td>事件驱动回测框架,逐根 K 线模拟,贴近实盘逻辑</td></tr>
+    <tr><td><b>vectorbt</b></td><td>向量化回测,速度极快,适合大规模参数扫描</td></tr>
+  </table>
+
+  <h2>4.2 numpy 与 pandas 基础</h2>
+<pre><code class="language-python">import numpy as np
+import pandas as pd
+
+# 生成一段模拟价格(几何布朗运动),仅用于练习
+rng = np.random.default_rng(0)
+dates = pd.bdate_range("2020-01-01", periods=750)          # 工作日索引
+daily_ret = rng.normal(loc=0.0003, scale=0.012, size=len(dates))
+close = pd.Series(100 * np.exp(np.cumsum(daily_ret)), index=dates, name="close")
+
+df = close.to_frame()
+df["ret"] = df["close"].pct_change()                      # 简单收益率
+df["log_ret"] = np.log(df["close"]).diff()                # 对数收益率
+df["sma20"] = df["close"].rolling(20).mean()              # 20 日均线
+df["vol20"] = df["ret"].rolling(20).std() * np.sqrt(252)  # 20 日年化波动率
+
+print(df.describe())
+monthly = df["close"].resample("ME").last()               # 重采样为月末价格(旧版 pandas 用 "M")
+print(monthly.pct_change().head())
+</code></pre>
+  <div class="callout">关键技巧:<code>pct_change()</code> 求收益率、<code>rolling()</code> 滚动窗口、<code>shift()</code> 错位(防止未来函数的关键!)、<code>cumprod()</code> 累乘得净值、<code>resample()</code> 改变频率。</div>
+
+  <h2>4.3 matplotlib 画净值和回撤</h2>
+<pre><code class="language-python">import matplotlib.pyplot as plt
+
+equity = (1 + df["ret"].fillna(0)).cumprod()
+drawdown = equity / equity.cummax() - 1
+
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 6), sharex=True,
+                               gridspec_kw={"height_ratios": [3, 1]})
+ax1.plot(df.index, df["close"], label="Close")
+ax1.plot(df.index, df["sma20"], label="SMA20")
+ax1.legend(); ax1.set_title("Simulated price (not real data)")
+ax2.fill_between(drawdown.index, drawdown, 0, color="red", alpha=0.4)
+ax2.set_ylabel("Drawdown")
+plt.tight_layout(); plt.show()
+</code></pre>
+  <p class="disclaimer">提示:matplotlib 默认字体不支持中文,图表标题可用英文,或设置 <code>plt.rcParams["font.sans-serif"] = ["SimHei"]</code>(Windows)/<code>["PingFang SC"]</code>(macOS)。</p>
+
+  <h2>4.4 backtrader:事件驱动回测</h2>
+  <p>backtrader 按时间顺序逐根 K 线调用策略的 <code>next()</code>,下单默认在<b>下一根 K 线开盘</b>成交,天然避免了“用今天收盘价信号、按今天收盘价成交”的问题。</p>
+<pre><code class="language-python">import backtrader as bt
+import yfinance as yf
+
+class SmaCross(bt.Strategy):
+    params = dict(fast=10, slow=30)
+
+    def __init__(self):
+        fast = bt.ind.SMA(period=self.p.fast)
+        slow = bt.ind.SMA(period=self.p.slow)
+        self.crossover = bt.ind.CrossOver(fast, slow)   # 上穿 = 1,下穿 = -1
+
+    def next(self):
+        if not self.position:
+            if self.crossover &gt; 0:
+                self.buy()
+        elif self.crossover &lt; 0:
+            self.close()
+
+df = yf.download("SPY", start="2015-01-01", end="2024-12-31",
+                 auto_adjust=True, multi_level_index=False)
+
+cerebro = bt.Cerebro()
+cerebro.adddata(bt.feeds.PandasData(dataname=df))
+cerebro.addstrategy(SmaCross)
+cerebro.broker.setcash(100_000)
+cerebro.broker.setcommission(commission=0.001)          # 0.1% 手续费
+cerebro.addsizer(bt.sizers.PercentSizer, percents=95)  # 每次用 95% 资金
+cerebro.addanalyzer(bt.analyzers.SharpeRatio, _name="sharpe", timeframe=bt.TimeFrame.Days, annualize=True)
+cerebro.addanalyzer(bt.analyzers.DrawDown, _name="dd")
+
+result = cerebro.run()[0]
+print("期末资金:", round(cerebro.broker.getvalue(), 2))
+print("夏普:", result.analyzers.sharpe.get_analysis())
+print("最大回撤 %:", result.analyzers.dd.get_analysis().max.drawdown)
+# cerebro.plot()   # 需要 matplotlib
+</code></pre>
+
+  <h2>4.5 vectorbt:向量化回测与参数扫描</h2>
+<pre><code class="language-python">import vectorbt as vbt
+
+price = vbt.YFData.download("SPY", start="2015-01-01", end="2024-12-31").get("Close")
+
+fast = vbt.MA.run(price, 10)
+slow = vbt.MA.run(price, 30)
+entries = fast.ma_crossed_above(slow)
+exits = fast.ma_crossed_below(slow)
+
+pf = vbt.Portfolio.from_signals(price, entries, exits, fees=0.001, freq="1D")
+print(pf.stats())            # 总收益、夏普、最大回撤、胜率等
+# pf.plot().show()
+
+# 一次性扫描多组参数(注意:扫描越多,越容易过拟合!)
+fast_m, slow_m = vbt.MA.run_combs(price, window=range(5, 60, 5), r=2, short_names=["fast", "slow"])
+pf_all = vbt.Portfolio.from_signals(price, fast_m.ma_crossed_above(slow_m),
+                                    fast_m.ma_crossed_below(slow_m), fees=0.001, freq="1D")
+print(pf_all.sharpe_ratio().sort_values(ascending=False).head())
+</code></pre>
+  <div class="callout warn">事件驱动(backtrader)更贴近实盘、灵活但慢;向量化(vectorbt / 纯 pandas)快、适合研究,但更容易不小心引入未来函数。两者结果可以互相校验。</div>
+
+  <div class="quiz" data-quiz="ch4"></div>
+</section>
+
+<!-- ================= CH5 ================= -->
+<section class="page" id="ch5" data-chapter>
+  <h1>第 5 章 · 经典策略</h1>
+  <p class="lead">以下策略都是教科书级的入门案例,目的是学习方法,而非可直接盈利的“圣杯”。</p>
+  <p>本章统一约定:<code>close</code> 为复权收盘价序列(pandas Series),<b>信号在 t 日收盘后产生,t+1 日才持仓</b>,所以收益计算都用 <code>position.shift(1)</code>。通用回测函数:</p>
+<pre><code class="language-python">import numpy as np
+import pandas as pd
+
+def backtest(close: pd.Series, position: pd.Series, cost: float = 0.001) -&gt; pd.Series:
+    """position: t 日收盘后决定的目标仓位(0~1 或 -1~1)。返回策略日收益率。"""
+    ret = close.pct_change().fillna(0)
+    pos = position.shift(1).fillna(0)        # 关键:用昨天的信号赚今天的收益
+    turnover = pos.diff().abs().fillna(0)    # 仓位变化量
+    return pos * ret - turnover * cost       # 扣除交易成本
+</code></pre>
+
+  <h2>5.1 均线交叉(趋势跟踪)<span class="badge">趋势</span></h2>
+  <p><b>思路</b>:短期均线代表近期趋势,长期均线代表长期趋势。短均线上穿长均线(“金叉”)视为上涨趋势开始,买入;下穿(“死叉”)卖出。</p>
+  $$\text{SMA}_n(t) = \frac{1}{n}\sum_{i=0}^{n-1} P_{t-i}$$
+  <p><b>优点</b>:规则简单,能抓住大趋势。<b>缺点</b>:信号滞后,震荡市中反复“打脸”,交易成本侵蚀收益。可以去 <a href="#demo">互动演示</a> 亲手试试。</p>
+<pre><code class="language-python">def sma_cross(close, fast=20, slow=60):
+    sma_f = close.rolling(fast).mean()
+    sma_s = close.rolling(slow).mean()
+    return (sma_f &gt; sma_s).astype(float)      # 1 = 持有, 0 = 空仓
+
+strat_ret = backtest(close, sma_cross(close))
+print("策略净值:", (1 + strat_ret).cumprod().iloc[-1])
+</code></pre>
+
+  <h2>5.2 动量策略 <span class="badge">趋势</span></h2>
+  <p><b>思路</b>:过去一段时间表现好的资产,未来一段时间倾向于继续表现好。学术上有两类:</p>
+  <ul>
+    <li><b>时间序列动量</b>:看资产自身过去收益的正负,正则做多、负则空仓/做空。</li>
+    <li><b>横截面动量</b>:在一篮子股票中买入过去收益最高的一组、卖出最低的一组。经典研究(Jegadeesh &amp; Titman, 1993)常用过去 3–12 个月收益,且常跳过最近 1 个月(短期存在反转效应)。</li>
+  </ul>
+<pre><code class="language-python"># 时间序列动量:过去 120 个交易日收益为正则持有
+def ts_momentum(close, lookback=120):
+    past_ret = close / close.shift(lookback) - 1
+    return (past_ret &gt; 0).astype(float)
+
+# 横截面动量:prices 为 DataFrame(列 = 股票),每月调仓,买入过去 12 个月(跳过最近 1 个月)收益最高的 20%
+def xs_momentum_weights(prices: pd.DataFrame, top_q=0.2):
+    monthly = prices.resample("ME").last()
+    mom = monthly.shift(1) / monthly.shift(12) - 1       # 12-1 动量
+    rank = mom.rank(axis=1, pct=True)
+    w = (rank &gt;= 1 - top_q).astype(float)
+    w = w.div(w.sum(axis=1), axis=0).fillna(0)          # 等权
+    return w   # 月末权重,下个月持有;应用到日频时需 shift 后前向填充
+</code></pre>
+  <div class="callout warn">动量策略可能出现“动量崩溃”:市场急跌后的快速反弹中,动量组合可能在短时间内大幅亏损。</div>
+
+  <h2>5.3 均值回归:布林带 <span class="badge">反转</span></h2>
+  <p><b>思路</b>:价格围绕某个均值波动,偏离过大时倾向回归。布林带(Bollinger Bands)由均线和上下各 \(k\) 倍标准差组成:</p>
+  $$\text{Mid}_t=\text{SMA}_n(t),\quad \text{Upper}_t=\text{Mid}_t+k\sigma_t,\quad \text{Lower}_t=\text{Mid}_t-k\sigma_t$$
+  <p>常用参数 \(n=20, k=2\)。规则示例:收盘跌破下轨买入,回到中轨卖出。</p>
+<pre><code class="language-python">def bollinger_mr(close, n=20, k=2.0):
+    mid = close.rolling(n).mean()
+    sd = close.rolling(n).std()
+    lower = mid - k * sd
+    # 入场 = 1,出场 = 0,其余时间保持上一状态(NaN 前向填充)
+    signal = pd.Series(np.nan, index=close.index)
+    signal[close &lt; lower] = 1.0
+    signal[close &gt; mid] = 0.0
+    return signal.ffill().fillna(0)
+
+strat_ret = backtest(close, bollinger_mr(close))
+</code></pre>
+  <div class="callout warn">均值回归的风险:趋势行情中价格可能一路突破下轨不回头(“接飞刀”)。通常需要止损或趋势过滤。<b>趋势策略和均值回归策略往往在不同市场环境下表现好坏相反。</b></div>
+
+  <h2>5.4 配对交易(统计套利)<span class="badge">相对价值</span></h2>
+  <p><b>思路</b>:找到两只长期走势高度相关、且价差存在稳定关系(<b>协整</b>)的资产,如同行业的两只股票。当价差偏离历史均值时,做多“便宜”的一只、做空“贵”的一只,等待价差回归。</p>
+  $$\text{spread}_t = \log P^A_t - \beta \log P^B_t \qquad z_t=\frac{\text{spread}_t-\mu_{\text{spread}}}{\sigma_{\text{spread}}}$$
+  <p>规则示例:\(z_t&gt;2\) 做空价差(空 A 多 B),\(z_t&lt;-2\) 做多价差,\(|z_t|&lt;0.5\) 平仓。</p>
+<pre><code class="language-python">import statsmodels.api as sm
+from statsmodels.tsa.stattools import coint
+
+def pairs_signal(pa: pd.Series, pb: pd.Series, train_end: str, window=60, entry=2.0, exit_=0.5):
+    la, lb = np.log(pa), np.log(pb)
+    # 1) 仅用训练期数据做协整检验并估计对冲比例 beta(避免未来函数)
+    tr_a, tr_b = la[:train_end], lb[:train_end]
+    t_stat, p_value, _ = coint(tr_a, tr_b)
+    print(f"协整检验 p 值: {p_value:.3f}")             # 通常要求 p &lt; 0.05
+    beta = sm.OLS(tr_a, sm.add_constant(tr_b)).fit().params.iloc[1]
+
+    # 2) 计算价差的滚动 z-score
+    spread = la - beta * lb
+    z = (spread - spread.rolling(window).mean()) / spread.rolling(window).std()
+
+    # 3) 生成价差仓位:+1 = 多 A 空 beta 份 B,-1 = 空 A 多 B
+    pos = pd.Series(np.nan, index=z.index)
+    pos[z &gt; entry] = -1.0
+    pos[z &lt; -entry] = 1.0
+    pos[z.abs() &lt; exit_] = 0.0
+    return pos.ffill().fillna(0), beta
+</code></pre>
+  <div class="callout">要点:相关 ≠ 协整;协整关系可能因基本面变化而破裂(需要止损);A 股个人做空受限,配对交易在 A 股实践中较难,期货、加密货币市场更常见。</div>
+
+  <h2>5.5 多因子模型入门 <span class="badge">选股</span></h2>
+  <p><b>思路</b>:股票收益可以部分由一组共同“因子”解释。经典模型:</p>
+  <ul>
+    <li><b>CAPM</b>:只有市场因子 \(E[R_i]-R_f=\beta_i(E[R_m]-R_f)\)。</li>
+    <li><b>Fama-French 三因子(1993)</b>:市场、规模(SMB,小盘减大盘)、价值(HML,高账面市值比减低账面市值比)。</li>
+    <li><b>Carhart 四因子(1997)</b>:在三因子基础上加入动量因子;后续还有 Fama-French 五因子(2015,加入盈利能力与投资)。</li>
+  </ul>
+  $$R_{i,t}-R_{f,t}=\alpha_i+\beta_i\,\text{MKT}_t+s_i\,\text{SMB}_t+h_i\,\text{HML}_t+\varepsilon_{i,t}$$
+  <p>实际选股中常见的做法是“打分法”:对每个因子做横截面标准化(z-score),加权合成综合得分,买入得分最高的一组股票,定期调仓。</p>
+<pre><code class="language-python"># factors: MultiIndex DataFrame,index = (date, stock),列 = 因子值,如 pe、roe、mom_12_1
+def zscore_cs(s: pd.Series) -&gt; pd.Series:
+    """横截面标准化,并对极端值缩尾到 ±3"""
+    z = (s - s.mean()) / s.std()
+    return z.clip(-3, 3)
+
+def composite_score(factors: pd.DataFrame) -&gt; pd.Series:
+    z = factors.groupby(level="date").transform(zscore_cs)
+    # 方向:PE 越低越好(取负),ROE、动量越高越好
+    score = (-z["pe"] + z["roe"] + z["mom_12_1"]) / 3
+    return score
+
+# 每个调仓日选出得分前 10% 的股票等权持有
+# top = score.groupby(level="date").apply(lambda s: s[s &gt;= s.quantile(0.9)])
+</code></pre>
+  <div class="callout warn">多因子研究的难点:因子数据必须按<b>公告日</b>对齐(否则未来函数)、股票池要包含退市股票、需要处理行业和市值中性化,还要检验因子是否只是数据挖掘的产物。</div>
+
+  <div class="quiz" data-quiz="ch5"></div>
+</section>
+<!-- ================= CH6 ================= -->
+<section class="page" id="ch6" data-chapter>
+  <h1>第 6 章 · 回测与常见陷阱</h1>
+  <p class="lead">回测很容易“骗”自己。绝大多数回测好、实盘差的问题都来自以下几个陷阱。</p>
+
+  <h2>6.1 未来函数(Look-ahead Bias)</h2>
+  <p>在 t 时刻的决策中使用了 t 时刻<b>还无法得知</b>的信息。常见形式:</p>
+  <ul>
+    <li>用 t 日收盘价算出信号,又假设在 t 日收盘价成交并获得 t 日收益。</li>
+    <li>财报数据按“报告期”而非“公告日”对齐(一季报 3 月 31 日截止,但可能 4 月底才公布)。</li>
+    <li>用<b>全样本</b>的均值/标准差做标准化,或用全样本估计参数(如配对交易的 β)。</li>
+    <li>使用了当天的最高价/最低价作为入场条件,却假设能以更优价格成交。</li>
+  </ul>
+<pre><code class="language-python">ret = close.pct_change()
+signal = (close &gt; close.rolling(20).mean()).astype(float)
+
+wrong = signal * ret             # ❌ 今天收盘才知道的信号,却赚了今天的收益
+right = signal.shift(1) * ret    # ✅ 昨天收盘的信号,今天持仓
+print((1 + wrong).prod(), (1 + right).prod())   # wrong 往往好得离谱
+</code></pre>
+  <div class="callout bad">一个经验法则:如果回测结果好得令人难以置信(比如夏普远高于业内顶尖水平、几乎没有回撤),先假设代码有 bug,尤其是未来函数。</div>
+
+  <h2>6.2 过拟合(Overfitting)与数据窥探</h2>
+  <p>参数和规则调得太多,策略记住了历史噪声而非真实规律。在 100 组参数里挑出最好的那组,其历史表现几乎必然被高估。</p>
+  <p><b>应对方法</b>:</p>
+  <ul>
+    <li><b>样本内/样本外划分</b>:在训练集上开发,在从未看过的测试集上只验证一次。</li>
+    <li><b>滚动前向分析(Walk-forward)</b>:滚动地“训练一段 → 测试下一段”,更接近真实使用方式。</li>
+    <li><b>参数稳健性</b>:好的策略在参数附近一片区域都表现不错,而不是只在某个“尖峰”参数有效。</li>
+    <li><b>控制尝试次数</b>:记录你试过的所有想法;Bailey 与 López de Prado 提出的<b>紧缩夏普比率(Deflated Sharpe Ratio)</b>可以对多重检验进行校正。</li>
+    <li><b>规则要少、要有逻辑</b>:能用经济逻辑解释的规律更可能持续。</li>
+  </ul>
+<pre><code class="language-python"># 简单的样本内 / 样本外划分
+in_sample = close[:"2019-12-31"]
+out_sample = close["2020-01-01":]
+
+best = max(((f, s) for f in range(5, 50, 5) for s in range(20, 200, 10) if f &lt; s),
+           key=lambda p: backtest(in_sample, sma_cross(in_sample, *p)).mean())
+print("样本内最佳参数:", best)
+oos = backtest(out_sample, sma_cross(out_sample, *best))   # 只看一次!
+</code></pre>
+
+  <h2>6.3 幸存者偏差(Survivorship Bias)</h2>
+  <p>只用<b>现在还存在</b>的股票做回测,忽略了历史上已退市、被并购、破产的公司。这些“死掉”的公司往往表现很差,剔除它们会让策略(尤其是买入小盘股、低价股、困境股的策略)看起来更好。</p>
+  <p>应对:使用包含退市股票的<b>历史时点股票池(point-in-time universe)</b>;指数成分股也要用当时的成分,而不是今天的成分。</p>
+
+  <h2>6.4 交易成本与滑点</h2>
+  <ul>
+    <li><b>显性成本</b>:佣金、印花税(A 股卖出)、过户费、交易所费用。</li>
+    <li><b>买卖价差</b>:市价买入付卖一价、卖出得买一价。</li>
+    <li><b>滑点(Slippage)</b>:实际成交价与预期价格的差异,来自价格波动和延迟。</li>
+    <li><b>市场冲击(Market Impact)</b>:自己的大单推动价格向不利方向移动,资金量越大越明显。</li>
+  </ul>
+  <p>换手越高的策略,成本影响越大。粗略估算:若每次换仓双边成本 0.2%,一年换仓 100 次,仅成本就约侵蚀 20% 的收益。务必在回测中加入保守的成本假设,并测试成本加倍后策略是否依然成立。</p>
+
+  <h2>6.5 其他需要注意的问题</h2>
+  <ul>
+    <li><b>A 股特殊规则</b>:涨停时往往买不进、跌停时往往卖不出;T+1;停牌期间无法交易。回测要识别这些情况。</li>
+    <li><b>流动性</b>:小盘股成交量小,回测中的仓位在现实中可能根本买不到。</li>
+    <li><b>样本区间偏差</b>:只在牛市回测的趋势策略、只在震荡市回测的反转策略都会误导你。</li>
+    <li><b>市场机制变化(Regime change)</b>:规则、参与者结构、波动率水平都会变化,历史规律可能消失。</li>
+  </ul>
+  <div class="card"><b>回测自查清单 ✅</b>
+    <ol>
+      <li>信号是否全部只用到了当时可得的数据?(shift 了吗?财报用公告日了吗?)</li>
+      <li>股票池是否包含退市股?</li>
+      <li>是否计入了佣金、税费、滑点?成本翻倍后结果如何?</li>
+      <li>是否在样本外数据上验证过?参数附近是否稳健?</li>
+      <li>最大回撤和回撤时长我能承受吗?</li>
+      <li>策略为什么能赚钱?对手方是谁?</li>
+    </ol>
+  </div>
+
+  <div class="quiz" data-quiz="ch6"></div>
+</section>
+
+<!-- ================= CH7 ================= -->
+<section class="page" id="ch7" data-chapter>
+  <h1>第 7 章 · 风险管理与仓位</h1>
+  <p class="lead">“先求不败,再求胜。” 决定你能在市场里活多久的,往往是仓位和风控,而不是入场信号。</p>
+
+  <h2>7.1 止损</h2>
+  <ul>
+    <li><b>固定比例止损</b>:从入场价下跌 \(x\%\) 即离场。</li>
+    <li><b>移动止损(Trailing Stop)</b>:从持仓期间最高价回落 \(x\%\) 离场,让利润奔跑。</li>
+    <li><b>波动率止损</b>:基于 ATR(平均真实波幅)设定止损距离,如入场价 − 2×ATR,能适应不同标的的波动水平。</li>
+    <li><b>时间止损</b>:持有一定时间仍未达到预期即离场。</li>
+  </ul>
+  $$\text{TR}_t=\max\big(H_t-L_t,\;|H_t-C_{t-1}|,\;|L_t-C_{t-1}|\big) \qquad \text{ATR}_t=\text{TR 的 } n \text{ 日平均(常用 } n=14)$$
+<pre><code class="language-python">def atr(df: pd.DataFrame, n: int = 14) -&gt; pd.Series:
+    prev_close = df["Close"].shift(1)
+    tr = pd.concat([df["High"] - df["Low"],
+                    (df["High"] - prev_close).abs(),
+                    (df["Low"] - prev_close).abs()], axis=1).max(axis=1)
+    return tr.rolling(n).mean()     # 简单平均;Wilder 原始定义使用指数平滑
+</code></pre>
+  <div class="callout warn">止损并非免费:在跳空(如 A 股跌停、隔夜大幅低开)时,实际成交价可能远差于止损价;止损过紧会被正常波动频繁触发。止损规则也应放进回测里检验。</div>
+
+  <h2>7.2 仓位管理</h2>
+  <h3>固定风险比例法</h3>
+  <p>每笔交易最多亏损账户的固定比例(业内常见的经验值是 1%–2%):</p>
+  $$\text{仓位股数}=\frac{\text{账户权益}\times\text{单笔风险比例}}{\text{入场价}-\text{止损价}}$$
+  <p>例:账户 10 万元,单笔风险 1% = 1000 元,入场价 50 元,止损价 45 元,则最多买 \(1000/5=200\) 股(A 股需按 100 股取整)。</p>
+  <h3>波动率目标(Volatility Targeting)</h3>
+  <p>根据资产近期波动率调整仓位,让组合波动保持在目标水平附近:</p>
+  $$w_t=\frac{\sigma_{\text{目标}}}{\hat\sigma_t}\quad(\text{通常设置上限,如 } w_t\le 1 \text{ 或杠杆上限})$$
+<pre><code class="language-python">def vol_target_weight(close, target_vol=0.15, lookback=20, max_w=1.0):
+    realized = close.pct_change().rolling(lookback).std() * np.sqrt(252)
+    return (target_vol / realized).clip(upper=max_w)   # 波动越大,仓位越小
+</code></pre>
+
+  <h2>7.3 凯利公式(Kelly Criterion)</h2>
+  <p>凯利公式给出使<b>长期资金对数增长率最大</b>的下注比例。</p>
+  <p><b>离散形式</b>(胜率 \(p\),败率 \(q=1-p\),赔率 \(b\) = 盈利额 / 亏损额):</p>
+  $$f^*=p-\frac{q}{b}=\frac{bp-q}{b}$$
+  <p>例:胜率 55%,盈亏比 1:1,则 \(f^*=0.55-0.45=0.10\),即每次下注 10% 的资金。</p>
+  <p><b>连续形式</b>(策略超额收益均值 \(\mu\)、波动率 \(\sigma\),近似假设收益正态):</p>
+  $$f^*=\frac{\mu - r_f}{\sigma^2}$$
+  <div class="callout bad"><b>实践中几乎没人用“全凯利”。</b>原因:(1) \(p\)、\(\mu\)、\(\sigma\) 都是估计值,误差很大,高估会导致过度下注;(2) 全凯利的净值波动和回撤非常剧烈。常见做法是使用<b>半凯利</b>或更低比例,把它当作仓位的<b>上限参考</b>。超过凯利比例下注,长期增长率反而下降,甚至趋向破产。</div>
+
+  <h2>7.4 组合层面的风险控制</h2>
+  <ul>
+    <li><b>分散化</b>:跨标的、跨策略、跨市场,关注相关性(尤其是危机时的相关性)。</li>
+    <li><b>集中度上限</b>:单一标的、单一行业的最大权重。</li>
+    <li><b>杠杆控制</b>:杠杆放大收益也放大亏损,还可能触发强制平仓。</li>
+    <li><b>回撤熔断</b>:组合回撤达到阈值时降低仓位或暂停策略,复盘原因。</li>
+    <li><b>操作风险</b>:代码 bug、数据错误、网络中断、下错单。实盘系统需要日志、告警和人工复核。</li>
+  </ul>
+
+  <div class="quiz" data-quiz="ch7"></div>
+</section>
+
+<!-- ================= CH8 ================= -->
+<section class="page" id="ch8" data-chapter>
+  <h1>第 8 章 · 学习路线与资源</h1>
+  <p class="lead">一条从零到能独立完成策略研究的路线,以及值得一读的经典书籍。</p>
+
+  <h2>8.1 学习路线图</h2>
+  <div class="card"><b>阶段 0 · 打基础(约 1–2 个月)</b>
+    <ul><li>Python 基础 + numpy / pandas / matplotlib</li><li>概率统计:均值方差、分布、回归、假设检验</li><li>金融基础:股票、指数、ETF、期货的交易规则,收益率与复权</li></ul></div>
+  <div class="card"><b>阶段 1 · 第一个回测(约 1 个月)</b>
+    <ul><li>用 AkShare / yfinance 下载数据,纯 pandas 实现均线交叉回测</li><li>正确计算夏普、最大回撤,加入交易成本</li><li>再用 backtrader 或 vectorbt 复现,对比结果</li></ul></div>
+  <div class="card"><b>阶段 2 · 策略与方法论(约 2–3 个月)</b>
+    <ul><li>实现第 5 章所有策略,做样本内/样本外与参数稳健性分析</li><li>学习多因子:因子构建、IC 分析、分组回测、中性化</li><li>阅读经典书籍和论文,复现一篇论文结论</li></ul></div>
+  <div class="card"><b>阶段 3 · 进阶与实践(持续)</b>
+    <ul><li>组合优化与风险模型、机器学习在量化中的应用(注意过拟合)</li><li>模拟盘跟踪,记录实盘与回测的偏差</li><li>若考虑真实资金:先非常小规模,充分了解合规要求与风险</li></ul></div>
+
+  <h2>8.2 推荐书籍</h2>
+  <table>
+    <tr><th>书名</th><th>作者</th><th>适合阶段 / 说明</th></tr>
+    <tr><td><i>Quantitative Trading: How to Build Your Own Algorithmic Trading Business</i>(《量化交易:如何建立自己的算法交易事业》)</td><td>Ernest P. Chan</td><td>入门首选,面向个人量化交易者;2021 年出第 2 版</td></tr>
+    <tr><td><i>Algorithmic Trading: Winning Strategies and Their Rationale</i></td><td>Ernest P. Chan</td><td>入门到进阶,均值回归与动量策略实战</td></tr>
+    <tr><td><i>Python for Data Analysis</i>(《利用 Python 进行数据分析》)</td><td>Wes McKinney(pandas 作者)</td><td>pandas 必读</td></tr>
+    <tr><td><i>Python for Finance</i></td><td>Yves Hilpisch</td><td>Python 金融数据分析与建模</td></tr>
+    <tr><td><i>Inside the Black Box</i>(《打开量化投资的黑箱》)</td><td>Rishi K. Narang</td><td>非技术性地理解量化基金如何运作</td></tr>
+    <tr><td><i>Systematic Trading</i></td><td>Robert Carver</td><td>系统化交易框架、仓位与波动率目标</td></tr>
+    <tr><td><i>Active Portfolio Management</i>(《主动投资组合管理》)</td><td>Richard C. Grinold, Ronald N. Kahn</td><td>多因子与组合管理的经典理论,偏进阶</td></tr>
+    <tr><td><i>Advances in Financial Machine Learning</i>(《金融机器学习》)</td><td>Marcos López de Prado</td><td>进阶:回测过拟合、特征工程、交叉验证</td></tr>
+    <tr><td><i>Machine Learning for Algorithmic Trading</i></td><td>Stefan Jansen</td><td>机器学习量化的代码实践大全</td></tr>
+    <tr><td><i>Options, Futures, and Other Derivatives</i>(《期权、期货及其他衍生产品》)</td><td>John C. Hull</td><td>衍生品经典教材</td></tr>
+  </table>
+  <p class="disclaimer">书名中译本译名可能因版本而异。</p>
+
+  <h2>8.3 平台、文档与开源项目</h2>
+  <ul>
+    <li><b>文档</b>:<a href="https://pandas.pydata.org/docs/" target="_blank" rel="noopener">pandas</a> · <a href="https://www.backtrader.com/docu/" target="_blank" rel="noopener">backtrader</a> · <a href="https://vectorbt.dev/" target="_blank" rel="noopener">vectorbt</a> · <a href="https://akshare.akfamily.xyz/" target="_blank" rel="noopener">AkShare</a> · <a href="https://tushare.pro/" target="_blank" rel="noopener">Tushare Pro</a></li>
+    <li><b>开源项目</b>:<a href="https://github.com/microsoft/qlib" target="_blank" rel="noopener">Microsoft Qlib</a>(AI 量化研究平台)、<a href="https://github.com/quantopian/zipline" target="_blank" rel="noopener">zipline</a>、<a href="https://github.com/quantopian/alphalens" target="_blank" rel="noopener">alphalens</a>(因子分析)、<a href="https://github.com/quantopian/research_public" target="_blank" rel="noopener">Quantopian 讲义存档</a></li>
+    <li><b>在线量化平台</b>:<a href="https://www.quantconnect.com/" target="_blank" rel="noopener">QuantConnect</a>(海外)、聚宽 JoinQuant、米筐 RiceQuant、BigQuant 等(国内,提供 A 股数据与回测环境)</li>
+    <li><b>学术数据</b>:<a href="https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/data_library.html" target="_blank" rel="noopener">Kenneth French Data Library</a>(Fama-French 因子数据)</li>
+    <li><b>经典论文</b>:Jegadeesh &amp; Titman (1993) 动量效应;Fama &amp; French (1993) 三因子模型;Bailey &amp; López de Prado (2014) 紧缩夏普比率</li>
+  </ul>
+
+  <h2>8.4 给初学者的建议</h2>
+  <ol>
+    <li><b>先求正确,再求盈利</b>:一个没有未来函数、计入成本的平庸回测,比一个有 bug 的漂亮回测有价值得多。</li>
+    <li><b>保持研究日志</b>:记录每个想法、参数和结果,包括失败的。</li>
+    <li><b>从简单开始</b>:先把均线策略做“对”,再尝试复杂模型。</li>
+    <li><b>对“稳赚”“高胜率”的宣传保持警惕</b>,尤其是收费荐股、带单。</li>
+  </ol>
+
+  <div class="quiz" data-quiz="ch8"></div>
+</section>
+
+<!-- ================= DEMO ================= -->
+<section class="page" id="demo">
+  <h1>🧪 互动演示:均线交叉回测</h1>
+  <p class="lead">在<b>程序随机生成的模拟价格</b>上运行均线交叉策略,观察参数、成本对结果的影响。</p>
+  <div class="callout warn"><b>注意:</b>下面的价格是用几何布朗运动(随机游走)生成的<b>模拟数据,不是任何真实股票的行情</b>。在纯随机游走里,任何择时策略的期望超额收益都接近于零——多换几个随机种子试试,你会看到“好结果”和“坏结果”都很常见,这正是理解过拟合的好方法。</div>
+  <div class="card">
+    <div class="controls">
+      <label>短均线周期:<span class="val" id="vFast">20</span><input type="range" id="inFast" min="2" max="100" value="20"></label>
+      <label>长均线周期:<span class="val" id="vSlow">60</span><input type="range" id="inSlow" min="5" max="250" value="60"></label>
+      <label>单边交易成本:<span class="val" id="vCost">0.10%</span><input type="range" id="inCost" min="0" max="100" value="10"></label>
+      <label>年化漂移(趋势):<span class="val" id="vDrift">8%</span><input type="range" id="inDrift" min="-30" max="30" value="8"></label>
+      <label>年化波动率:<span class="val" id="vVol">25%</span><input type="range" id="inVol" min="5" max="80" value="25"></label>
+      <label>随机种子:<span class="val" id="vSeed">42</span><input type="range" id="inSeed" min="1" max="500" value="42"></label>
+    </div>
+    <button class="btn secondary" id="btnNewSeed">🎲 换一组随机数据</button>
+    <span class="disclaimer" style="margin-left:8px">模拟 3 年(756 个交易日),初始价格 100。</span>
+  </div>
+  <div class="stats" id="demoStats"></div>
+  <h3>价格与均线(▲ 买入 ▼ 卖出)</h3>
+  <div class="chart-box"><canvas id="priceChart"></canvas></div>
+  <h3>净值对比:策略 vs. 买入持有</h3>
+  <div class="chart-box small"><canvas id="equityChart"></canvas></div>
+  <h3>策略回撤</h3>
+  <div class="chart-box small"><canvas id="ddChart"></canvas></div>
+  <div class="card"><b>演示用的规则</b>
+    <ul>
+      <li>当日收盘后若短均线 &gt; 长均线,则次日起持有(满仓),否则空仓——信号<b>滞后一天</b>执行,不含未来函数。</li>
+      <li>每次仓位变化按“单边交易成本”扣费;空仓期收益为 0(不计现金利息)。</li>
+      <li>夏普比率按无风险利率 0、日频 ×√252 年化计算。</li>
+    </ul>
+    <b>试试看:</b>把漂移设为 0、成本调到 0.3%,短均线调到 5——频繁交易如何侵蚀收益?把种子换几次,最好的参数是否稳定?
+  </div>
+</section>
+
+<!-- ================= GLOSSARY ================= -->
+<section class="page" id="glossary">
+  <h1>📖 术语表</h1>
+  <p class="lead">按主题整理的常用量化术语。输入关键词快速筛选。</p>
+  <input class="glossary-search" id="glossSearch" placeholder="搜索术语,例如:夏普、drawdown、因子……">
+  <dl class="gloss" id="glossList"></dl>
+</section>
+
+</main>
+</div>
+<script src="vendor/katex/katex.min.js"></script>
+<script src="vendor/katex/contrib/auto-render.min.js"></script>
+<script src="vendor/hljs/highlight.min.js"></script>
+<script src="vendor/chart.umd.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
