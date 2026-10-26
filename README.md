@@ -14,6 +14,10 @@
 
 **https://ddminatoaqua.github.io/quant-learn/**
 
+进阶教程（量化交易进阶 · 从研究到实盘）：
+
+**https://ddminatoaqua.github.io/quant-learn/advanced/**
+
 ## ⚠️ 免责声明
 
 本站内容仅用于学习交流，**不构成任何投资建议**。示例代码与数据均为教学用途，历史回测表现不代表未来收益。真实交易有亏损本金的风险。

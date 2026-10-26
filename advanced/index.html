@@ -1,0 +1,3025 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>量化交易进阶 · 从研究到实盘</title>
+<meta name="description" content="量化交易进阶中文教程:数据工程、因子研究、时间序列、组合优化、机器学习、事件驱动回测、稳健性检验、交易执行与实盘。">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧭</text></svg>">
+<link rel="stylesheet" href="vendor/katex/katex.min.css">
+<link rel="stylesheet" href="vendor/hljs/github.min.css" id="hljsLight">
+<link rel="stylesheet" href="vendor/hljs/github-dark.min.css" id="hljsDark" disabled>
+<link rel="stylesheet" href="style.css">
+<script>
+  (function(){var t=null;try{t=localStorage.getItem('qa-theme')}catch(e){}t=t||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.setAttribute('data-theme',t);})();
+</script>
+</head>
+<body>
+<header class="topbar">
+  <button class="icon-btn" id="menuBtn" aria-label="打开目录">☰</button>
+  <div class="brand">🧭 量化交易<span>进阶</span> <small style="font-weight:400;color:var(--muted);font-size:13px">Quant 201</small></div>
+  <div class="spacer"></div>
+  <div class="progress-wrap" title="学习进度(保存在本浏览器,与入门站分开记录)"><div class="progress-bar"><div id="progressFill"></div></div><span id="progressText">0%</span></div>
+  <button class="icon-btn" id="themeBtn" aria-label="切换深色/浅色主题">🌙</button>
+</header>
+<div class="backdrop" id="backdrop"></div>
+<div class="layout">
+<nav class="sidebar" id="sidebar">
+  <a href="#home" data-page="home">🏠 首页</a>
+  <a href="#prereq" data-page="prereq">🔁 前置知识回顾</a>
+  <a href="../" style="color:var(--muted)">↩ 返回入门站</a>
+  <div class="group">研究基础</div>
+  <a href="#ch1" data-page="ch1">1. 数据工程与研究环境 <span class="check">✔</span></a>
+  <a href="#ch2" data-page="ch2">2. 因子研究 <span class="check">✔</span></a>
+  <a href="#ch3" data-page="ch3">3. 时间序列建模 <span class="check">✔</span></a>
+  <div class="group">组合与模型</div>
+  <a href="#ch4" data-page="ch4">4. 组合优化 <span class="check">✔</span></a>
+  <a href="#ch5" data-page="ch5">5. 机器学习与量化 <span class="check">✔</span></a>
+  <div class="group">回测与验证</div>
+  <a href="#ch6" data-page="ch6">6. 事件驱动回测引擎 <span class="check">✔</span></a>
+  <a href="#ch7" data-page="ch7">7. 策略评估与稳健性 <span class="check">✔</span></a>
+  <div class="group">执行与实盘</div>
+  <a href="#ch8" data-page="ch8">8. 交易执行与微观结构 <span class="check">✔</span></a>
+  <a href="#ch9" data-page="ch9">9. 从回测到实盘 <span class="check">✔</span></a>
+  <div class="group">互动演示 <span class="sim-tag">模拟数据</span></div>
+  <a href="#demo-frontier" data-page="demo-frontier">📐 有效前沿与估计误差</a>
+  <a href="#demo-factor" data-page="demo-factor">🧮 因子 IC 与分层回测</a>
+  <a href="#demo-multi" data-page="demo-multi">🎲 多重检验与运气</a>
+  <div class="group">附录</div>
+  <a href="#glossary" data-page="glossary">📖 术语表</a>
+  <a href="code/" target="_blank" rel="noopener">💾 本站示例代码</a>
+  <div class="group">进度</div>
+  <a href="#" id="resetProgress" style="color:var(--muted)">↺ 重置本站进度</a>
+</nav>
+<main id="main">
+<!-- ================= HOME ================= -->
+<section class="page" id="home">
+  <h1>量化交易进阶 🧭</h1>
+  <p class="lead">入门站教会了你“量化是什么、一个策略怎么回测”。这个进阶站要回答下一个问题:<b>怎样做出一个经得起推敲、能从研究走到实盘的量化系统?</b></p>
+  <div class="callout warn"><b>免责声明:</b>本站内容仅用于学习交流,<b>不构成任何投资建议</b>。所有示例代码和互动演示使用的都是程序随机生成的<b>模拟数据</b>(页面上会标注 <span class="sim-tag">模拟数据</span>),输出的收益、夏普等数字只用来说明方法,<b>不代表任何真实市场、真实策略的表现</b>。文中提到的交易规则、费率等以交易所和券商最新公布为准。真实交易有亏损本金的风险。</div>
+
+  <div class="callout bridge">🔗 <b>还没学入门?</b>请先完成 <a href="../">量化交易入门(Quant 101)</a>。如果已经学完,可以先花 10 分钟看看 <a href="#prereq">前置知识回顾</a>,确认这些概念都还记得。</div>
+
+  <h2>这个网站和入门站有什么不同</h2>
+  <ul>
+    <li><b>更深而不是更广</b>:入门站每个主题用一两段话带过;这里每个主题都按同一个顺序展开——<b>① 为什么重要(直觉)→ ② 数学推导(每个符号都解释)→ ③ 手算的数值例子 → ④ 逐行注释的代码与输出解读 → ⑤ 常见错误 → ⑥ 小结</b>。</li>
+    <li><b>代码都真的跑过</b>:每段 Python 示例都在模拟数据上实际运行过,页面上展示的“运行输出”就是真实运行结果。完整代码可以在 <a href="code/" target="_blank" rel="noopener">示例代码目录</a> 下载。</li>
+    <li><b>新术语首次出现会加粗并给出英文</b>,例如 <span class="term">信息系数 <span class="en">(Information Coefficient, IC)</span></span>,并全部收录到 <a href="#glossary">术语表</a>。</li>
+    <li><b>更接近真实工作</b>:数据清洗、point-in-time、事件驱动引擎、执行成本、风控系统……这些是“回测漂亮但实盘亏钱”的主要来源。</li>
+  </ul>
+
+  <h2>学习路线</h2>
+  <div class="flow">
+    <span class="step">数据工程</span><span class="arrow">→</span><span class="step">因子研究</span><span class="arrow">→</span><span class="step">时间序列</span><span class="arrow">→</span>
+    <span class="step">组合优化</span><span class="arrow">→</span><span class="step">机器学习</span><span class="arrow">→</span><span class="step">回测引擎</span><span class="arrow">→</span>
+    <span class="step">稳健性</span><span class="arrow">→</span><span class="step">交易执行</span><span class="arrow">→</span><span class="step">实盘</span>
+  </div>
+  <p>顺序是按“一个量化研究项目的生命周期”排的:先有干净的数据(第 1 章),再从数据里找信号(第 2、3 章),把信号变成组合(第 4 章),用更复杂的模型挖掘信号(第 5 章),在更真实的模拟器里回测(第 6 章),严格检验结果是不是运气(第 7 章),思考怎么真正下单(第 8 章),最后搭建实盘系统(第 9 章)。第 3、4、5 章相对独立,可以按兴趣调整顺序;第 6、7 章建议按顺序读。</p>
+
+  <h2>章节一览</h2>
+  <div class="grid">
+    <a class="card chap-card" href="#ch1"><div class="num">第 1 章</div><div class="t">数据工程与研究环境</div><div class="d">复权推导、停牌/涨跌停、point-in-time、Parquet 存储、研究项目结构</div></a>
+    <a class="card chap-card" href="#ch2"><div class="num">第 2 章</div><div class="t">因子研究</div><div class="d">去极值/标准化/中性化、IC/RankIC/ICIR、分层回测、衰减与换手、多因子合成</div></a>
+    <a class="card chap-card" href="#ch3"><div class="num">第 3 章</div><div class="t">时间序列建模</div><div class="d">平稳性与 ADF、ARIMA、GARCH 波动率、协整进阶、卡尔曼滤波</div></a>
+    <a class="card chap-card" href="#ch4"><div class="num">第 4 章</div><div class="t">组合优化</div><div class="d">均值-方差推导、协方差收缩、风险平价、Black-Litterman、HRP、cvxpy 约束</div></a>
+    <a class="card chap-card" href="#ch5"><div class="num">第 5 章</div><div class="t">机器学习与量化</div><div class="d">特征与标签、三重障碍法、Purged/Embargo 交叉验证、LightGBM、特征重要性</div></a>
+    <a class="card chap-card" href="#ch6"><div class="num">第 6 章</div><div class="t">事件驱动回测引擎实战</div><div class="d">从零写一个约 200 行的引擎:数据、策略、组合、撮合、成本</div></a>
+    <a class="card chap-card" href="#ch7"><div class="num">第 7 章</div><div class="t">策略评估与稳健性</div><div class="d">归因、参数敏感性、bootstrap、滚动前向、多重检验、DSR、PBO</div></a>
+    <a class="card chap-card" href="#ch8"><div class="num">第 8 章</div><div class="t">交易执行与市场微观结构</div><div class="d">订单簿、价差、冲击成本、TWAP/VWAP、执行落差</div></a>
+    <a class="card chap-card" href="#ch9"><div class="num">第 9 章</div><div class="t">从回测到实盘</div><div class="d">模拟盘、风控系统、监控告警、开源框架、合规、进阶书单与论文</div></a>
+  </div>
+  <h2>互动演示 <span class="sim-tag">模拟数据</span></h2>
+  <div class="grid">
+    <a class="card chap-card" href="#demo-frontier"><div class="num">配合第 4 章</div><div class="t">📐 有效前沿与估计误差</div><div class="d">用有限样本估计参数后,“最优组合”真实表现会差多少?收缩能帮多少?</div></a>
+    <a class="card chap-card" href="#demo-factor"><div class="num">配合第 2 章</div><div class="t">🧮 因子 IC 与分层回测</div><div class="d">调 IC 强度、因子持续性、成本,看 IC 序列、分组收益和换手</div></a>
+    <a class="card chap-card" href="#demo-multi"><div class="num">配合第 7 章</div><div class="t">🎲 多重检验与运气</div><div class="d">试 1000 个纯噪声策略,最好的那个夏普有多高?DSR 怎么识破它?</div></a>
+  </div>
+
+  <h2>需要的基础与环境</h2>
+  <ul>
+    <li><b>知识</b>:学完入门站;会用 pandas 做 groupby/rolling/shift;知道矩阵乘法是什么(第 4 章会用到 \(w^\top \Sigma w\) 这样的写法,首次出现时会解释)。</li>
+    <li><b>环境</b>:Python 3.10+,安装 <code>pip install numpy pandas scipy statsmodels scikit-learn cvxpy lightgbm pyarrow</code>。本站代码在 numpy 2.x、pandas 3.x、statsmodels 0.15 下测试过。</li>
+    <li><b>时间</b>:每章大约需要 2–4 小时(读 + 跑代码 + 做测验)。不必一次读完,进度会保存在浏览器里。</li>
+  </ul>
+  <h2>怎么用这个网站</h2>
+  <ul>
+    <li>每章开头有“学习目标”和“本章目录”,结尾有<b>本章小结</b>和<b>小测验</b>;全部答对会自动标记完成。</li>
+    <li>进度只保存在你自己浏览器的 <code>localStorage</code> 里,<b>与入门站分开记录</b>,不会上传。</li>
+    <li>右上角 🌙 切换深色模式;手机上点左上角 ☰ 打开目录。</li>
+  </ul>
+</section>
+
+<!-- ================= PREREQ ================= -->
+<section class="page" id="prereq">
+  <h1>🔁 前置知识回顾</h1>
+  <p class="lead">进阶内容建立在入门站的基础上。这一页先用最短的篇幅把要用到的概念复习一遍,再补充几样入门站没讲、但进阶必需的数学工具(向量与矩阵写法、回归、假设检验)。</p>
+  <div class="callout bridge">🔗 每个小节后面都有“回到入门站”的链接。如果某一段读起来很吃力,建议先回去把对应章节重读一遍——进阶内容默认你已经熟悉这些。</div>
+
+  <h2>A. 入门站核心概念速查</h2>
+  <table>
+    <tr><th>概念</th><th>一句话回顾</th><th>本站在哪里继续深入</th><th>入门站出处</th></tr>
+    <tr><td>简单收益 / 对数收益</td><td>\(r_t = P_t/P_{t-1}-1\);\(\ell_t=\ln(P_t/P_{t-1})\)。简单收益可以按资产加权相加,对数收益可以按时间相加。</td><td>第 1 章(复权后再算收益)、第 3 章(对数收益的平稳性)</td><td><a href="../#ch2">入门第 2 章</a></td></tr>
+    <tr><td>波动率与年化</td><td>收益率的标准差;日波动 × \(\sqrt{252}\) ≈ 年化波动(假设各日独立)。</td><td>第 3 章 GARCH:波动率本身会随时间变化</td><td><a href="../#ch3">入门第 3 章</a></td></tr>
+    <tr><td>夏普比率</td><td>平均超额收益 ÷ 收益标准差,常年化。</td><td>第 7 章:夏普的抽样误差、PSR、Deflated Sharpe</td><td><a href="../#ch3">入门第 3 章</a></td></tr>
+    <tr><td>最大回撤</td><td>净值从历史高点到之后低点的最大跌幅。</td><td>第 7 章 bootstrap、第 9 章风控阈值</td><td><a href="../#ch3">入门第 3 章</a></td></tr>
+    <tr><td>未来函数 / 前视偏差</td><td>回测中用到了决策时刻还不知道的信息;最常见的防法是信号 <code>shift(1)</code>。</td><td>第 1 章 point-in-time 数据、第 5 章标签泄漏、第 6 章引擎设计</td><td><a href="../#ch6">入门第 6 章</a></td></tr>
+    <tr><td>幸存者偏差</td><td>只用今天还活着的股票做历史回测,结果偏乐观。</td><td>第 1 章:历史股票池的构建</td><td><a href="../#ch6">入门第 6 章</a></td></tr>
+    <tr><td>过拟合 / 样本外</td><td>在历史数据上调参“调”出了噪声;要在没参与开发的数据上验证。</td><td>第 5 章交叉验证、第 7 章多重检验和 PBO</td><td><a href="../#ch6">入门第 6 章</a></td></tr>
+    <tr><td>交易成本与滑点</td><td>佣金、税费、买卖价差、滑点、市场冲击;换手越高影响越大。</td><td>第 6 章成本模型、第 8 章微观结构</td><td><a href="../#ch6">入门第 6 章</a></td></tr>
+    <tr><td>因子与 IC</td><td>因子是解释收益差异的共同特征;IC 是因子值与下期收益的相关系数。</td><td>第 2 章整章</td><td><a href="../#ch5">入门第 5 章</a></td></tr>
+    <tr><td>协整与配对交易</td><td>两个非平稳价格的某个线性组合是平稳的 → 价差会回归。</td><td>第 3 章:Engle-Granger 两步法、半衰期、卡尔曼滤波</td><td><a href="../#ch5">入门第 5 章</a></td></tr>
+    <tr><td>仓位管理</td><td>固定风险比例、凯利公式、波动率目标。</td><td>第 4 章:从“单个资产仓位”到“整个组合的权重”</td><td><a href="../#ch7">入门第 7 章</a></td></tr>
+    <tr><td>回测框架</td><td>向量化(vectorbt)快;事件驱动(backtrader)更贴近实盘。</td><td>第 6 章:自己写一个事件驱动引擎</td><td><a href="../#ch4">入门第 4 章</a></td></tr>
+  </table>
+
+  <h2>B. 新工具 1:向量和矩阵的写法</h2>
+  <h3>为什么需要</h3>
+  <p>入门站只处理一两个资产。一旦资产变成 50 个、500 个,逐个写公式就写不下了。线性代数的写法只是一种<b>“批量记账”的简写</b>,背后的运算你都会。</p>
+  <h3>符号</h3>
+  <table class="symbols">
+    <tr><th>符号</th><th>含义</th><th>例子(3 个资产)</th></tr>
+    <tr><td>\(w\)</td><td>权重向量:一列数,第 \(i\) 个是资产 \(i\) 的仓位占比</td><td>\(w=(0.5,\,0.3,\,0.2)^\top\)</td></tr>
+    <tr><td>\(\mu\)</td><td>预期收益向量</td><td>\(\mu=(8\%,\,6\%,\,3\%)^\top\)</td></tr>
+    <tr><td>\(^\top\)</td><td>转置:把列变成行(或反过来)</td><td>\(w^\top\) 是一行数</td></tr>
+    <tr><td>\(w^\top\mu\)</td><td>内积:对应位置相乘再相加</td><td>\(0.5\times8\%+0.3\times6\%+0.2\times3\%=6.4\%\)</td></tr>
+    <tr><td>\(\Sigma\)</td><td>协方差矩阵:第 \(i\) 行第 \(j\) 列是 \(\operatorname{Cov}(r_i,r_j)=\rho_{ij}\sigma_i\sigma_j\);对角线是各自的方差 \(\sigma_i^2\)</td><td>3×3 的对称表格</td></tr>
+    <tr><td>\(w^\top\Sigma w\)</td><td>组合方差 \(=\sum_i\sum_j w_i w_j \Sigma_{ij}\)</td><td>见下面的手算</td></tr>
+    <tr><td>\(\Sigma^{-1}\)</td><td>逆矩阵:满足 \(\Sigma^{-1}\Sigma=I\)(单位矩阵);相当于矩阵版的“除法”</td><td>代码里用 <code>np.linalg.solve</code> 而不是显式求逆</td></tr>
+    <tr><td>\(\mathbf 1\)</td><td>全是 1 的向量;\(\mathbf 1^\top w=\sum_i w_i\)</td><td>“满仓”约束写成 \(\mathbf 1^\top w=1\)</td></tr>
+  </table>
+  <div class="callout example"><b>手算例子:两资产组合的方差。</b>资产 1 波动 \(\sigma_1=20\%\),资产 2 波动 \(\sigma_2=10\%\),相关系数 \(\rho=0.3\),权重 \(w=(0.6,0.4)\)。
+  <ol>
+    <li>协方差 \(\Sigma_{12}=\rho\sigma_1\sigma_2=0.3\times0.2\times0.1=0.006\);方差 \(\Sigma_{11}=0.04\),\(\Sigma_{22}=0.01\)。</li>
+    <li>\(w^\top\Sigma w = w_1^2\Sigma_{11}+w_2^2\Sigma_{22}+2w_1w_2\Sigma_{12} = 0.36\times0.04+0.16\times0.01+2\times0.24\times0.006=0.0144+0.0016+0.00288=0.01888\)。</li>
+    <li>组合波动 \(=\sqrt{0.01888}\approx 13.7\%\),低于加权平均波动 \(0.6\times20\%+0.4\times10\%=16\%\)——这多出来的 2.3 个百分点就是<b>分散化</b>的好处,来源于 \(\rho&lt;1\)。</li>
+  </ol></div>
+<pre><code class="language-python">import numpy as np
+w = np.array([0.6, 0.4])
+sigma = np.array([0.20, 0.10])
+corr = np.array([[1.0, 0.3], [0.3, 1.0]])
+Sigma = np.outer(sigma, sigma) * corr   # 协方差矩阵 = σ_i σ_j ρ_ij
+print(w @ Sigma @ w)                    # 0.01888  —— @ 就是矩阵乘法
+print(np.sqrt(w @ Sigma @ w))           # 0.1374...</code></pre>
+
+  <h2>C. 新工具 2:线性回归(最小二乘)</h2>
+  <h3>直觉</h3>
+  <p>回归就是“用一条直线(或一个平面)去解释一个变量”。在量化里它无处不在:算贝塔、做因子中性化(第 2 章)、估计对冲比率(第 3 章)、做收益归因(第 7 章)。</p>
+  <h3>公式</h3>
+  <p>有 \(n\) 个样本,因变量 \(y\)(长度 \(n\) 的向量),自变量矩阵 \(X\)(\(n\) 行 \(k\) 列,每列一个解释变量,通常含一列全 1 作为截距)。模型 \(y = X\beta + \varepsilon\),其中 \(\beta\) 是要估计的 \(k\) 个系数,\(\varepsilon\) 是残差。<span class="term">普通最小二乘 <span class="en">(Ordinary Least Squares, OLS)</span></span> 选择让残差平方和 \(\sum_i \varepsilon_i^2\) 最小的 \(\beta\),解是</p>
+  $$\hat\beta = (X^\top X)^{-1}X^\top y .$$
+  <p><b>残差</b> \(\hat\varepsilon = y - X\hat\beta\) 有一个重要性质:它与 \(X\) 的每一列都<b>不相关</b>。第 2 章的“中性化”正是利用这一点——把因子对行业、市值回归,残差就是“去掉了行业和市值影响”的部分。</p>
+  <div class="callout example"><b>手算例子</b>:\(x=(1,2,3)\),\(y=(2,4,5)\),只估计斜率(无截距)。\(\hat\beta = \frac{\sum x_iy_i}{\sum x_i^2}=\frac{2+8+15}{1+4+9}=\frac{25}{14}\approx1.786\)。残差 \(=(2-1.786,\;4-3.571,\;5-5.357)=(0.214,\,0.429,\,-0.357)\),检查 \(\sum x_i\hat\varepsilon_i=0.214+0.857-1.071=0\) ✔。</div>
+
+  <h2>D. 新工具 3:假设检验、p 值与 t 值</h2>
+  <p>研究中我们反复问:“这个效果是真的,还是运气?” 统计检验给出一种标准化的回答方式:</p>
+  <ol class="steps">
+    <li>先假设<span class="term">原假设 <span class="en">(null hypothesis, H₀)</span></span>:没有效果,例如“策略的真实平均收益 = 0”。</li>
+    <li>计算一个统计量,例如 <span class="term">t 值 <span class="en">(t-statistic)</span></span>:\(t=\dfrac{\bar x}{s/\sqrt n}\),其中 \(\bar x\) 是样本均值,\(s\) 是样本标准差,\(n\) 是样本数。分母 \(s/\sqrt n\) 叫<b>标准误</b>,衡量“样本均值本身有多不确定”。</li>
+    <li><span class="term">p 值 <span class="en">(p-value)</span></span>:<b>如果 H₀ 为真</b>,看到至少这么极端结果的概率。p 值小(常用阈值 0.05)说明“纯靠运气很难出现”,于是拒绝 H₀。</li>
+  </ol>
+  <div class="callout example"><b>例子</b>:某策略 36 个月的月收益均值 \(\bar x = 0.8\%\),标准差 \(s=4\%\)。标准误 \(=4\%/\sqrt{36}=0.667\%\),\(t=0.8/0.667=1.2\)。在正态近似下双侧 p 值约 0.23——<b>不能</b>说这个策略显著赚钱。注意这和夏普的关系:月夏普 \(=0.8/4=0.2\),\(t = \text{夏普}\times\sqrt n\)。</div>
+  <div class="callout warn"><b>两个最常见的误解</b>:① p 值<b>不是</b>“策略无效的概率”;② p<0.05 只在“只检验了一次”时才有它字面的含义。如果你试了 100 个策略只报告最好的那个,p 值就失真了——这是第 7 章“多重检验”的主题。</div>
+
+  <h2>E. 自测清单</h2>
+  <p>开始第 1 章之前,确认你能不看资料回答下面的问题(答案都在入门站):</p>
+  <ul>
+    <li>为什么“t 日收盘价算出的信号”不能拿来赚 t 日的收益?代码里怎么防?</li>
+    <li>亏损 50% 需要涨多少才能回本?为什么回撤控制这么重要?</li>
+    <li>日波动 1.5% 大约对应多少年化波动?这个换算隐含了什么假设?</li>
+    <li>相关系数为 0 能说明两个变量独立吗?</li>
+    <li>同一个策略,为什么高换手版本对成本更敏感?</li>
+  </ul>
+  <div class="callout good">都能答出来?那就从 <a href="#ch1">第 1 章 · 数据工程与研究环境</a> 开始吧。</div>
+  <div class="page-foot"><a class="btn secondary" href="#home">← 首页</a><a class="btn" href="#ch1">开始第 1 章 →</a></div>
+</section>
+
+<!-- ================= CH1 ================= -->
+<section class="page" id="ch1" data-chapter>
+  <h1>第 1 章 · 数据工程与研究环境</h1>
+  <p class="lead">策略的上限由想法决定,下限由数据决定。这一章把“拿到数据就直接回测”升级为“先把数据变成可信的研究原料”。</p>
+  <div class="callout bridge">🔗 <b>承上启下</b>:入门站 <a href="../#ch2">第 2 章</a> 提到过“回测要用复权价格”“要处理停牌和退市”,<a href="../#ch6">第 6 章</a> 讲了未来函数和幸存者偏差。当时只说了“要注意”,这一章讲<b>具体怎么做</b>:复权因子怎么算、哪些天不能成交、财报数据怎样避免“提前知道”、数据怎么存才又快又不出错。</div>
+  <div class="card objectives"><b>🎯 学完本章你将能够</b>
+    <ul>
+      <li>从除权除息信息<b>自己计算</b>复权因子,并解释前复权与后复权分别适合什么场景;</li>
+      <li>在回测中正确标记停牌、一字涨停、跌停等<b>不可交易</b>状态;</li>
+      <li>理解并实现 <b>point-in-time</b> 查询,避免财报“提前可见”和“数据被事后修订”带来的前视偏差;</li>
+      <li>用 Parquet 分区存储面板数据,搭建一个可复现的研究项目目录。</li>
+    </ul>
+    <p class="disclaimer" style="margin:6px 0 0">⏱ 预计 2–3 小时。代码依赖:pandas、numpy、pyarrow。</p>
+  </div>
+
+  <h2>1.1 为什么数据工程是进阶第一课</h2>
+  <h3>直觉</h3>
+  <p>回测是一台“时间机器”:它假装我们回到过去,只用当时能看到的信息做决策,然后看结果。只要数据里混进了一点“当时不可能知道”或“当时根本做不到”的东西,时间机器就失灵了——而且失灵的方向几乎总是<b>让回测看起来更好</b>。原因很简单:研究者会不断修改策略直到回测好看,而数据错误恰好提供了一条“好看”的捷径。</p>
+  <h3>数据错误的四大类</h3>
+  <table>
+    <tr><th>类别</th><th>例子</th><th>后果</th><th>本章对应小节</th></tr>
+    <tr><td>价格不连续</td><td>分红、送转造成的价格跳空</td><td>出现虚假的“暴跌/暴涨”信号</td><td>1.2 复权</td></tr>
+    <tr><td>不可交易</td><td>停牌、一字涨停、跌停</td><td>回测里买到了现实中买不到的股票</td><td>1.3 可交易性</td></tr>
+    <tr><td>信息时点错误</td><td>财报按报告期而不是公告日对齐;使用事后修订的数据;用今天的指数成分股回测过去</td><td>前视偏差、幸存者偏差</td><td>1.4 point-in-time</td></tr>
+    <tr><td>脏数据</td><td>缺失、重复、单位不一致(元/万元)、极端错误值</td><td>统计量被个别错误值主导</td><td>1.5 清洗清单</td></tr>
+  </table>
+
+  <h2>1.2 复权:从原理到手算</h2>
+  <h3>直觉</h3>
+  <p>假设你持有 1 股价格 20.4 元的股票。公司宣布“每股派现 0.4 元、每 1 股送 1 股”。除权除息日开盘后,你手里变成了 <b>2 股</b>和 <b>0.4 元现金</b>,而股价会被交易所调整到大约 10 元。你的财富几乎没变(2 × 10 + 0.4 = 20.4),但行情软件上的价格从 20.4“跌”到了 10。如果回测直接用这条原始价格,就会以为发生了 −51% 的暴跌。<span class="term">复权 <span class="en">(price adjustment)</span></span> 就是把这种“账面上的跳空”抹平,让价格序列只反映真实的涨跌。</p>
+  <h3>数学:除权参考价与复权因子</h3>
+  <p>交易所会在除权除息日公布一个<span class="term">除权(息)参考价 <span class="en">(ex-rights reference price)</span></span>,作为当天涨跌幅计算的基准。不考虑配股时:</p>
+  $$P^{\text{ref}}_t=\frac{P^{\text{close}}_{t-1}-D}{1+S}$$
+  <table class="symbols">
+    <tr><th>符号</th><th>含义</th></tr>
+    <tr><td>\(P^{\text{close}}_{t-1}\)</td><td>除权日前一个交易日的收盘价</td></tr>
+    <tr><td>\(D\)</td><td>每股现金分红(税前,元)</td></tr>
+    <tr><td>\(S\)</td><td>每股送转股数(“10 送 10”即 \(S=1\),“10 转 5”即 \(S=0.5\))</td></tr>
+  </table>
+  <p>(有配股时,分子再加上“配股价 × 每股配股比例”,分母再加上“每股配股比例”,以交易所公式为准。)</p>
+  <p>当天的<b>单日复权因子</b>定义为“前收盘 ÷ 参考价”,其余日子为 1;把它从第一天起连乘,得到<span class="term">累计复权因子 <span class="en">(cumulative adjustment factor)</span></span> \(F_t\):</p>
+  $$f_t=\frac{P^{\text{close}}_{t-1}}{P^{\text{ref}}_t}\ (\text{除权日}),\qquad F_t=\prod_{s\le t} f_s .$$
+  <p>于是有两种复权价:</p>
+  <ul>
+    <li><span class="term">后复权 <span class="en">(backward-adjusted, 以起点为基准)</span></span>:\(P^{\text{hfq}}_t = P_t \times F_t\)。最早那天的价格不变,之后的价格被“放大”。</li>
+    <li><span class="term">前复权 <span class="en">(forward-adjusted, 以最新价为基准)</span></span>:\(P^{\text{qfq}}_t = P_t \times F_t / F_T\),\(T\) 是最后一天。最新价格和行情软件一致,历史价格被“缩小”。</li>
+  </ul>
+  <div class="callout math"><b>为什么两种复权算出的收益率完全相同?</b>因为 \(P^{\text{qfq}}_t\) 只是 \(P^{\text{hfq}}_t\) 除以一个常数 \(F_T\)。收益率是比值 \(P_t/P_{t-1}\),常数会被约掉。所以<b>算收益用哪种都行</b>;区别在于“价格水平”:</div>
+  <ul>
+    <li>前复权的历史价格<b>会随着每次新的分红而改变</b>(因为 \(F_T\) 变了)。如果你的策略用到价格水平(例如“股价低于 5 元”过滤),前复权会引入前视偏差——过去某天的“前复权价”包含了未来分红的信息。</li>
+    <li>后复权价格水平和当时的真实价格不一致,所以“股价门槛”“涨跌停价”“下单股数”必须用<b>不复权</b>的原始价格计算。</li>
+    <li>实践规则:<b>收益和技术指标用复权价;与真实价格水平相关的规则(涨跌停、一手 100 股、价格过滤)用原始价。</b></li>
+  </ul>
+  <div class="callout example"><b>手算例子</b>(和下面的代码同一组数):前收盘 20.4 元,派现 0.4 元,10 送 10。
+    <ol>
+      <li>参考价 \(=(20.4-0.4)/(1+1)=10.0\) 元。</li>
+      <li>单日因子 \(f=20.4/10.0=2.04\);之前因子为 1,所以除权日起累计因子 \(F=2.04\)。</li>
+      <li>除权日收盘 10.0 元 → 后复权价 \(10.0\times2.04=20.4\),与前一天相同,真实收益 0%;而原始价格的“收益” \(=10/20.4-1=-50.98\%\)。</li>
+      <li>第一天 20.0 元的前复权价 \(=20.0\times1/2.04\approx9.804\) 元。</li>
+    </ol>
+  </div>
+  <h3>代码:自己算复权因子</h3>
+  <div class="code-title">📄 ch1_adjust.py</div><pre><code class="language-python">import pandas as pd
+
+# 一只虚构股票的 6 个交易日原始(不复权)收盘价 —— 教学用模拟数据
+raw = pd.DataFrame({
+    &quot;date&quot;: pd.to_datetime([&quot;2024-06-03&quot;, &quot;2024-06-04&quot;, &quot;2024-06-05&quot;,
+                            &quot;2024-06-06&quot;, &quot;2024-06-07&quot;, &quot;2024-06-11&quot;]),
+    &quot;close&quot;: [20.0, 20.4, 10.0, 10.3, 10.1, 10.5],
+})
+# 公司行为(corporate action)表:6 月 5 日除权除息,每股派现 0.4 元,每 1 股送转 1 股
+actions = pd.DataFrame({
+    &quot;date&quot;: pd.to_datetime([&quot;2024-06-05&quot;]),
+    &quot;cash_div&quot;: [0.4],     # 每股现金分红(元)
+    &quot;split&quot;: [1.0],        # 每股送转股数:10 送 10 即每股送 1 股
+})
+
+df = raw.merge(actions, on=&quot;date&quot;, how=&quot;left&quot;).fillna({&quot;cash_div&quot;: 0.0, &quot;split&quot;: 0.0})
+df[&quot;prev_close&quot;] = df[&quot;close&quot;].shift(1)                       # 前一交易日收盘价
+# 除权参考价 = (前收盘 − 每股派现) / (1 + 每股送转)
+df[&quot;ref_price&quot;] = (df[&quot;prev_close&quot;] - df[&quot;cash_div&quot;]) / (1 + df[&quot;split&quot;])
+# 单日复权因子:除权日 = 前收盘 / 除权参考价,其它日子 = 1
+df[&quot;step&quot;] = (df[&quot;prev_close&quot;] / df[&quot;ref_price&quot;]).where(df[&quot;cash_div&quot;] + df[&quot;split&quot;] &gt; 0, 1.0)
+df[&quot;adj_factor&quot;] = df[&quot;step&quot;].cumprod()                        # 累计复权因子(从第一天起连乘)
+df[&quot;hfq&quot;] = df[&quot;close&quot;] * df[&quot;adj_factor&quot;]                     # 后复权价:第一天价格不变
+df[&quot;qfq&quot;] = df[&quot;hfq&quot;] / df[&quot;adj_factor&quot;].iloc[-1]              # 前复权价:最后一天价格不变
+
+df[&quot;ret_raw&quot;] = df[&quot;close&quot;].pct_change()                       # 用原始价算的“收益”(错的)
+df[&quot;ret_adj&quot;] = df[&quot;hfq&quot;].pct_change()                         # 用复权价算的收益(对的)
+pd.set_option(&quot;display.width&quot;, 120)
+df[&quot;date&quot;] = df[&quot;date&quot;].dt.strftime(&quot;%m-%d&quot;)                     # 只显示月-日,便于阅读
+print(df[[&quot;date&quot;, &quot;close&quot;, &quot;ref_price&quot;, &quot;adj_factor&quot;, &quot;hfq&quot;, &quot;qfq&quot;, &quot;ret_raw&quot;, &quot;ret_adj&quot;]].round(4).to_string(index=False))</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext"> date  close  ref_price  adj_factor    hfq     qfq  ret_raw  ret_adj
+06-03   20.0        NaN        1.00 20.000  9.8039      NaN      NaN
+06-04   20.4       20.0        1.00 20.400 10.0000   0.0200   0.0200
+06-05   10.0       10.0        2.04 20.400 10.0000  -0.5098   0.0000
+06-06   10.3       10.0        2.04 21.012 10.3000   0.0300   0.0300
+06-07   10.1       10.3        2.04 20.604 10.1000  -0.0194  -0.0194
+06-11   10.5       10.1        2.04 21.420 10.5000   0.0396   0.0396</code></pre>
+  <p><b>怎么读这个输出</b>:<code>ret_raw</code> 在 06-05 出现 −50.98% 的“暴跌”,这正是不复权数据会骗过策略的地方;<code>ret_adj</code> 当天是 0,其余日子两列完全一致——说明复权只修正了除权那一天。<code>hfq</code> 第一天等于原始价,<code>qfq</code> 最后一天等于原始价,这就是“后复权以起点为基准、前复权以最新为基准”的含义。</p>
+  <div class="callout warn"><b>数据商之间的差异</b>:有的数据商用“等比”复权(本节的方法),有的用“加减”复权(直接把分红金额加回去),算出来的复权价会有细微差别。换数据源时,先对比几只分红频繁的股票。</div>
+
+  <h2>1.3 停牌、涨跌停与可交易性</h2>
+  <h3>直觉</h3>
+  <p>回测最常见的“作弊”之一是买到了现实中买不到的东西。A 股有<span class="term">涨跌停 <span class="en">(price limit)</span></span>制度:价格触及涨停后,卖方很少,排队买入的单子往往成交不了;触及跌停后,想卖的人排长队。<span class="term">停牌 <span class="en">(trading suspension)</span></span>期间则完全不能交易。如果你的策略恰好喜欢“强势股”,而回测假设在涨停价都能买到,收益会被严重高估。</p>
+  <h3>规则(示意,以交易所最新规定为准)</h3>
+  <ul>
+    <li>主板普通股票日涨跌幅限制一般为 ±10%,风险警示(ST)股票为 ±5%;创业板、科创板为 ±20%;北交所为 ±30%。新股上市初期等情形另有规定。</li>
+    <li>涨停价 = 前收盘 × (1 + 限制比例),按交易所规则四舍五入到 0.01 元。</li>
+    <li>“一字涨停”:开盘即涨停且全天不打开(最低价 = 涨停价),通常意味着几乎买不到。</li>
+  </ul>
+  <h3>回测中的保守规则</h3>
+  <p>我们没法知道排队能不能轮到自己,所以采用<b>保守假设</b>:</p>
+  <table>
+    <tr><th>情形</th><th>买入</th><th>卖出</th></tr>
+    <tr><td>停牌(成交量为 0)</td><td>❌</td><td>❌(只能继续持有,并按停牌前价格估值)</td></tr>
+    <tr><td>一字涨停</td><td>❌</td><td>✅</td></tr>
+    <tr><td>按收盘价成交且收盘跌停</td><td>✅</td><td>❌</td></tr>
+    <tr><td>盘中触及涨停但打开过</td><td colspan="2">取决于你的成交价假设;按开盘价成交时只需检查开盘价是否在涨跌停价上</td></tr>
+  </table>
+  <div class="code-title">📄 ch1_tradable.py</div><pre><code class="language-python">import numpy as np
+import pandas as pd
+
+# 模拟 5 只股票某一天的行情快照(教学用虚构数据)
+bar = pd.DataFrame({
+    &quot;code&quot;:       [&quot;A&quot;, &quot;B&quot;, &quot;C&quot;, &quot;D&quot;, &quot;E&quot;],
+    &quot;board&quot;:      [&quot;main&quot;, &quot;main&quot;, &quot;st&quot;, &quot;gem&quot;, &quot;main&quot;],   # 主板 / ST / 创业板
+    &quot;pre_close&quot;:  [10.00, 8.00, 5.00, 30.00, 12.00],
+    &quot;open&quot;:       [11.00, 7.50, 5.25, 31.00, np.nan],
+    &quot;high&quot;:       [11.00, 7.90, 5.25, 36.00, np.nan],
+    &quot;low&quot;:        [11.00, 7.20, 5.25, 30.50, np.nan],
+    &quot;close&quot;:      [11.00, 7.20, 5.25, 36.00, np.nan],
+    &quot;volume&quot;:     [1.2e5, 3.4e6, 8.0e4, 5.1e6, 0.0],
+})
+# 不同板块的涨跌幅限制(示意,具体以交易所最新规则为准)
+limit_pct = bar[&quot;board&quot;].map({&quot;main&quot;: 0.10, &quot;st&quot;: 0.05, &quot;gem&quot;: 0.20})
+# 涨停价/跌停价 = 前收盘 × (1 ± 限制比例),四舍五入到分
+bar[&quot;up_limit&quot;] = (bar[&quot;pre_close&quot;] * (1 + limit_pct)).round(2)
+bar[&quot;down_limit&quot;] = (bar[&quot;pre_close&quot;] * (1 - limit_pct)).round(2)
+
+bar[&quot;suspended&quot;] = bar[&quot;volume&quot;].fillna(0) &lt;= 0                       # 停牌:无成交
+bar[&quot;one_word_up&quot;] = (bar[&quot;low&quot;] &gt;= bar[&quot;up_limit&quot;]) &amp; ~bar[&quot;suspended&quot;]   # 一字涨停:最低价=涨停价
+bar[&quot;close_at_down&quot;] = bar[&quot;close&quot;] &lt;= bar[&quot;down_limit&quot;]              # 收盘跌停
+
+# 回测里的“能否成交”规则(保守版本):
+bar[&quot;can_buy&quot;] = ~bar[&quot;suspended&quot;] &amp; ~bar[&quot;one_word_up&quot;]              # 停牌、一字涨停都买不进
+bar[&quot;can_sell&quot;] = ~bar[&quot;suspended&quot;] &amp; ~bar[&quot;close_at_down&quot;]           # 停牌、跌停(按收盘价成交时)卖不出
+print(bar[[&quot;code&quot;, &quot;board&quot;, &quot;pre_close&quot;, &quot;close&quot;, &quot;up_limit&quot;, &quot;down_limit&quot;,
+           &quot;suspended&quot;, &quot;one_word_up&quot;, &quot;can_buy&quot;, &quot;can_sell&quot;]].to_string(index=False))</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">code board  pre_close  close  up_limit  down_limit  suspended  one_word_up  can_buy  can_sell
+   A  main       10.0  11.00     11.00        9.00      False         True    False      True
+   B  main        8.0   7.20      8.80        7.20      False        False     True     False
+   C    st        5.0   5.25      5.25        4.75      False         True    False      True
+   D   gem       30.0  36.00     36.00       24.00      False        False     True      True
+   E  main       12.0    NaN     13.20       10.80       True        False    False     False</code></pre>
+  <p><b>解读</b>:A 是主板一字涨停,买不进;B 收盘跌停,卖不出;C 是 ST 股,5% 就涨停了(5.00×1.05=5.25),如果误用 10% 的限制,就会以为它还没涨停;D 是创业板,虽然涨了 20%,但盘中有低于涨停价的成交,所以在我们的保守规则里视为可买(更严格的做法是同时检查你假设的成交价);E 停牌,两个方向都不能交易。</p>
+  <div class="callout warn"><b>停牌股的另一个坑</b>:停牌期间价格不变,如果用前值填充(forward fill)再算收益,停牌期收益为 0,复牌当天可能一次性跳空 ±30%。计算波动率、相关性时要意识到这一点;计算收益时它是真实的(你确实持有它),但策略不能在停牌期间“提前卖掉”。</div>
+
+  <h2>1.4 Point-in-time 数据与历史股票池</h2>
+  <h3>直觉</h3>
+  <p><span class="term">Point-in-time(时点一致)<span class="en">(point-in-time, PIT)</span></span>数据的意思是:<b>对任意历史时刻 \(t\),数据库能回答“在 \(t\) 时刻,我们能看到的数据是什么样子”。</b> 这比听上去难,因为:</p>
+  <ol>
+    <li><b>财报有延迟</b>:2023 年年报的报告期是 2023-12-31,但可能 2024 年 4 月才公布。在 2024 年 3 月,你还看不到它。</li>
+    <li><b>数据会被修订</b>:公司可能发布更正公告;数据商可能修正录入错误。今天的数据库里通常只保留“最终版”,丢掉了“当时看到的版本”。</li>
+    <li><b>股票池会变化</b>:今天的指数成分股列表里没有那些已经退市、被调出的股票。用它回测过去就是<span class="term">幸存者偏差 <span class="en">(survivorship bias)</span></span>。</li>
+  </ol>
+  <h3>数学化的定义</h3>
+  <p>把每条记录看作三元组 \((\text{实体}, \text{报告期 } p, \text{公告时间 } a)\) 加数值 \(v\)。在决策时刻 \(t\),可用的信息集是</p>
+  $$\mathcal I_t = \{(p, a, v) : a \le t\}$$
+  <p>“最新一期财报”= 在 \(\mathcal I_t\) 里报告期 \(p\) 最大的那一期;如果同一报告期有多次公告(原版、更正版),取 \(a\) 最大的那一条。<b>关键点:过滤条件用的是公告时间 \(a\),不是报告期 \(p\)。</b></p>
+  <div class="callout example"><b>例子</b>:某公司 2023 年报(净利润 10.0)于 2024-04-20 公布,2024-06-15 更正为 8.5;2024 年一季报(3.0)于 2024-04-28 公布。
+    <ul>
+      <li>2024-03-29 调仓:\(\mathcal I_t\) 为空 → 没有年报可用(而按报告期对齐会错误地“看到”年报)。</li>
+      <li>2024-04-30 调仓:能看到年报原版(10.0)和一季报(3.0);最新一期是一季报。如果你的因子要用“2023 年报净利润”,应取 <b>10.0</b> 而不是更正后的 8.5。</li>
+      <li>2024-06-28 调仓:2023 年报净利润已更正为 8.5。</li>
+    </ul>
+  </div>
+  <div class="code-title">📄 ch1_pit.py</div><pre><code class="language-python">import pandas as pd
+
+# 财报表:报告期(period)和真实公告日(ann_date)不是一回事 —— 教学用虚构数据
+fin = pd.DataFrame({
+    &quot;code&quot;: [&quot;A&quot;, &quot;A&quot;, &quot;A&quot;, &quot;A&quot;],
+    &quot;period&quot;: pd.to_datetime([&quot;2023-12-31&quot;, &quot;2024-03-31&quot;, &quot;2023-12-31&quot;, &quot;2024-06-30&quot;]),
+    &quot;ann_date&quot;: pd.to_datetime([&quot;2024-04-20&quot;, &quot;2024-04-28&quot;, &quot;2024-06-15&quot;, &quot;2024-08-25&quot;]),
+    &quot;net_profit&quot;: [10.0, 3.0, 8.5, 6.2],   # 第三行:2023 年报在 6 月 15 日被“更正”为 8.5
+})
+# 每月末调仓一次,想知道“当时”能看到的最新一期净利润
+rebal = pd.to_datetime([&quot;2024-03-29&quot;, &quot;2024-04-30&quot;, &quot;2024-06-28&quot;, &quot;2024-08-30&quot;])
+
+# ❌ 错误做法 1:按报告期对齐 —— 3 月 29 日就“看到了”4 月 20 日才公布、甚至 6 月才更正的数据
+wrong = pd.merge_asof(pd.DataFrame({&quot;code&quot;: &quot;A&quot;, &quot;date&quot;: rebal}),
+                      fin.sort_values(&quot;period&quot;), left_on=&quot;date&quot;, right_on=&quot;period&quot;, by=&quot;code&quot;)
+
+def pit_latest(fin, code, asof):
+    &quot;&quot;&quot;point-in-time 查询:只用 asof 当天及以前已公告的记录,
+    取其中报告期最新的一期;同一报告期有多次公告时取最后一次(更正版)。&quot;&quot;&quot;
+    known = fin[(fin[&quot;code&quot;] == code) &amp; (fin[&quot;ann_date&quot;] &lt;= asof)]     # 1) 只保留当时已知的
+    if known.empty:
+        return None                                                    # 当时还没有任何财报
+    known = known.sort_values([&quot;period&quot;, &quot;ann_date&quot;])                  # 2) 按报告期、公告日排序
+    return known.iloc[-1]                                              # 3) 最后一行 = 最新期的最新版本
+
+# ❌ 错误做法 2:用“今天的数据库快照”——每个报告期只保留最终修订版,丢失了更正前的数值
+snapshot_fy23 = fin[fin[&quot;period&quot;] == &quot;2023-12-31&quot;].sort_values(&quot;ann_date&quot;).iloc[-1][&quot;net_profit&quot;]
+
+rows = []
+for d in rebal:
+    r = pit_latest(fin, &quot;A&quot;, d)
+    fy23 = fin[(fin[&quot;period&quot;] == &quot;2023-12-31&quot;) &amp; (fin[&quot;ann_date&quot;] &lt;= d)].sort_values(&quot;ann_date&quot;)
+    rows.append({&quot;date&quot;: d.date(),
+                 &quot;wrong_by_period&quot;: wrong.loc[wrong[&quot;date&quot;] == d, &quot;net_profit&quot;].item(),
+                 &quot;pit_period&quot;: None if r is None else r[&quot;period&quot;].date(),
+                 &quot;pit_profit&quot;: None if r is None else r[&quot;net_profit&quot;],
+                 &quot;fy23_snapshot&quot;: snapshot_fy23,                                   # 错:永远是 8.5
+                 &quot;fy23_pit&quot;: fy23[&quot;net_profit&quot;].iloc[-1] if len(fy23) else None})  # 对:10.0 → 8.5
+print(pd.DataFrame(rows).to_string(index=False))</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">      date  wrong_by_period pit_period  pit_profit  fy23_snapshot  fy23_pit
+2024-03-29              8.5       None         NaN            8.5       NaN
+2024-04-30              3.0 2024-03-31         3.0            8.5      10.0
+2024-06-28              3.0 2024-03-31         3.0            8.5       8.5
+2024-08-30              6.2 2024-06-30         6.2            8.5       8.5</code></pre>
+  <p><b>解读</b>:<code>wrong_by_period</code> 在 3 月 29 日就给出了 8.5——不但提前看到了 4 月才公布的年报,而且看到的是 6 月才更正的数值,是“双重未来函数”。<code>fy23_snapshot</code> 列模拟了“只保存最终版的数据库”,它在 4 月 30 日给出 8.5,而当时市场看到的是 10.0。<code>fy23_pit</code> 才是正确的历史视角。</p>
+  <h3>历史股票池</h3>
+  <p>同样的逻辑适用于股票池:回测某天的“沪深 300 成分股”,必须用<b>那一天</b>的成分股名单(包括后来被调出、退市的股票),而不是今天的名单。实践中需要一张 <code>(指数, 股票, 纳入日, 剔除日)</code> 的历史成分表,以及一张包含<b>已退市股票</b>的完整行情表。退市股票往往在退市前大跌,把它们漏掉会让“买入低价股”“买入困境股”一类策略看起来特别好。</p>
+
+  <h2>1.5 数据清洗清单</h2>
+  <p>每接入一个新数据源,建议逐项检查(可以写成自动化的数据质量测试):</p>
+  <table>
+    <tr><th>检查项</th><th>怎么查</th><th>常见处理</th></tr>
+    <tr><td>主键重复</td><td><code>df.duplicated(["date","code"]).sum()</code></td><td>弄清原因(数据修订?合并错误?)后去重</td></tr>
+    <tr><td>缺失值</td><td>按日期、按股票统计缺失比例</td><td>价格:停牌用前值并标记;财务:不要用 0 填充,保留缺失并在因子计算时剔除</td></tr>
+    <tr><td>逻辑约束</td><td>low ≤ open, close ≤ high;成交量 ≥ 0</td><td>违反的行要追查,通常是数据错误</td></tr>
+    <tr><td>单位与口径</td><td>同一字段在不同时期是“元”还是“万元”、“股”还是“手”</td><td>统一单位并在字段名中写明(<code>amount_yuan</code>)</td></tr>
+    <tr><td>极端值</td><td>收益率超出涨跌幅限制(除权日、新股除外)</td><td>大多是未复权或数据错误</td></tr>
+    <tr><td>交易日历</td><td>和交易所日历对比</td><td>不要用自然日或工作日代替交易日</td></tr>
+    <tr><td>时区与时间戳</td><td>分钟数据的时间戳是区间开始还是结束?</td><td>统一约定并写进文档——差一根 K 线就可能是未来函数</td></tr>
+  </table>
+  <div class="callout warn"><b>缺失值填充的一个陷阱</b>:<code>bfill()</code>(向后填充,旧版 pandas 写作 <code>fillna(method="bfill")</code>)会用<b>未来</b>的值填过去的缺失,是隐蔽的未来函数。在时间序列里只应使用前值填充 <code>ffill()</code>,而且要想清楚“前值”在当时是否已知。</div>
+
+  <h2>1.6 存储:Parquet 与本地数据库</h2>
+  <h3>直觉</h3>
+  <p>CSV 是“一行一行”存的文本,读一列也得把整行都解析一遍。<span class="term">Parquet <span class="en">(Apache Parquet)</span></span> 是<span class="term">列式存储 <span class="en">(columnar storage)</span></span>格式:同一列的数据连续存放并压缩,读取时可以只读需要的列;再配合按年份、按日期的<span class="term">分区 <span class="en">(partitioning)</span></span>,还可以跳过不需要的文件。对“几千只股票 × 十几年 × 几十个字段”的面板数据,这能把读取时间从分钟级降到秒级。</p>
+  <div class="code-title">📄 ch1_parquet.py</div><pre><code class="language-python">import os, tempfile, time
+import numpy as np
+import pandas as pd
+
+rng = np.random.default_rng(0)
+dates = pd.bdate_range(&quot;2020-01-01&quot;, &quot;2023-12-29&quot;)          # 约 1000 个工作日
+codes = [f&quot;S{i:04d}&quot; for i in range(500)]                    # 500 只虚构股票
+idx = pd.MultiIndex.from_product([dates, codes], names=[&quot;date&quot;, &quot;code&quot;])
+panel = pd.DataFrame({
+    &quot;close&quot;: rng.lognormal(3, 0.5, len(idx)).astype(&quot;float32&quot;),   # 模拟数据,仅用来测存储
+    &quot;volume&quot;: rng.integers(0, 10**7, len(idx)).astype(&quot;int64&quot;),
+}, index=idx).reset_index()
+panel[&quot;year&quot;] = panel[&quot;date&quot;].dt.year                        # 用来分区的列
+
+root = tempfile.mkdtemp()
+csv_path = os.path.join(root, &quot;panel.csv&quot;)
+pq_dir = os.path.join(root, &quot;panel_pq&quot;)
+
+panel.to_csv(csv_path, index=False)                                  # 文本格式
+panel.to_parquet(pq_dir, partition_cols=[&quot;year&quot;], index=False)       # 按年分区的 parquet 数据集
+
+def size(p):
+    if os.path.isfile(p):
+        return os.path.getsize(p)
+    return sum(os.path.getsize(os.path.join(d, f)) for d, _, fs in os.walk(p) for f in fs)
+
+print(f&quot;行数: {len(panel):,}&quot;)
+print(f&quot;CSV 体积: {size(csv_path)/1e6:.1f} MB, Parquet 体积: {size(pq_dir)/1e6:.1f} MB&quot;)
+
+t0 = time.perf_counter()
+sub = pd.read_parquet(pq_dir, columns=[&quot;date&quot;, &quot;code&quot;, &quot;close&quot;],
+                      filters=[(&quot;year&quot;, &quot;=&quot;, 2023), (&quot;code&quot;, &quot;in&quot;, [&quot;S0001&quot;, &quot;S0002&quot;])])
+print(f&quot;只读 2023 年 2 只股票的 close 列: {len(sub)} 行, 用时 {time.perf_counter()-t0:.2f}s&quot;)
+print(sub.head(3).to_string(index=False))</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">行数: 521,500
+CSV 体积: 20.7 MB, Parquet 体积: 6.9 MB
+只读 2023 年 2 只股票的 close 列: 520 行, 用时 0.04s
+      date  code     close
+2023-01-02 S0001 21.878006
+2023-01-02 S0002 23.308535
+2023-01-03 S0001 44.558846</code></pre>
+  <p><b>解读</b>:同样 52 万行数据,Parquet 体积约为 CSV 的三分之一;按 <code>year</code> 分区后,读取时只打开 2023 年的文件、只解压 3 列,再按 <code>code</code> 过滤(用时会因机器不同而不同)。注意 <code>float32</code> 可以把价格类数据体积减半,但会损失精度(约 7 位有效数字),对价格足够,对累计复权因子这类需要连乘的量建议保留 <code>float64</code>。</p>
+  <h3>什么时候需要数据库</h3>
+  <ul>
+    <li><b>个人研究</b>:Parquet 文件 + pandas 通常就够了。需要 SQL 查询时,可以用 <span class="term">DuckDB</span>(嵌入式分析数据库)直接查询 Parquet 文件,无需部署服务。</li>
+    <li><b>团队共享、多人写入</b>:考虑 PostgreSQL(可加 TimescaleDB 扩展)、ClickHouse 等服务端数据库。</li>
+    <li><b>tick 级高频数据</b>:数据量会大几个数量级,常用专门的时序数据库或按日期切分的二进制文件。</li>
+  </ul>
+
+  <h2>1.7 研究环境与项目结构</h2>
+  <p>研究代码最大的敌人是“三个月后自己也看不懂、跑不出同样结果”。一个简单而有效的目录结构:</p>
+<pre><code class="language-plaintext">quant-research/
+├── data/
+│   ├── raw/            # 原始下载数据,只读,永不手改
+│   ├── clean/          # 清洗后的 Parquet(由脚本生成,可随时重建)
+│   └── meta/           # 交易日历、股票列表(含退市)、指数历史成分、行业分类历史
+├── src/
+│   ├── data_io.py      # 读写函数:所有数据访问都经过这里,保证 point-in-time
+│   ├── factors/        # 每个因子一个文件
+│   ├── backtest/       # 回测引擎(第 6 章)
+│   └── metrics.py      # 绩效指标(第 7 章)
+├── notebooks/          # 探索性分析;成熟的代码要搬进 src/
+├── configs/            # 参数文件(YAML),不要把参数写死在代码里
+├── tests/              # 单元测试:例如“复权后除权日收益应接近 0”
+└── results/            # 回测输出,文件名带日期和 git 提交号</code></pre>
+  <ul>
+    <li><b>可复现</b>:固定随机种子;用 <code>requirements.txt</code> 或 <code>pyproject.toml</code> 锁定库版本;用 git 管理代码,每个结果记录对应的提交号。</li>
+    <li><b>数据版本</b>:清洗后的数据也可能变化(修了一个 bug)。至少记录“数据生成日期 + 清洗脚本版本”。</li>
+    <li><b>写测试</b>:数据错误最好由程序自动发现。例如本章每个小节都可以变成一个测试:除权日复权收益在 ±涨跌幅内、没有重复主键、没有 bfill……</li>
+  </ul>
+
+  <h2>1.8 常见错误</h2>
+  <ul class="mistakes">
+    <li>❌ 用前复权价格做“价格水平”相关的判断(低价股过滤、整手计算)→ 引入未来信息。✅ 价格水平用原始价,收益用复权价。</li>
+    <li>❌ 假设涨停也能买到、跌停也能卖出 → 动量、打板类策略收益被高估。✅ 用保守的可交易性规则,并统计“因不可交易被拒绝的订单比例”。</li>
+    <li>❌ 财报按报告期对齐;使用只保存最终版的数据库 → 前视偏差。✅ 按公告日做 point-in-time 查询,保留修订历史。</li>
+    <li>❌ 用今天的成分股回测过去;行情表里没有退市股票 → 幸存者偏差。✅ 使用历史成分表和包含退市股票的全量数据。</li>
+    <li>❌ 用 <code>bfill</code> 填充缺失、用 0 填充财务缺失 → 未来函数 / 虚假的极端值。</li>
+    <li>❌ 在 notebook 里手动改数据 → 结果不可复现。✅ 原始数据只读,所有变换都由脚本完成。</li>
+  </ul>
+
+  <h2>1.9 本章小结</h2>
+  <div class="card summary"><ul>
+    <li>复权因子 = 前收盘 ÷ 除权参考价(连乘);<b>前复权、后复权收益率相同</b>,区别只在价格水平。</li>
+    <li>涨跌停、停牌会让一部分交易在现实中不可能发生,回测必须保守地处理。</li>
+    <li>Point-in-time 的核心是“<b>按公告时间过滤,而不是按报告期</b>”,并保留修订历史;股票池也要用历史成分并包含退市股票。</li>
+    <li>Parquet 列式 + 分区存储让面板数据读写又快又省空间;研究项目要做到“原始数据只读、变换全脚本化、结果可复现”。</li>
+    <li>下一章我们将在这样干净的数据上做<b>因子研究</b>。</li>
+  </ul></div>
+  <div class="quiz" data-quiz="ch1"></div>
+</section>
+
+<!-- ================= CH2 ================= -->
+<section class="page" id="ch2" data-chapter>
+  <h1>第 2 章 · 因子研究</h1>
+  <p class="lead">把“这只股票好不好”的模糊判断,变成可以计算、可以检验、可以组合的数字。</p>
+  <div class="callout bridge">🔗 <b>承上启下</b>:入门站 <a href="../#ch5">第 5 章</a> 介绍了多因子选股和 Fama-French 三因子模型,也提到了 IC 和中性化这两个词。这一章把它们展开成一套<b>完整的因子研究流水线</b>:构造 → 预处理 → 检验(IC、分层)→ 衰减与换手 → 多因子合成。用到的数据必须是第 1 章意义上“干净、point-in-time”的数据。</div>
+  <div class="card objectives"><b>🎯 学完本章你将能够</b>
+    <ul>
+      <li>区分“截面”与“时间序列”两种视角,知道因子研究为什么主要看截面;</li>
+      <li>实现 MAD 去极值、标准化和行业/市值中性化,并解释每一步在解决什么问题;</li>
+      <li>计算 IC、RankIC、ICIR 和 t 值,读懂分层回测的结果;</li>
+      <li>评估因子衰减和换手,并把交易成本纳入判断;</li>
+      <li>用等权和 ICIR 加权合成多因子,理解合成在什么情况下有效。</li>
+    </ul>
+    <p class="disclaimer" style="margin:6px 0 0">⏱ 预计 3–4 小时。本章所有代码共享一个模拟数据生成器 <code>ch2_sim.py</code>。</p>
+  </div>
+
+  <h2>2.1 因子研究在做什么:截面视角</h2>
+  <h3>直觉</h3>
+  <p>入门站的均线策略问的是“<b>这只股票</b>明天涨还是跌”——这是<span class="term">时间序列 <span class="en">(time-series)</span></span>问题。因子研究问的是另一个问题:“<b>在同一天的这 500 只股票里</b>,哪些会比其它的涨得多?”——这是<span class="term">截面 <span class="en">(cross-section)</span></span>问题。截面问题有两个好处:</p>
+  <ul>
+    <li>大盘整体涨跌(最难预测的部分)在“相对比较”中被抵消了;</li>
+    <li>每一期都有几百个样本,统计上比单只股票的一条时间序列有力得多。</li>
+  </ul>
+  <p><span class="term">因子 <span class="en">(factor)</span></span>在这里指:对每只股票、每个时点计算出的一个数字 \(f_{i,t}\),我们猜测它和该股票<b>下一期</b>收益 \(r_{i,t+1}\) 的截面排序有关。</p>
+  <h3>一条完整的流水线</h3>
+  <div class="flow">
+    <span class="step">原始数据(PIT)</span><span class="arrow">→</span><span class="step">因子构造</span><span class="arrow">→</span><span class="step">去极值</span><span class="arrow">→</span><span class="step">标准化</span><span class="arrow">→</span><span class="step">中性化</span><span class="arrow">→</span><span class="step">IC / 分层检验</span><span class="arrow">→</span><span class="step">衰减与换手</span><span class="arrow">→</span><span class="step">多因子合成</span>
+  </div>
+
+  <h2>2.2 因子构造:从想法到公式</h2>
+  <p>好的因子背后应该有一个<b>能讲清楚的理由</b>:是风险补偿(承担了别人不愿承担的风险)?是行为偏差(投资者系统性地反应过度或不足)?还是结构性约束(某些机构不能买某类股票)?下面是几类经典因子的常见构造方法(具体定义在文献和业界有很多变体):</p>
+  <table>
+    <tr><th>类别</th><th>例子</th><th>常见构造</th><th>数据时点注意</th></tr>
+    <tr><td>动量</td><td>12-1 动量</td><td>过去 12 个月累计收益,但<b>跳过最近 1 个月</b>(因为最近 1 个月常呈短期反转)</td><td>用复权价</td></tr>
+    <tr><td>反转</td><td>短期反转</td><td>过去 1 个月(或 1 周)收益取负号</td><td>用复权价</td></tr>
+    <tr><td>价值</td><td>盈利收益率 EP</td><td>最近 12 个月净利润 ÷ 总市值(PE 的倒数,避免 PE 在亏损时的符号问题)</td><td>净利润按公告日 PIT</td></tr>
+    <tr><td>质量</td><td>ROE</td><td>净利润 ÷ 净资产</td><td>财报 PIT</td></tr>
+    <tr><td>低风险</td><td>低波动</td><td>过去 N 日收益波动率取负号</td><td>—</td></tr>
+    <tr><td>规模</td><td>小市值</td><td>对数总市值取负号</td><td>股本要用当时的股本</td></tr>
+    <tr><td>流动性</td><td>换手率</td><td>过去 N 日平均换手率</td><td>—</td></tr>
+  </table>
+  <div class="callout">约定:我们总是把因子的<b>方向</b>调整成“值越大,预期收益越高”,这样后面的检验和合成都统一。例如低波动因子 = −波动率。</div>
+  <p>以 12-1 动量为例,写成公式:\(\text{MOM}_{i,t}=\dfrac{P_{i,t-21}}{P_{i,t-252}}-1\),\(P\) 是复权价,\(t\) 以交易日计。用 pandas:<code>mom = close.shift(21) / close.shift(252) - 1</code>,其中 <code>close</code> 是“行 = 日期、列 = 股票”的宽表。</p>
+
+  <h2>2.3 预处理:去极值、标准化、中性化</h2>
+  <p>原始因子不能直接拿来比较,有三个问题:<b>① 极端值</b>会主导统计量;<b>② 量纲不同</b>,EP 是百分比、换手率是小数,不能直接相加;<b>③ 混入了别的东西</b>,比如很多因子和市值、行业高度相关,你以为发现了新因子,其实只是重新发现了“小盘股效应”。三个步骤分别解决这三个问题。</p>
+  <h3>① 去极值(MAD 法)</h3>
+  <p><b>直觉</b>:如果 499 只股票的因子在 −3 到 3 之间,而 1 只因为数据错误是 300,它会单独决定均值和标准差。我们需要一个<b>不受极端值影响</b>的“中心”和“尺度”。均值和标准差都会被极端值拉动,而<span class="term">中位数 <span class="en">(median)</span></span>和<span class="term">绝对中位差 <span class="en">(Median Absolute Deviation, MAD)</span></span>不会。</p>
+  $$\text{MAD}=\operatorname{median}_i\big(|x_i-\operatorname{median}(x)|\big),\qquad \hat\sigma = 1.4826\times\text{MAD}$$
+  <p>常数 1.4826 的作用:当数据服从正态分布时,\(1.4826\times\text{MAD}\) 恰好约等于标准差,于是“\(k\) 倍 \(\hat\sigma\)”就有了和“\(k\) 倍标准差”类似的含义。去极值规则:把超出 \([\operatorname{median}-k\hat\sigma,\ \operatorname{median}+k\hat\sigma]\) 的值<b>截断到边界</b>(不是删除),\(k\) 常取 3 或 5。</p>
+  <div class="callout example"><b>手算</b>:\(x=(1,2,3,4,100)\),\(k=3\)。中位数 = 3;绝对离差 \(=(2,1,0,1,97)\),其中位数 MAD = 1;\(\hat\sigma=1.4826\);边界 \(=3\pm4.448=[-1.448,\ 7.448]\)。所以 100 被截断成 7.448,其它值不变。对比:原始均值是 22,标准差约 43.6——一个错误值让所有统计量都失去了意义。</div>
+  <h3>② 标准化</h3>
+  <p><span class="term">Z-score 标准化 <span class="en">(z-score)</span></span>:\(z_i=(x_i-\bar x)/s_x\),每一期在截面上单独做。之后不同因子都是“均值 0、标准差 1”,可以相加。另一种选择是<span class="term">排序标准化 <span class="en">(rank transform)</span></span>:把因子换成截面排名再映射到 \([0,1]\) 或正态分位数,对极端值更稳健,但丢掉了“差距有多大”的信息。</p>
+  <h3>③ 中性化</h3>
+  <p><b>直觉</b>:如果一个因子高分的股票大多是小盘股,那么它的收益可能只是“小盘股效应”。<span class="term">中性化 <span class="en">(neutralization)</span></span>就是在每一期截面上,把因子对“我们不想要的暴露”做回归,只保留残差。</p>
+  $$f_i = \sum_{k=1}^{K}\beta_k\,D_{i,k} + \gamma\,\text{Size}_i + \varepsilon_i,\qquad f^{\text{neu}}_i=\hat\varepsilon_i$$
+  <table class="symbols">
+    <tr><th>符号</th><th>含义</th></tr>
+    <tr><td>\(f_i\)</td><td>股票 \(i\) 标准化后的因子值</td></tr>
+    <tr><td>\(D_{i,k}\)</td><td>行业<span class="term">哑变量 <span class="en">(dummy variable)</span></span>:股票 \(i\) 属于行业 \(k\) 时为 1,否则为 0</td></tr>
+    <tr><td>\(\text{Size}_i\)</td><td>标准化后的对数市值</td></tr>
+    <tr><td>\(\beta_k,\gamma\)</td><td>回归系数:\(\beta_k\) 就是行业 \(k\) 的平均因子水平</td></tr>
+    <tr><td>\(\hat\varepsilon_i\)</td><td>残差:因子中不能被行业和市值解释的部分</td></tr>
+  </table>
+  <p>由 <a href="#prereq">前置知识 C 节</a> 的 OLS 性质,残差与每个行业哑变量、与市值都不相关——所以中性化后的因子在每个行业里均值为 0、与市值的截面相关为 0。注意行业哑变量已经起到“截距”的作用,不要再额外加一列常数(否则矩阵共线)。</p>
+  <div class="code-title">📄 ch2_sim.py</div><pre><code class="language-python">&quot;&quot;&quot;ch2_sim.py —— 生成一个“教学用”模拟股票面板。所有数据均为随机生成,不对应任何真实股票。&quot;&quot;&quot;
+import numpy as np
+import pandas as pd
+
+def make_panel(n_stocks=500, n_months=72, n_ind=10, ic_true=0.03, persist=0.8, seed=7):
+    rng = np.random.default_rng(seed)
+    codes = [f&quot;S{i:04d}&quot; for i in range(n_stocks)]
+    months = pd.period_range(&quot;2019-01&quot;, periods=n_months, freq=&quot;M&quot;)
+    industry = rng.integers(0, n_ind, n_stocks)                  # 每只股票固定属于一个行业
+    log_mcap0 = rng.normal(23, 1.0, n_stocks)                    # 对数市值(约 1e10 元量级)
+    alpha = rng.standard_normal(n_stocks)                        # 真实“好坏”信号(不可直接观测)
+    alpha2 = rng.standard_normal(n_stocks)                       # 另一个独立的、较弱的真实信号
+    rows = []
+    for t, m in enumerate(months):
+        # 真实信号随时间缓慢变化:persist 越高,信号越持久(因子换手越低)
+        alpha = persist * alpha + np.sqrt(1 - persist**2) * rng.standard_normal(n_stocks)
+        alpha2 = persist * alpha2 + np.sqrt(1 - persist**2) * rng.standard_normal(n_stocks)
+        log_mcap = log_mcap0 + 0.05 * rng.standard_normal(n_stocks)
+        size_z = (log_mcap - log_mcap.mean()) / log_mcap.std()
+        # 我们观测到的“原始因子” = 真实信号 + 市值暴露 + 噪声,并混入少量极端值
+        raw = alpha + 0.8 * size_z + 0.7 * rng.standard_normal(n_stocks)
+        raw = np.where(rng.random(n_stocks) &lt; 0.01, raw * 15, raw)       # 1% 的脏数据/极端值
+        # 第二个因子:主要反映 alpha2,并带一点 alpha 的成分和更多噪声
+        raw2 = alpha2 + 0.3 * alpha + 1.0 * rng.standard_normal(n_stocks)
+        # 下月收益 = 行业效应 + 小市值效应 + 真实 alpha + 特质噪声(月度)
+        ind_ret = rng.normal(0, 0.04, n_ind)[industry]
+        noise_sd = 0.10
+        fwd_ret = ind_ret - 0.01 * size_z + ic_true * noise_sd * (alpha + 0.7 * alpha2) + noise_sd * rng.standard_normal(n_stocks)
+        rows.append(pd.DataFrame({&quot;month&quot;: m, &quot;code&quot;: codes, &quot;industry&quot;: industry,
+                                  &quot;log_mcap&quot;: log_mcap, &quot;factor_raw&quot;: raw, &quot;factor2_raw&quot;: raw2, &quot;fwd_ret&quot;: fwd_ret}))
+    return pd.concat(rows, ignore_index=True)</code></pre>
+  <p><code>ch2_sim.py</code> 只是“造数据”的脚本:我们故意让原始因子 = 真实信号 + 0.8 × 市值暴露 + 噪声,再混入 1% 的极端值,并让收益里含有行业效应和小市值效应。这样就能检验预处理是否真的把这些“杂质”去掉了。</p>
+  <div class="code-title">📄 ch2_preprocess.py</div><pre><code class="language-python">import numpy as np
+import pandas as pd
+from ch2_sim import make_panel
+
+def winsorize_mad(x: pd.Series, k: float = 5.0) -&gt; pd.Series:
+    &quot;&quot;&quot;MAD 去极值:把超出 中位数 ± k×1.4826×MAD 的值“拉回”到边界上。&quot;&quot;&quot;
+    med = x.median()
+    mad = (x - med).abs().median()            # 绝对离差的中位数
+    sigma = 1.4826 * mad                      # 正态分布下 1.4826×MAD ≈ 标准差
+    return x.clip(med - k * sigma, med + k * sigma)
+
+def zscore(x: pd.Series) -&gt; pd.Series:
+    &quot;&quot;&quot;标准化:减均值、除标准差,让不同因子处于同一量纲。&quot;&quot;&quot;
+    return (x - x.mean()) / x.std()
+
+def neutralize(f: pd.Series, industry: pd.Series, log_mcap: pd.Series) -&gt; pd.Series:
+    &quot;&quot;&quot;行业 + 市值中性化:对 [行业哑变量, 对数市值] 做截面回归,取残差。&quot;&quot;&quot;
+    X = pd.get_dummies(industry, prefix=&quot;ind&quot;, dtype=float)   # 每个行业一列 0/1,相当于各行业有自己的截距
+    X[&quot;size&quot;] = zscore(log_mcap)
+    beta, *_ = np.linalg.lstsq(X.values, f.values, rcond=None)  # 最小二乘求回归系数
+    resid = f.values - X.values @ beta                          # 残差 = 因子中无法被行业/市值解释的部分
+    return pd.Series(resid, index=f.index)
+
+if __name__ == &quot;__main__&quot;:                  # 被其它脚本 import 时不执行下面的演示
+    panel = make_panel()
+    cs = panel[panel[&quot;month&quot;] == panel[&quot;month&quot;].iloc[0]].copy()     # 取第一个月的截面
+
+    cs[&quot;f_w&quot;] = winsorize_mad(cs[&quot;factor_raw&quot;])
+    cs[&quot;f_z&quot;] = zscore(cs[&quot;f_w&quot;])
+    cs[&quot;f_n&quot;] = zscore(neutralize(cs[&quot;f_z&quot;], cs[&quot;industry&quot;], cs[&quot;log_mcap&quot;]))
+
+    def describe(s):
+        return f&quot;min={s.min():7.2f} max={s.max():7.2f} 偏度={s.skew():6.2f} 与市值相关={s.corr(cs[&#x27;log_mcap&#x27;]):5.2f}&quot;
+    print(&quot;原始因子    &quot;, describe(cs[&quot;factor_raw&quot;]))
+    print(&quot;去极值后    &quot;, describe(cs[&quot;f_w&quot;]))
+    print(&quot;标准化后    &quot;, describe(cs[&quot;f_z&quot;]))
+    print(&quot;中性化后    &quot;, describe(cs[&quot;f_n&quot;]))
+    # 中性化后,各行业的因子均值应接近 0
+    print(&quot;中性化后各行业均值(前 5 个):&quot;, cs.groupby(&quot;industry&quot;)[&quot;f_n&quot;].mean().round(3).head().tolist())</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">原始因子     min= -21.52 max=   5.88 偏度= -3.37 与市值相关= 0.44
+去极值后     min=  -7.87 max=   5.88 偏度= -0.08 与市值相关= 0.49
+标准化后     min=  -5.09 max=   3.84 偏度= -0.08 与市值相关= 0.49
+中性化后     min=  -5.31 max=   4.65 偏度= -0.10 与市值相关=-0.00
+中性化后各行业均值(前 5 个): [0.0, -0.0, -0.0, 0.0, 0.0]</code></pre>
+  <p><b>怎么读这个输出</b>:</p>
+  <ul>
+    <li>原始因子的最小值约 −21.5,偏度明显——这就是那 1% 的极端值;去极值后范围缩到 ±8 以内,偏度接近 0。</li>
+    <li>有意思的是,去极值后“与市值相关”反而<b>上升</b>了(0.44 → 0.49):极端值本来是噪声,掩盖了因子与市值的真实关系。去掉噪声后,市值暴露更清楚地显露出来。</li>
+    <li>标准化不改变相关性(线性变换),只改变尺度。</li>
+    <li>中性化后与市值相关变为 0,各行业均值都是 0——正是 OLS 残差的性质。</li>
+  </ul>
+
+  <h2>2.4 IC、RankIC、ICIR:因子有没有预测力</h2>
+  <h3>直觉</h3>
+  <p>如果一个因子有用,那么在每一期,<b>因子值高的股票下一期收益也应该偏高</b>。衡量“偏高多少”最直接的方法就是计算两者在截面上的相关系数。</p>
+  <h3>定义</h3>
+  <table class="symbols">
+    <tr><th>指标</th><th>公式</th><th>含义</th></tr>
+    <tr><td><span class="term">IC <span class="en">(Information Coefficient)</span></span></td><td>\(\text{IC}_t=\operatorname{corr}\big(f_{\cdot,t},\,r_{\cdot,t+1}\big)\)</td><td>第 \(t\) 期因子与下期收益的 Pearson 截面相关</td></tr>
+    <tr><td><span class="term">RankIC <span class="en">(Spearman rank IC)</span></span></td><td>\(\operatorname{corr}\big(\operatorname{rank}(f),\operatorname{rank}(r)\big)\)</td><td>先排名再求相关;不受极端值影响,更常用</td></tr>
+    <tr><td><span class="term">ICIR <span class="en">(IC Information Ratio)</span></span></td><td>\(\overline{\text{IC}}/\operatorname{std}(\text{IC})\)</td><td>IC 的“夏普比率”:预测力有多<b>稳定</b></td></tr>
+    <tr><td>IC 的 t 值</td><td>\(t=\overline{\text{IC}}\big/\big(\operatorname{std}(\text{IC})/\sqrt{T}\big)=\text{ICIR}\times\sqrt T\)</td><td>\(T\) 期 IC 均值是否显著不为 0</td></tr>
+  </table>
+  <div class="callout example"><b>手算 RankIC</b>:5 只股票,因子 \(f=(1.2,-0.5,0.3,2.0,-1.0)\),下期收益 \(r=(2\%,-1\%,1\%,0.5\%,-2\%)\)。
+    <ol>
+      <li>因子排名(从小到大记 1–5):\((4,2,3,5,1)\);收益排名:\((5,2,4,3,1)\)。</li>
+      <li>排名差 \(d=(-1,0,-1,2,0)\),\(\sum d^2=6\)。</li>
+      <li>无并列时 Spearman 公式:\(\rho=1-\dfrac{6\sum d^2}{n(n^2-1)}=1-\dfrac{36}{5\times24}=0.70\)。</li>
+    </ol>
+    这一期 RankIC = 0.70。真实市场里单期 IC 通常小得多,而且正负交替——所以我们关心的是<b>很多期 IC 的均值和稳定性</b>。
+  </div>
+  <div class="callout math"><b>为什么很小的 IC 也可能有价值?</b>主动管理里有一个著名的近似关系——<span class="term">主动管理基本定律 <span class="en">(Fundamental Law of Active Management, Grinold)</span></span>:\(\text{IR}\approx\text{IC}\times\sqrt{\text{BR}}\),其中 IR 是主动收益的信息比率,BR(breadth)是每年<b>独立</b>下注的次数。截面上几百只股票、每月调仓,下注次数很多,所以即使每次预测只“好一点点”,累积起来也可能可观。但这个定律假设各次下注相互独立、没有成本,现实中要打折扣。</div>
+  <div class="code-title">📄 ch2_ic.py</div><pre><code class="language-python">import numpy as np
+import pandas as pd
+from ch2_sim import make_panel
+from ch2_preprocess import winsorize_mad, zscore, neutralize   # 复用上一段的预处理函数
+
+panel = make_panel()
+
+def prep(g):
+    f = zscore(winsorize_mad(g[&quot;factor_raw&quot;]))
+    g = g.copy()
+    g[&quot;factor&quot;] = zscore(neutralize(f, g[&quot;industry&quot;], g[&quot;log_mcap&quot;]))
+    return g
+panel = pd.concat([prep(g) for _, g in panel.groupby(&quot;month&quot;)], ignore_index=True)
+
+# ---- 1) 每期 IC 与 RankIC ----
+by_m = panel.groupby(&quot;month&quot;)
+ic = by_m.apply(lambda g: g[&quot;factor&quot;].corr(g[&quot;fwd_ret&quot;]))                      # Pearson IC
+ric = by_m.apply(lambda g: g[&quot;factor&quot;].corr(g[&quot;fwd_ret&quot;], method=&quot;spearman&quot;))  # 秩相关 RankIC
+icir = ric.mean() / ric.std()                                                  # 信息比率 ICIR(月度)
+t_stat = ric.mean() / (ric.std() / np.sqrt(len(ric)))                          # 均值是否显著不为 0
+print(f&quot;期数={len(ric)}  IC均值={ic.mean():.4f}  RankIC均值={ric.mean():.4f}  RankIC标准差={ric.std():.4f}&quot;)
+print(f&quot;ICIR={icir:.3f}  年化ICIR≈{icir*np.sqrt(12):.2f}  t值={t_stat:.2f}  RankIC&gt;0 占比={(ric&gt;0).mean():.1%}&quot;)
+
+# ---- 2) 分层(分位数)回测:每期按因子分 5 组,看各组下月平均收益 ----
+panel[&quot;q&quot;] = by_m[&quot;factor&quot;].transform(lambda s: pd.qcut(s, 5, labels=False) + 1)
+q_ret = panel.groupby([&quot;month&quot;, &quot;q&quot;])[&quot;fwd_ret&quot;].mean().unstack()   # 行=月份,列=组别 1..5
+print(&quot;\n各组月均收益(%):&quot;, (q_ret.mean() * 100).round(3).to_dict())
+ls = q_ret[5] - q_ret[1]                                            # 多空组合:做多第5组、做空第1组
+print(f&quot;多空月均收益={ls.mean():.4%}  年化夏普≈{ls.mean()/ls.std()*np.sqrt(12):.2f}&quot;)
+
+# ---- 3) 换手率:第 5 组成分股每月有多少比例被换掉 ----
+top = panel[panel[&quot;q&quot;] == 5].groupby(&quot;month&quot;)[&quot;code&quot;].apply(set)
+turnover = [1 - len(a &amp; b) / len(b) for a, b in zip(top[:-1], top[1:])]
+print(f&quot;第5组平均月换手率={np.mean(turnover):.1%}&quot;)
+
+# ---- 4) 因子衰减:用 t 月因子去预测 t+h 月收益 ----
+wide_f = panel.pivot(index=&quot;month&quot;, columns=&quot;code&quot;, values=&quot;factor&quot;)
+wide_r = panel.pivot(index=&quot;month&quot;, columns=&quot;code&quot;, values=&quot;fwd_ret&quot;)
+for h in [0, 1, 2, 3, 6]:
+    ics = [wide_f.iloc[t].corr(wide_r.iloc[t + h], method=&quot;spearman&quot;) for t in range(len(wide_f) - h)]
+    print(f&quot;滞后 {h} 期的 RankIC 均值: {np.mean(ics):.4f}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">期数=72  IC均值=0.0199  RankIC均值=0.0208  RankIC标准差=0.0369
+ICIR=0.562  年化ICIR≈1.95  t值=4.77  RankIC&gt;0 占比=69.4%
+
+各组月均收益(%): {1: -0.403, 2: -0.499, 3: -0.096, 4: 0.039, 5: 0.111}
+多空月均收益=0.5134%  年化夏普≈1.30
+第5组平均月换手率=54.2%
+滞后 0 期的 RankIC 均值: 0.0208
+滞后 1 期的 RankIC 均值: 0.0178
+滞后 2 期的 RankIC 均值: 0.0180
+滞后 3 期的 RankIC 均值: 0.0181
+滞后 6 期的 RankIC 均值: 0.0012</code></pre>
+  <p><b>逐行解读</b>:</p>
+  <ul>
+    <li><b>IC 均值 ≈ 0.02,RankIC ≈ 0.021</b>:单期相关很弱,符合我们在模拟里设定的弱信号。</li>
+    <li><b>ICIR ≈ 0.56,t 值 ≈ 4.8</b>:虽然 IC 小,但足够稳定——72 期里约 69% 为正。t 值大于 2 通常被当作“统计显著”的粗略门槛(第 7 章会解释为什么试过很多因子后,这个门槛要提高)。</li>
+    <li><b>年化 ICIR</b> 是月度 ICIR × \(\sqrt{12}\),只是换算口径,不是新信息。</li>
+    <li><b>分层收益</b>:第 5 组(因子最高)月均收益最高,第 1、2 组最低,但组 1 和组 2 之间<b>并不单调</b>。真实研究中要关注单调性:如果只有头部或尾部有效,构建组合的方式就要相应调整。</li>
+    <li><b>多空夏普</b>是在零成本、等权、做空无限制的理想条件下计算的,只能说明“方向对”,不能当作可实现的收益。A 股个股做空受限,实践中更常见的是“做多头部组 + 对冲指数期货”或“相对基准超额”。</li>
+  </ul>
+
+  <h2>2.5 分层回测</h2>
+  <h3>做法</h3>
+  <ol class="steps">
+    <li>每个调仓日,按因子值把股票池分成 \(Q\) 组(常用 5 或 10 组),组 1 因子最小、组 \(Q\) 最大;</li>
+    <li>每组内部等权(或市值加权)持有到下一调仓日,记录组收益;</li>
+    <li>画出每组的累计净值,看是否<b>单调分层</b>;计算“组 \(Q\) − 组 1”的多空收益。</li>
+  </ol>
+  <h3>和 IC 的关系</h3>
+  <p>IC 衡量“整体排序”的相关性,分层回测衡量“可以赚多少钱”。两者可能不一致:例如一个因子只在尾部有效(能识别“雷”,但分不出好股票),IC 不高,但做多“非尾部”可能仍有价值。所以两者都要看。</p>
+  <div class="callout warn"><b>分层回测的三个细节</b>:① 组内等权会放大小盘股的影响,建议同时看市值加权结果;② 每期股票数量变化时,分组边界也会变化,要使用 point-in-time 股票池;③ 剔除停牌、涨停买不进的股票(第 1 章),否则头部组的收益会虚高。</div>
+  <p>👉 去 <a href="#demo-factor">互动演示:因子 IC 与分层回测</a> 拖动“IC 强度”和“分组数”,感受 IC 的大小如何对应到分组收益的差距。</p>
+
+  <h2>2.6 因子衰减与换手</h2>
+  <h3>直觉</h3>
+  <p>因子的信息会“过期”。<span class="term">因子衰减 <span class="en">(alpha decay)</span></span>描述的是:用 \(t\) 期的因子去预测 \(t+h\) 期的收益,IC 随 \(h\) 增大下降得有多快。衰减慢的因子可以低频调仓、交易成本低;衰减快的因子必须频繁调仓,成本可能吃掉全部收益。</p>
+  <h3>换手与成本的量化</h3>
+  <p>定义头部组的<span class="term">换手率 <span class="en">(turnover)</span></span>为:本期成分中“上期不在组内”的比例。若每期换手 \(\tau\),单边成本 \(c\),则每期成本约为 \(2\tau c\)(卖出旧的、买入新的各一次)。</p>
+  <div class="callout example"><b>数值例子</b>:下面代码给出头部组月换手约 54%。若单边成本 0.15%(含佣金、税、冲击的粗略假设),每月成本 \(\approx 2\times0.54\times0.15\%=0.16\%\),一年约 1.9%。把它和多空(或多头超额)年化收益比较,才能判断因子是否“扣完成本还有剩”。</div>
+  <p>因子越<b>持久</b>(相邻两期因子值的截面相关越高),换手越低。在模拟数据里我们设定了 0.8 的月度持续性,所以 54% 的换手完全来自“排名在边界附近来回跳”。降低换手的常见方法:① 降低调仓频率;② 对因子做时间平滑(例如取过去 3 个月均值);③ 设置“缓冲区”——已持有的股票跌出前 20% 才卖,新股票进入前 15% 才买。</p>
+  <p>上一节代码最后几行的输出就是衰减曲线:滞后 0 期 RankIC ≈ 0.021,滞后 1–3 期仍有约 0.018,滞后 6 期接近 0。</p>
+
+  <h2>2.7 多因子合成</h2>
+  <h3>直觉</h3>
+  <p>单个因子的 IC 都不高,但如果几个因子包含<b>不同的信息</b>,把它们合在一起,噪声会部分抵消,信号会叠加。关键词是“不同”:两个高度相关的因子合成,几乎没有收益;两个独立的弱因子合成,可能明显提高 ICIR。</p>
+  <h3>三种常见方法</h3>
+  <ol>
+    <li><b>等权</b>:\(F=\frac1K\sum_k z_k\)。简单、稳健,不需要估计任何参数。</li>
+    <li><b>ICIR 加权</b>:权重 \(\propto\) 每个因子<b>过去</b>一段窗口的 ICIR(负值置 0)。给“历史上更稳定”的因子更大权重。</li>
+    <li><b>最大化 ICIR 加权</b>:若各因子 IC 序列的均值向量为 \(\bar{\mathbf{IC}}\)、协方差矩阵为 \(\Sigma_{IC}\),则使合成因子 ICIR 最大的权重近似为 \(w\propto\Sigma_{IC}^{-1}\bar{\mathbf{IC}}\)——这和第 4 章最大夏普组合的公式形式完全相同。它考虑了因子之间的相关,但需要估计协方差,样本少时不稳定。</li>
+  </ol>
+  <div class="code-title">📄 ch2_combine.py</div><pre><code class="language-python">import numpy as np
+import pandas as pd
+from ch2_sim import make_panel
+from ch2_preprocess import winsorize_mad, zscore, neutralize
+
+panel = make_panel()
+
+def clean(g, col):
+    &quot;&quot;&quot;去极值 → 标准化 → 中性化 → 再标准化,返回干净的因子暴露。&quot;&quot;&quot;
+    f = zscore(winsorize_mad(g[col]))
+    return zscore(neutralize(f, g[&quot;industry&quot;], g[&quot;log_mcap&quot;]))
+
+parts = []
+for m, g in panel.groupby(&quot;month&quot;):
+    g = g.copy()
+    g[&quot;f1&quot;], g[&quot;f2&quot;] = clean(g, &quot;factor_raw&quot;), clean(g, &quot;factor2_raw&quot;)
+    parts.append(g)
+panel = pd.concat(parts, ignore_index=True)
+
+def rank_ic(df, col):
+    return df.groupby(&quot;month&quot;).apply(lambda g: g[col].corr(g[&quot;fwd_ret&quot;], method=&quot;spearman&quot;))
+
+ic1, ic2 = rank_ic(panel, &quot;f1&quot;), rank_ic(panel, &quot;f2&quot;)
+print(f&quot;f1 与 f2 的平均截面相关: {panel.groupby(&#x27;month&#x27;).apply(lambda g: g[&#x27;f1&#x27;].corr(g[&#x27;f2&#x27;])).mean():.2f}&quot;)
+
+# 方法 A:等权合成
+panel[&quot;eq&quot;] = (panel[&quot;f1&quot;] + panel[&quot;f2&quot;]) / 2
+# 方法 B:按“过去 12 个月”的 ICIR 加权 —— 权重只用历史信息,避免未来函数
+icir1 = (ic1.rolling(12).mean() / ic1.rolling(12).std()).shift(1)   # shift(1):本月只能用到上月为止
+icir2 = (ic2.rolling(12).mean() / ic2.rolling(12).std()).shift(1)
+w1 = icir1.clip(lower=0) / (icir1.clip(lower=0) + icir2.clip(lower=0))  # 负的 ICIR 不给权重
+panel[&quot;w1&quot;] = panel[&quot;month&quot;].map(w1)
+panel[&quot;icir_w&quot;] = panel[&quot;w1&quot;] * panel[&quot;f1&quot;] + (1 - panel[&quot;w1&quot;]) * panel[&quot;f2&quot;]
+valid = panel.dropna(subset=[&quot;icir_w&quot;])                                    # 前 13 个月没有足够历史
+
+for name in [&quot;f1&quot;, &quot;f2&quot;, &quot;eq&quot;, &quot;icir_w&quot;]:
+    r = rank_ic(valid, name)
+    print(f&quot;{name:7s} RankIC均值={r.mean():.4f}  ICIR={r.mean()/r.std():.3f}&quot;)
+print(f&quot;ICIR 加权中 f1 的平均权重: {w1.mean():.2f}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">f1 与 f2 的平均截面相关: 0.16
+f1      RankIC均值=0.0197  ICIR=0.545
+f2      RankIC均值=0.0178  ICIR=0.425
+eq      RankIC均值=0.0229  ICIR=0.566
+icir_w  RankIC均值=0.0215  ICIR=0.548
+ICIR 加权中 f1 的平均权重: 0.61</code></pre>
+  <p><b>解读</b>:两个因子平均截面相关只有 0.16,包含较多独立信息,于是<b>等权合成</b>的 ICIR(0.566)高于任何单一因子。ICIR 加权给了 f1 约 61% 的权重,结果介于两者之间——在这组模拟数据上,“更聪明”的加权并没有赢过等权,这在实践中也很常见:<b>权重估计本身有误差</b>,估计误差可能抵消“优化”带来的好处(第 4 章会更系统地讨论这个现象)。</p>
+  <div class="callout warn"><b>加权必须只用历史信息</b>:代码里 <code>rolling(12)...shift(1)</code> 保证第 \(t\) 月的权重只用到 \(t-1\) 月为止的 IC。如果用全样本 ICIR 当权重,就把“未来哪个因子表现更好”的信息带进了过去。</div>
+  <h3>补充:Fama-MacBeth 回归</h3>
+  <p>另一种检验因子的经典方法是 <span class="term">Fama-MacBeth 两步回归 <span class="en">(Fama-MacBeth regression)</span></span>(Fama & MacBeth, 1973):每一期在截面上做回归 \(r_{i,t+1}=a_t+\lambda_t f_{i,t}+e_{i,t+1}\),得到一串 \(\lambda_t\)(称为该期的<span class="term">因子收益 <span class="en">(factor return)</span></span>),再检验 \(\lambda_t\) 的均值是否显著不为 0。它和 IC 思路一致,好处是可以同时放入多个因子,看“控制了其它因子后”某个因子还有没有增量信息。</p>
+
+  <h2>2.8 一份完整的因子报告应包含什么</h2>
+  <p>开源工具 <b>Alphalens</b>(原 Quantopian 项目,社区维护版为 <code>alphalens-reloaded</code>)把因子检验整理成标准报告。即使不用它,你自己的报告也建议包含:</p>
+  <ul>
+    <li>因子分布:每期覆盖股票数、缺失比例、分位数;</li>
+    <li>IC / RankIC 的时间序列、均值、标准差、ICIR、t 值、IC>0 占比,以及<b>按年份、按市场环境</b>拆开的 IC;</li>
+    <li>分层收益(等权 + 市值加权)、多空收益、头部组相对基准的超额收益;</li>
+    <li>IC 衰减曲线、头部组换手率、扣成本后的收益;</li>
+    <li>与已知因子(市值、行业、动量、价值……)的相关性,判断是否“新”。</li>
+  </ul>
+
+  <h2>2.9 常见错误</h2>
+  <ul class="mistakes">
+    <li>❌ 因子在 \(t\) 日收盘计算,却和 \(t\) 日的收益对齐 → 未来函数。✅ 因子永远对齐<b>下一期</b>收益(<code>fwd_ret</code>)。</li>
+    <li>❌ 用全样本(而不是每期截面)做标准化或去极值 → 把未来的分布信息带到过去。✅ 所有预处理在每期截面内单独完成。</li>
+    <li>❌ 只看 IC 不看分层、只看多空不看成本 → 高估可实现收益。</li>
+    <li>❌ 没有中性化就宣称发现了新因子 → 可能只是市值或行业的“马甲”。</li>
+    <li>❌ 试了 200 个因子,只报告 t 值最高的那个 → 多重检验问题(第 7 章)。</li>
+    <li>❌ 用全样本 ICIR 给因子定权重 → 未来函数。</li>
+  </ul>
+
+  <h2>2.10 本章小结</h2>
+  <div class="card summary"><ul>
+    <li>因子研究是<b>截面</b>问题:同一时点,哪些股票相对更好。</li>
+    <li>预处理三步:<b>MAD 去极值</b>(稳健)、<b>标准化</b>(统一量纲)、<b>中性化</b>(回归取残差,剔除行业/市值暴露)。</li>
+    <li>IC/RankIC 衡量预测力,ICIR 衡量稳定性,\(t=\text{ICIR}\sqrt T\);分层回测检验单调性和可实现收益。</li>
+    <li>衰减决定调仓频率,换手决定成本;每期成本 ≈ \(2\tau c\)。</li>
+    <li>多因子合成的价值来自<b>信息的独立性</b>;复杂加权未必胜过等权,且权重只能用历史数据估计。</li>
+  </ul></div>
+  <div class="quiz" data-quiz="ch2"></div>
+</section>
+
+<!-- ================= CH3 ================= -->
+<section class="page" id="ch3" data-chapter>
+  <h1>第 3 章 · 时间序列建模</h1>
+  <p class="lead">第 2 章看“同一时刻的很多股票”,这一章看“同一个序列在很多时刻”:它会不会回归?波动会不会聚集?关系会不会漂移?</p>
+  <div class="callout bridge">🔗 <b>承上启下</b>:入门站 <a href="../#ch3">第 3 章</a> 把波动率当成一个固定的数,<a href="../#ch5">第 5 章</a> 的配对交易提到“协整意味着价差平稳”。这一章要回答:什么叫<b>平稳</b>、怎么<b>检验</b>;波动率为什么会<b>随时间变化</b>、怎么建模;对冲比率漂移时怎样<b>在线更新</b>。这些工具会在第 4 章(协方差估计)和第 9 章(风控)里反复用到。</div>
+  <div class="card objectives"><b>🎯 学完本章你将能够</b>
+    <ul>
+      <li>说清平稳性的定义,用 ADF 检验判断一个序列是否有单位根;</li>
+      <li>理解 AR/MA/ARIMA 的含义,拟合模型并用残差诊断检验它;</li>
+      <li>写出 GARCH(1,1) 方程,解释每个参数,并用极大似然自己估计它;</li>
+      <li>用 Engle-Granger 两步法检验协整,计算均值回归半衰期;</li>
+      <li>用卡尔曼滤波估计随时间变化的对冲比率。</li>
+    </ul>
+    <p class="disclaimer" style="margin:6px 0 0">⏱ 预计 3–4 小时。代码依赖:numpy、scipy、statsmodels。</p>
+  </div>
+
+  <h2>3.1 平稳性:为什么它是一切的前提</h2>
+  <h3>直觉</h3>
+  <p>几乎所有统计方法都隐含一个假设:<b>过去的规律在未来仍然成立</b>。如果一个序列的均值、波动、相关结构一直在变,那么“用过去估计参数、用来预测未来”就没有依据。<span class="term">平稳 <span class="en">(stationary)</span></span>的序列就是“统计性质不随时间变化”的序列。</p>
+  <h3>定义(弱平稳)</h3>
+  <p>序列 \(\{x_t\}\) 称为弱平稳,如果对所有 \(t\) 和滞后 \(h\):</p>
+  <ol>
+    <li>均值恒定:\(E[x_t]=\mu\);</li>
+    <li>方差有限且恒定:\(\operatorname{Var}(x_t)=\sigma^2&lt;\infty\);</li>
+    <li>自协方差只取决于间隔:\(\operatorname{Cov}(x_t,x_{t-h})=\gamma_h\),与 \(t\) 无关。</li>
+  </ol>
+  <p><b>价格通常不平稳,收益率通常(近似)平稳。</b>最典型的非平稳序列是<span class="term">随机游走 <span class="en">(random walk)</span></span> \(x_t=x_{t-1}+\varepsilon_t\):它的方差 \(\operatorname{Var}(x_t)=t\sigma^2\) 随时间无限增大。对数价格大致就是随机游走,而它的一阶差分——对数收益率——就是 \(\varepsilon_t\),是平稳的。</p>
+  <div class="callout warn"><b>伪回归 <span class="en">(spurious regression)</span></b>:把两条<b>互不相关</b>的随机游走做回归,经常会得到很高的 \(R^2\) 和“显著”的 t 值。这是因为两个都在漂移的序列在有限样本里看起来总像有关系。所以:<b>不要直接拿价格对价格做回归来找关系</b>,除非你在检验协整(3.5 节)。</div>
+
+  <h2>3.2 单位根与 ADF 检验</h2>
+  <h3>思路</h3>
+  <p>考虑 AR(1) 模型 \(x_t=\phi x_{t-1}+\varepsilon_t\)。如果 \(|\phi|&lt;1\),冲击会逐渐消失,序列是平稳的;如果 \(\phi=1\),就是随机游走,称为有<span class="term">单位根 <span class="en">(unit root)</span></span>。两边同时减去 \(x_{t-1}\):</p>
+  $$\Delta x_t = \gamma\,x_{t-1}+\varepsilon_t,\qquad \gamma=\phi-1 .$$
+  <p>检验 \(\phi=1\) 就等价于检验 \(\gamma=0\)。<span class="term">ADF 检验 <span class="en">(Augmented Dickey-Fuller test)</span></span>在右边再加入常数项和若干阶 \(\Delta x_{t-i}\)(“增广”部分,用来吸收残差的自相关):</p>
+  $$\Delta x_t=\alpha+\gamma x_{t-1}+\sum_{i=1}^{p}\delta_i\,\Delta x_{t-i}+\varepsilon_t$$
+  <ul>
+    <li><b>原假设 H₀</b>:\(\gamma=0\)(有单位根、非平稳);<b>备择假设</b>:\(\gamma&lt;0\)(平稳)。</li>
+    <li>检验统计量是 \(\hat\gamma\) 的 t 值,但在 H₀ 下它<b>不服从</b>通常的 t 分布,而服从 Dickey-Fuller 分布,临界值更“负”(5% 水平约 −2.86,而不是 −1.65)。</li>
+    <li>滞后阶数 \(p\) 一般用信息准则(AIC/BIC)自动选择。</li>
+  </ul>
+  <div class="code-title">📄 ch3_adf.py</div><pre><code class="language-python">import numpy as np
+from statsmodels.tsa.stattools import adfuller
+
+rng = np.random.default_rng(1)
+n = 1000
+eps = rng.standard_normal(n)
+
+random_walk = np.cumsum(eps)                  # 随机游走:x_t = x_{t-1} + ε_t(单位根,非平稳)
+ar1 = np.zeros(n)                             # AR(1):x_t = 0.9·x_{t-1} + ε_t(平稳)
+for t in range(1, n):
+    ar1[t] = 0.9 * ar1[t - 1] + eps[t]
+log_price = 4.6 + np.cumsum(0.0003 + 0.015 * rng.standard_normal(n))  # 模拟对数价格:带漂移的随机游走
+log_ret = np.diff(log_price)                  # 对数收益率 = 对数价格的一阶差分
+
+for name, x in [(&quot;随机游走&quot;, random_walk), (&quot;AR(1) φ=0.9&quot;, ar1),
+                (&quot;模拟对数价格&quot;, log_price), (&quot;模拟对数收益率&quot;, log_ret)]:
+    res = adfuller(x, autolag=&quot;AIC&quot;)          # 自动用 AIC 选择差分滞后阶数
+    stat, pvalue, crit = res[0], res[1], res[4]   # 检验统计量、p 值、临界值字典
+    verdict = &quot;拒绝单位根 → 平稳&quot; if pvalue &lt; 0.05 else &quot;不能拒绝单位根 → 视为非平稳&quot;
+    print(f&quot;{name:12s} ADF统计量={stat:7.3f}  p值={pvalue:.4f}  5%临界值={crit[&#x27;5%&#x27;]:.3f}  {verdict}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">随机游走         ADF统计量= -1.168  p值=0.6874  5%临界值=-2.864  不能拒绝单位根 → 视为非平稳
+AR(1) φ=0.9  ADF统计量= -7.298  p值=0.0000  5%临界值=-2.864  拒绝单位根 → 平稳
+模拟对数价格       ADF统计量=  0.164  p值=0.9702  5%临界值=-2.864  不能拒绝单位根 → 视为非平稳
+模拟对数收益率      ADF统计量=-14.971  p值=0.0000  5%临界值=-2.864  拒绝单位根 → 平稳</code></pre>
+  <p><b>解读</b>:随机游走和模拟对数价格的 p 值都很大(不能拒绝单位根);AR(1) φ=0.9 和对数收益率的统计量远小于 5% 临界值 −2.864,拒绝单位根。注意 φ=0.9 的序列<b>看起来</b>也像在漂移,但它终究会回归——ADF 正是用来区分这两种情况的。</p>
+  <div class="callout warn"><b>ADF 的局限</b>:① 它的检验功效不高:φ=0.98 这种“接近单位根”的平稳序列,在样本不长时常常无法拒绝 H₀;② 结论依赖于是否包含常数项、趋势项(<code>regression="c"</code> 或 <code>"ct"</code>);③ “不能拒绝 H₀”≠“证明了非平稳”。可以配合 KPSS 检验(原假设与 ADF 相反,为“平稳”)一起看。</div>
+
+  <h2>3.3 ARIMA:对序列的“记忆”建模</h2>
+  <h3>三个积木</h3>
+  <table class="symbols">
+    <tr><th>模型</th><th>方程</th><th>直觉</th></tr>
+    <tr><td>AR(p)<br><span class="en">自回归 Autoregressive</span></td><td>\(x_t=c+\sum_{i=1}^p\phi_i x_{t-i}+\varepsilon_t\)</td><td>今天和过去几天的<b>值</b>有关</td></tr>
+    <tr><td>MA(q)<br><span class="en">移动平均 Moving Average</span></td><td>\(x_t=\mu+\varepsilon_t+\sum_{j=1}^q\theta_j\varepsilon_{t-j}\)</td><td>今天和过去几天的<b>冲击</b>有关(注意:和技术分析里的“均线”不是一回事)</td></tr>
+    <tr><td>ARIMA(p,d,q)</td><td>对 \(x_t\) 差分 \(d\) 次后做 ARMA(p,q)</td><td>\(d=1\) 用来处理有单位根的序列,如对价格建模等价于对收益建模</td></tr>
+  </table>
+  <p>其中 \(\varepsilon_t\) 是<span class="term">白噪声 <span class="en">(white noise)</span></span>:均值 0、方差恒定、互不相关。</p>
+  <h3>AR(1) 的均值回归形式</h3>
+  <p>把 AR(1) 写成 \(r_t-\mu=\phi(r_{t-1}-\mu)+\varepsilon_t\),其中 \(\mu=c/(1-\phi)\) 是长期均值。它的含义是:今天偏离均值的部分,明天只剩 \(\phi\) 倍。偏离衰减一半所需的期数——<span class="term">半衰期 <span class="en">(half-life)</span></span>——为</p>
+  $$h_{1/2}=\frac{\ln 0.5}{\ln\phi}.$$
+  <div class="callout example"><b>数值例子</b>:\(\mu=0.03\%\),\(\phi=0.1\),昨天收益 \(r_{t-1}=2\%\)。今天的预测值 \(=0.0003+0.1\times(0.02-0.0003)=0.227\%\)。半衰期 \(=\ln0.5/\ln0.1\approx0.3\) 天——几乎立刻消失。而 \(\phi=0.95\) 时半衰期约 13.5 天。</div>
+  <h3>怎么选阶数、怎么验证</h3>
+  <ul>
+    <li><span class="term">AIC <span class="en">(Akaike Information Criterion)</span></span> \(=2k-2\ln L\)(\(k\) 为参数个数,\(L\) 为似然):在拟合优度与复杂度之间权衡,<b>越小越好</b>。BIC 对参数的惩罚更重。</li>
+    <li>拟合后检查残差:如果模型抓住了所有线性结构,残差应该接近白噪声。<span class="term">Ljung-Box 检验 <span class="en">(Ljung-Box test)</span></span>的原假设是“前 \(m\) 阶自相关全为 0”,p 值大说明没发现剩余结构。</li>
+  </ul>
+  <div class="code-title">📄 ch3_arima.py</div><pre><code class="language-python">import numpy as np
+from statsmodels.tsa.arima.model import ARIMA
+from statsmodels.stats.diagnostic import acorr_ljungbox
+
+rng = np.random.default_rng(2)
+n, mu, phi, sigma = 1500, 0.0003, 0.10, 0.012       # 真实参数:均值、AR 系数、噪声标准差
+r = np.zeros(n)
+for t in range(1, n):                               # 生成 AR(1) 收益率:r_t − μ = φ(r_{t-1} − μ) + ε_t
+    r[t] = mu + phi * (r[t - 1] - mu) + sigma * rng.standard_normal()
+
+model = ARIMA(r, order=(1, 0, 0))                   # (p, d, q) = (1, 0, 0):AR(1),不差分,无 MA 项
+res = model.fit()
+const, ar_l1, s2 = res.params                       # 估计的常数(=均值)、AR 系数、残差方差
+print(f&quot;估计 μ={const:.5f}  φ={ar_l1:.3f} (标准误 {res.bse[1]:.3f})  σ={np.sqrt(s2):.4f}&quot;)
+print(f&quot;AIC={res.aic:.1f}&quot;)
+
+lb = acorr_ljungbox(res.resid, lags=[10])           # 残差还有没有自相关?p 值大 = 没有明显剩余结构
+print(f&quot;残差 Ljung-Box(10) p值={lb[&#x27;lb_pvalue&#x27;].iloc[0]:.3f}&quot;)
+
+fc = res.get_forecast(steps=3)                      # 向前预测 3 步
+print(&quot;未来 3 天预测均值:&quot;, np.round(fc.predicted_mean, 5))
+print(&quot;95% 区间下限:&quot;, np.round(fc.conf_int()[:, 0], 4))</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">估计 μ=-0.00051  φ=0.080 (标准误 0.026)  σ=0.0121
+AIC=-8974.9
+残差 Ljung-Box(10) p值=0.276
+未来 3 天预测均值: [-0.00099 -0.00055 -0.00052]
+95% 区间下限: [-0.0247 -0.0244 -0.0244]</code></pre>
+  <p><b>解读</b>:真实 φ=0.10,估计 0.080,标准误 0.026——真值在估计值 ±1 个标准误附近,符合预期;μ 的估计(−0.051%)与真值(0.03%)差别不小,因为日收益的均值本来就极难估准(这也是为什么均值-方差优化在第 4 章会遇到麻烦)。残差 Ljung-Box p=0.276,没有发现剩余自相关。预测值很快收敛到长期均值,95% 区间约 ±2.4%,远大于预测值本身——<b>收益率的可预测部分相对于噪声非常小</b>。</p>
+  <div class="callout">实务提示:在流动性好的市场里,日收益率的线性自相关通常很弱,ARIMA 直接预测收益效果有限。它更常用于:价差序列(配对交易)、宏观或基本面变量、以及作为更复杂模型的基准。</div>
+
+  <h2>3.4 GARCH:波动率会聚集</h2>
+  <h3>直觉</h3>
+  <p>观察任何一段市场行情都会发现:<b>大波动之后往往跟着大波动,平静之后往往跟着平静</b>——这叫<span class="term">波动率聚集 <span class="en">(volatility clustering)</span></span>。入门站把波动率当作常数,但对风险管理、仓位控制(波动率目标法)、期权定价来说,“明天的波动率是多少”才是关键。</p>
+  <h3>模型</h3>
+  <p><span class="term">GARCH(1,1) <span class="en">(Generalized Autoregressive Conditional Heteroskedasticity)</span></span>(Bollerslev, 1986,推广了 Engle 1982 年的 ARCH 模型):</p>
+  $$r_t=\sigma_t z_t,\quad z_t\sim N(0,1);\qquad \sigma_t^2=\omega+\alpha\,r_{t-1}^2+\beta\,\sigma_{t-1}^2$$
+  <table class="symbols">
+    <tr><th>符号</th><th>含义</th><th>直觉</th></tr>
+    <tr><td>\(\sigma_t^2\)</td><td><span class="term">条件方差 <span class="en">(conditional variance)</span></span>:基于 \(t-1\) 时刻信息对 \(t\) 日方差的预测</td><td>“明天的波动率”</td></tr>
+    <tr><td>\(\omega&gt;0\)</td><td>常数项</td><td>决定长期水平</td></tr>
+    <tr><td>\(\alpha\ge0\)</td><td>对昨天“意外”(\(r_{t-1}^2\))的反应</td><td>新闻冲击有多大影响</td></tr>
+    <tr><td>\(\beta\ge0\)</td><td>对昨天波动预测的记忆</td><td>波动有多“粘”</td></tr>
+    <tr><td>\(\alpha+\beta&lt;1\)</td><td>持续性 <span class="en">(persistence)</span></td><td>越接近 1,冲击消退越慢</td></tr>
+  </table>
+  <p>由此可以推出两个常用结论:</p>
+  <ul>
+    <li><b>长期(无条件)方差</b>:\(\bar\sigma^2=\dfrac{\omega}{1-\alpha-\beta}\)。</li>
+    <li><b>多步预测</b>:\(E_t[\sigma_{t+h}^2]=\bar\sigma^2+(\alpha+\beta)^{h-1}\big(\sigma_{t+1}^2-\bar\sigma^2\big)\)——波动预测以 \(\alpha+\beta\) 的速度向长期水平回归,半衰期 \(=\ln0.5/\ln(\alpha+\beta)\)。</li>
+  </ul>
+  <div class="callout example"><b>数值例子</b>:\(\omega=2\times10^{-6}\),\(\alpha=0.08\),\(\beta=0.90\)。
+    <ol>
+      <li>长期日方差 \(=2\times10^{-6}/0.02=10^{-4}\),即日波动 1%,年化 \(\approx1\%\times\sqrt{252}=15.9\%\)。</li>
+      <li>假设昨天 \(\sigma_{t-1}^2=10^{-4}\),昨天收益 \(-3\%\):今天 \(\sigma_t^2=2\times10^{-6}+0.08\times0.0009+0.9\times0.0001=1.64\times10^{-4}\),日波动从 1% 升到 1.28%。</li>
+      <li>持续性 0.98 → 半衰期 \(=\ln0.5/\ln0.98\approx34\) 个交易日。</li>
+    </ol>
+  </div>
+  <h3>估计:极大似然</h3>
+  <p><span class="term">极大似然估计 <span class="en">(Maximum Likelihood Estimation, MLE)</span></span>的思路:找一组参数,使“观测到这串收益”的概率最大。在正态假设下,每天的对数似然是 \(-\tfrac12\big[\ln(2\pi)+\ln\sigma_t^2+r_t^2/\sigma_t^2\big]\),把所有天加起来再取负号,交给优化器最小化即可。下面的代码不依赖专门的库,自己实现了这一过程(实际工作中可用 <code>arch</code> 库,它提供更多模型变体和稳健标准误)。</p>
+  <div class="code-title">📄 ch3_garch.py</div><pre><code class="language-python">import numpy as np
+from scipy.optimize import minimize
+
+rng = np.random.default_rng(3)
+# ---- 1) 用已知参数模拟一条 GARCH(1,1) 日收益率序列 ----
+omega, alpha, beta, n = 2e-6, 0.08, 0.90, 3000
+r, s2 = np.zeros(n), np.zeros(n)
+s2[0] = omega / (1 - alpha - beta)                 # 从长期方差开始
+for t in range(n):
+    if t &gt; 0:
+        s2[t] = omega + alpha * r[t - 1]**2 + beta * s2[t - 1]   # 条件方差递推
+    r[t] = np.sqrt(s2[t]) * rng.standard_normal()                 # 收益 = 条件波动 × 标准正态
+
+# ---- 2) 极大似然估计:最小化负对数似然 ----
+def neg_loglik(params, r):
+    w, a, b = params
+    if w &lt;= 0 or a &lt; 0 or b &lt; 0 or a + b &gt;= 1:     # 不满足约束 → 返回极大值,让优化器避开
+        return 1e10
+    var = np.empty_like(r)
+    var[0] = r.var()                               # 初值:用样本方差
+    for t in range(1, len(r)):
+        var[t] = w + a * r[t - 1]**2 + b * var[t - 1]
+    return 0.5 * np.sum(np.log(2 * np.pi) + np.log(var) + r**2 / var)
+
+x0 = [r.var() * 0.05, 0.05, 0.90]                  # 合理的初始猜测
+opt = minimize(neg_loglik, x0, args=(r,), method=&quot;Nelder-Mead&quot;,
+               options={&quot;maxiter&quot;: 4000, &quot;xatol&quot;: 1e-10, &quot;fatol&quot;: 1e-6})
+w_hat, a_hat, b_hat = opt.x
+print(f&quot;真实: ω={omega:.2e} α={alpha:.3f} β={beta:.3f}&quot;)
+print(f&quot;估计: ω={w_hat:.2e} α={a_hat:.3f} β={b_hat:.3f}  α+β={a_hat+b_hat:.3f}&quot;)
+long_run_vol = np.sqrt(w_hat / (1 - a_hat - b_hat) * 252)
+print(f&quot;长期年化波动率≈{long_run_vol:.1%}  (真实值 {np.sqrt(omega/(1-alpha-beta)*252):.1%})&quot;)
+half_life = np.log(0.5) / np.log(a_hat + b_hat)
+print(f&quot;波动冲击半衰期≈{half_life:.1f} 个交易日&quot;)
+
+# ---- 3) 向前预测:h 步后的方差向长期方差回归 ----
+var_f = np.empty_like(r)                            # 用“估计出的参数”重新滤波得到条件方差序列
+var_f[0] = r.var()
+for t in range(1, n):
+    var_f[t] = w_hat + a_hat * r[t - 1]**2 + b_hat * var_f[t - 1]
+var_T = w_hat + a_hat * r[-1]**2 + b_hat * var_f[-1]   # 明天(T+1)的条件方差
+lr_var = w_hat / (1 - a_hat - b_hat)
+for h in [1, 5, 20, 60]:
+    v = lr_var + (a_hat + b_hat)**(h - 1) * (var_T - lr_var)
+    print(f&quot;{h:3d} 天后的日波动率预测: {np.sqrt(v):.4%}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">真实: ω=2.00e-06 α=0.080 β=0.900
+估计: ω=2.07e-06 α=0.062 β=0.916  α+β=0.978
+长期年化波动率≈15.5%  (真实值 15.9%)
+波动冲击半衰期≈31.5 个交易日
+  1 天后的日波动率预测: 1.2868%
+  5 天后的日波动率预测: 1.2635%
+ 20 天后的日波动率预测: 1.1896%
+ 60 天后的日波动率预测: 1.0693%</code></pre>
+  <p><b>解读</b>:3000 个样本下,α、β 的估计与真值有一定差距,但 α+β(0.978 vs 0.98)和长期波动(15.5% vs 15.9%)估得很准——GARCH 中 α 和 β 单独往往不好识别,但“持续性”识别得好。预测部分显示:明天的波动预测高于长期水平,并随 \(h\) 增大逐步回归。</p>
+  <div class="callout warn"><b>常见扩展</b>:真实股票收益常有<span class="term">杠杆效应 <span class="en">(leverage effect)</span></span>——下跌带来的波动上升比同等幅度上涨更大,可以用 GJR-GARCH 或 EGARCH 建模;残差肥尾时可用 t 分布代替正态分布。</div>
+
+  <h2>3.5 协整进阶:Engle-Granger 两步法</h2>
+  <h3>直觉</h3>
+  <p>两只股票各自是随机游走(不平稳),但如果它们被同一个经济因素“拴在一起”,它们的某个线性组合(价差)可能是平稳的,会围绕均值来回摆动——这就是<span class="term">协整 <span class="en">(cointegration)</span></span>(Engle & Granger, 1987)。配对交易押注的正是“价差会回归”。</p>
+  <h3>两步法</h3>
+  <ol class="steps">
+    <li><b>估计关系</b>:OLS 回归 \(y_t=c+\beta x_t+u_t\),得到<span class="term">对冲比率 <span class="en">(hedge ratio)</span></span> \(\hat\beta\),价差 \(\hat u_t=y_t-\hat c-\hat\beta x_t\)。</li>
+    <li><b>检验价差平稳</b>:对 \(\hat u_t\) 做 ADF 型检验。由于 \(\hat\beta\) 是“为了让残差最小”而估计出来的,残差天然显得更平稳,所以<b>必须使用 Engle-Granger 专用临界值</b>(比普通 ADF 更严格)。<code>statsmodels.tsa.stattools.coint</code> 已经处理了这一点。</li>
+  </ol>
+  <h3>半衰期与交易信号</h3>
+  <p>对价差回归 \(\Delta u_t=\lambda u_{t-1}+e_t\)(这是离散版的<span class="term">OU 过程 <span class="en">(Ornstein-Uhlenbeck process)</span></span>),\(\lambda&lt;0\) 表示回归,半衰期 \(=-\ln2/\lambda\)。半衰期决定持仓周期:半衰期 10 天的价差适合日频交易,半衰期 200 天的价差则几乎不可交易。交易信号常用 \(z_t=(u_t-\bar u)/s_u\):\(|z|&gt;2\) 开仓,回到 0 附近平仓。</p>
+  <div class="code-title">📄 ch3_coint.py</div><pre><code class="language-python">import numpy as np
+import statsmodels.api as sm
+from statsmodels.tsa.stattools import coint, adfuller
+
+rng = np.random.default_rng(4)
+n = 750
+# 共同的随机趋势 + 各自的平稳偏离 → 两个价格序列协整(模拟数据)
+common = np.cumsum(rng.normal(0, 1, n))
+spread_true = np.zeros(n)
+for t in range(1, n):                                  # 价差服从 AR(1),φ=0.95,会回归
+    spread_true[t] = 0.95 * spread_true[t - 1] + rng.normal(0, 1)
+x = 50 + common                                        # 资产 X
+y = 10 + 1.5 * x + spread_true                         # 资产 Y = 常数 + 1.5·X + 平稳价差
+
+# 第 1 步:OLS 回归 y = c + β·x,得到对冲比率 β
+ols = sm.OLS(y, sm.add_constant(x)).fit()
+c_hat, beta_hat = ols.params
+spread = y - c_hat - beta_hat * x
+print(f&quot;对冲比率 β 估计={beta_hat:.3f}  (真实 1.5)&quot;)
+
+# 第 2 步:检验残差(价差)是否平稳 —— 用 coint() 而不是直接 adfuller(),
+# 因为残差是“估计出来的”,临界值需要用 Engle-Granger 专门的表
+t_stat, p_value, crit = coint(y, x)
+print(f&quot;Engle-Granger 检验: 统计量={t_stat:.3f}  p值={p_value:.4f}  5%临界值={crit[1]:.3f}&quot;)
+print(f&quot;(对照)直接对价差做 ADF 的 p 值={adfuller(spread)[1]:.4f} —— 偏乐观,不应这样用&quot;)
+
+# 第 3 步:均值回归半衰期:Δs_t = λ·s_{t-1} + 误差,半衰期 = −ln2 / λ
+ds, s_lag = np.diff(spread), spread[:-1]
+lam = sm.OLS(ds, sm.add_constant(s_lag)).fit().params[1]
+print(f&quot;λ={lam:.4f}  半衰期≈{-np.log(2)/lam:.1f} 天  (真实 φ=0.95 对应 {np.log(0.5)/np.log(0.95):.1f} 天)&quot;)
+
+# 第 4 步:z-score 信号
+z = (spread - spread.mean()) / spread.std()
+print(f&quot;|z|&gt;2 的天数占比: {(np.abs(z) &gt; 2).mean():.1%}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">对冲比率 β 估计=1.483  (真实 1.5)
+Engle-Granger 检验: 统计量=-4.678  p值=0.0006  5%临界值=-3.344
+(对照)直接对价差做 ADF 的 p 值=0.0001 —— 偏乐观,不应这样用
+λ=-0.0600  半衰期≈11.6 天  (真实 φ=0.95 对应 13.5 天)
+|z|&gt;2 的天数占比: 4.7%</code></pre>
+  <p><b>解读</b>:β 估计 1.483(真值 1.5);Engle-Granger p≈0.0006,协整显著;估计的半衰期 11.6 天,与真值 13.5 天同一量级。“直接 ADF”的 p 值更小——这就是为什么不能对估计出的残差直接套用普通 ADF 临界值。</p>
+  <div class="callout warn"><b>样本内的协整 ≠ 未来的协整</b>:上面 z-score 用的是<b>全样本</b>均值和标准差,只用于描述;交易回测中必须用滚动窗口估计 \(\beta\)、均值和标准差。另外,经济关系可能断裂(公司业务变化、并购),协整关系需要持续监控。多于两个资产时,可以用 Johansen 检验。</div>
+
+  <h2>3.6 卡尔曼滤波:让参数随时间变化</h2>
+  <h3>直觉</h3>
+  <p>上一节用一个固定的 \(\beta\) 描述整个样本。但真实的对冲比率会慢慢漂移。用滚动窗口 OLS 可以缓解,但窗口长度很难选:太短噪声大,太长反应慢。<span class="term">卡尔曼滤波 <span class="en">(Kalman filter)</span></span>(Kalman, 1960)提供了一个更系统的答案:把 \(\beta_t\) 当作一个<b>看不见、会慢慢变化的状态</b>,每来一个新观测就按“新数据有多可信”来更新估计。</p>
+  <h3>模型(状态空间形式)</h3>
+  $$\text{状态方程:}\ \beta_t=\beta_{t-1}+w_t,\ w_t\sim N(0,Q)\qquad \text{观测方程:}\ y_t=x_t\beta_t+v_t,\ v_t\sim N(0,R)$$
+  <p>每一步分两段:</p>
+  <table class="symbols">
+    <tr><th>步骤</th><th>公式</th><th>含义</th></tr>
+    <tr><td>预测</td><td>\(\hat\beta_{t|t-1}=\hat\beta_{t-1},\quad P_{t|t-1}=P_{t-1}+Q\)</td><td>没有新信息时,最佳猜测不变,但不确定性 \(P\) 增加</td></tr>
+    <tr><td>新息</td><td>\(e_t=y_t-x_t\hat\beta_{t|t-1},\quad S_t=x_t^2P_{t|t-1}+R\)</td><td>预测误差及其方差</td></tr>
+    <tr><td>增益</td><td>\(K_t=P_{t|t-1}x_t/S_t\)</td><td>新数据的“话语权”:\(P\) 大(对旧估计没把握)或 \(R\) 小(观测很准)时,\(K\) 大</td></tr>
+    <tr><td>更新</td><td>\(\hat\beta_t=\hat\beta_{t|t-1}+K_te_t,\quad P_t=(1-K_tx_t)P_{t|t-1}\)</td><td>按增益修正估计,不确定性减小</td></tr>
+  </table>
+  <div class="callout example"><b>手算一步</b>:\(\hat\beta_{t-1}=1.0\),\(P_{t-1}=0.01\),\(Q=10^{-4}\),\(R=4\);今天 \(x_t=50\),\(y_t=52\)。
+    <ol>
+      <li>预测:\(P_{t|t-1}=0.0101\)。</li>
+      <li>新息:\(e_t=52-50\times1.0=2\);\(S_t=2500\times0.0101+4=29.25\)。</li>
+      <li>增益:\(K_t=0.0101\times50/29.25\approx0.01726\)。</li>
+      <li>更新:\(\hat\beta_t=1.0+0.01726\times2\approx1.0345\);\(P_t=(1-0.01726\times50)\times0.0101\approx0.00138\)。</li>
+    </ol>
+    一次 2 元的“意外”只让 β 移动了 0.035,因为观测噪声 \(R\) 相对较大;不确定性 \(P\) 则因为有了新数据而显著下降。
+  </div>
+  <div class="code-title">📄 ch3_kalman.py</div><pre><code class="language-python">import numpy as np
+
+rng = np.random.default_rng(5)
+n = 600
+# 真实对冲比率 β_t 随时间缓慢漂移(模拟数据)
+beta_true = 1.0 + np.cumsum(rng.normal(0.001, 0.01, n))
+x = 50 + np.cumsum(rng.normal(0, 1, n))
+y = beta_true * x + rng.normal(0, 2.0, n)              # 观测:y_t = β_t·x_t + 观测噪声
+
+# 状态空间模型:
+#   状态方程 β_t = β_{t-1} + w_t,  w_t ~ N(0, Q)   (β 像随机游走一样慢慢变)
+#   观测方程 y_t = x_t·β_t + v_t,   v_t ~ N(0, R)
+Q, R = 1e-4, 4.0                                        # 过程噪声方差 / 观测噪声方差(需调参)
+beta_hat, P = 0.0, 1.0                                  # 初始估计与其不确定性(方差)
+est = np.zeros(n)
+for t in range(n):
+    # 1) 预测:β 的最佳猜测不变,不确定性增加 Q
+    P = P + Q
+    # 2) 更新:看到 y_t 后,用“预测误差”修正
+    y_pred = x[t] * beta_hat                            # 预测的观测值
+    err = y[t] - y_pred                                 # 新息(innovation)
+    S = x[t] * P * x[t] + R                             # 新息的方差
+    K = P * x[t] / S                                    # 卡尔曼增益:多相信新数据还是旧估计
+    beta_hat = beta_hat + K * err
+    P = (1 - K * x[t]) * P
+    est[t] = beta_hat
+
+ols_beta = (x @ y) / (x @ x)                            # 对比:全样本一个固定 β(无截距)
+for t in [50, 200, 400, 599]:
+    print(f&quot;t={t:3d}  真实β={beta_true[t]:.3f}  卡尔曼估计={est[t]:.3f}&quot;)
+print(f&quot;全样本 OLS 固定 β={ols_beta:.3f}&quot;)
+print(f&quot;后 400 天平均绝对误差: 卡尔曼={np.abs(est[200:]-beta_true[200:]).mean():.3f}  &quot;
+      f&quot;固定OLS={np.abs(ols_beta-beta_true[200:]).mean():.3f}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">t= 50  真实β=0.898  卡尔曼估计=0.907
+t=200  真实β=1.066  卡尔曼估计=1.039
+t=400  真实β=1.209  卡尔曼估计=1.201
+t=599  真实β=1.403  卡尔曼估计=1.404
+全样本 OLS 固定 β=1.230
+后 400 天平均绝对误差: 卡尔曼=0.012  固定OLS=0.118</code></pre>
+  <p><b>解读</b>:卡尔曼估计紧跟着真实 β 的漂移,后 400 天平均误差 0.012;一个固定的全样本 OLS β(而且还“偷看”了全样本)误差是 0.118。实际使用时,\(Q/R\) 的比值决定了反应速度:\(Q\) 越大,β 变得越快、越“抖”。它可以通过极大似然估计,也可以在训练集上调参——<b>但不要在测试集上调</b>。</p>
+
+  <h2>3.7 常见错误</h2>
+  <ul class="mistakes">
+    <li>❌ 对价格(非平稳)直接做回归、算相关 → 伪回归。✅ 对收益做,或专门检验协整。</li>
+    <li>❌ 把 ADF“不能拒绝”理解为“证明了有单位根”。</li>
+    <li>❌ 对估计出的价差直接用普通 ADF 临界值 → 高估协整显著性。✅ 用 <code>coint()</code>(Engle-Granger 临界值)。</li>
+    <li>❌ 用全样本均值/标准差计算 z-score 再回测 → 未来函数。✅ 滚动估计。</li>
+    <li>❌ 认为 GARCH 能预测收益方向——它预测的是<b>波动大小</b>,不是涨跌。</li>
+    <li>❌ 卡尔曼滤波的 \(Q,R\) 在全样本上调到最好 → 过拟合。</li>
+  </ul>
+
+  <h2>3.8 本章小结</h2>
+  <div class="card summary"><ul>
+    <li>平稳 = 均值、方差、自协方差不随时间变化;价格通常不平稳,收益近似平稳。</li>
+    <li>ADF 检验 \(\Delta x_t=\alpha+\gamma x_{t-1}+\dots\) 中 \(\gamma=0\)(单位根),使用专门的临界值。</li>
+    <li>AR(1) 的 \(\phi\) 决定均值回归速度,半衰期 \(=\ln0.5/\ln\phi\);日收益的线性可预测性通常很弱。</li>
+    <li>GARCH(1,1):\(\sigma_t^2=\omega+\alpha r_{t-1}^2+\beta\sigma_{t-1}^2\);\(\alpha+\beta\) 是持续性,长期方差 \(\omega/(1-\alpha-\beta)\)。</li>
+    <li>协整用 Engle-Granger 两步法检验;卡尔曼滤波让对冲比率等参数可以在线、平滑地更新。</li>
+  </ul></div>
+  <div class="quiz" data-quiz="ch3"></div>
+</section>
+
+<!-- ================= CH4 ================= -->
+<section class="page" id="ch4" data-chapter>
+  <h1>第 4 章 · 组合优化</h1>
+  <p class="lead">有了信号(第 2、3 章),下一个问题是:每个资产到底买多少?这一章从马科维茨的均值-方差模型出发,一路讲到现代实践中真正常用的稳健方法。</p>
+  <div class="callout bridge">🔗 <b>承上启下</b>:入门站 <a href="../#ch7">第 7 章</a> 讲了<b>单个</b>头寸的仓位管理(固定风险、凯利、波动率目标)。当持有很多资产时,资产之间的<b>相关性</b>变得和各自的波动同样重要——这需要协方差矩阵和 <a href="#prereq">前置知识 B 节</a> 的矩阵写法。第 2 章得到的因子分数在这里会变成“预期收益 \(\mu\)”的输入。</div>
+  <div class="card objectives"><b>🎯 学完本章你将能够</b>
+    <ul>
+      <li>推导最小方差组合和最大夏普组合的解析解,并画出有效前沿;</li>
+      <li>解释为什么“最优”组合在实践中常常很差(估计误差),并用 Ledoit-Wolf 收缩改善;</li>
+      <li>计算风险贡献并构建风险平价组合;</li>
+      <li>理解 Black-Litterman 如何把“观点”与“市场均衡”融合;</li>
+      <li>实现 HRP,并用 cvxpy 求解带实际约束(仓位上限、行业、换手)的组合优化。</li>
+    </ul>
+    <p class="disclaimer" style="margin:6px 0 0">⏱ 预计 3–4 小时。代码依赖:numpy、scipy、scikit-learn、cvxpy。本章资产的收益、波动和相关系数全部是<b>假设的教学参数</b>。</p>
+  </div>
+
+  <h2>4.1 从仓位到权重:组合的收益与风险</h2>
+  <p>设有 \(N\) 个资产,权重向量 \(w\)(\(\sum_iw_i=1\)),预期收益向量 \(\mu\),协方差矩阵 \(\Sigma\)。那么组合的</p>
+  $$\text{预期收益 } \mu_p=w^\top\mu,\qquad \text{方差 } \sigma_p^2=w^\top\Sigma w=\sum_{i}\sum_{j}w_iw_j\sigma_{ij}.$$
+  <p>方差公式里有 \(N\) 个方差项和 \(N(N-1)\) 个协方差项。资产越多,<b>协方差项越占主导</b>——这说明组合风险主要由资产之间的相关性决定,而不是各自的波动。这也是分散化的数学本质。</p>
+
+  <h2>4.2 均值-方差优化与有效前沿</h2>
+  <h3>直觉</h3>
+  <p>马科维茨(Markowitz, 1952)提出:投资者应该在“给定预期收益下,方差最小”的组合中选择。所有这样的组合在“波动–收益”平面上连成一条曲线,称为<span class="term">有效前沿 <span class="en">(efficient frontier)</span></span>。前沿以下的组合都是“浪费”的:存在另一个组合,风险相同而收益更高。</p>
+  <h3>推导 1:全局最小方差组合</h3>
+  <p>问题:\(\min_w\ w^\top\Sigma w\),约束 \(\mathbf 1^\top w=1\)(允许做空)。用<span class="term">拉格朗日乘子法 <span class="en">(Lagrange multiplier)</span></span>:构造 \(\mathcal L=w^\top\Sigma w-\lambda(\mathbf 1^\top w-1)\),对 \(w\) 求导令其为 0:</p>
+  $$2\Sigma w-\lambda\mathbf 1=0\ \Rightarrow\ w=\tfrac{\lambda}{2}\Sigma^{-1}\mathbf 1 .$$
+  <p>再用约束 \(\mathbf 1^\top w=1\) 解出 \(\lambda\),得到<span class="term">全局最小方差组合 <span class="en">(Global Minimum Variance, GMV)</span></span>:</p>
+  $$w_{\text{GMV}}=\frac{\Sigma^{-1}\mathbf 1}{\mathbf 1^\top\Sigma^{-1}\mathbf 1}.$$
+  <p>注意它<b>完全不需要预期收益 \(\mu\)</b>——这一点在 4.3 节会变得非常重要。</p>
+  <div class="callout example"><b>两资产手算</b>:沿用前置知识里的例子,\(\sigma_1^2=0.04\),\(\sigma_2^2=0.01\),\(\sigma_{12}=0.006\)。两资产时 GMV 有简洁公式 \(w_1=\dfrac{\sigma_2^2-\sigma_{12}}{\sigma_1^2+\sigma_2^2-2\sigma_{12}}=\dfrac{0.004}{0.038}\approx10.5\%\),\(w_2\approx89.5\%\)。组合方差 \(\approx0.009579\),波动 \(\approx9.79\%\)——比波动 10% 的资产 2 单独持有<b>还低</b>。加入一个更危险的资产反而降低了风险,这就是相关性 \(\rho=0.3&lt;1\) 带来的分散化。</div>
+  <h3>推导 2:最大夏普(切点)组合</h3>
+  <p>若存在无风险利率 \(r_f\),最大化 \(\dfrac{w^\top\mu-r_f}{\sqrt{w^\top\Sigma w}}\)。类似地可以推出</p>
+  $$w_{\text{tan}}=\frac{\Sigma^{-1}(\mu-r_f\mathbf 1)}{\mathbf 1^\top\Sigma^{-1}(\mu-r_f\mathbf 1)}.$$
+  <p>它叫<span class="term">切点组合 <span class="en">(tangency portfolio)</span></span>,因为从 \((0,r_f)\) 出发、与有效前沿相切的直线正好切在这个组合上。和第 2 章的“最大化 ICIR 加权”形式完全一样:\(\Sigma^{-1}\times\)“预期收益”。</p>
+  <div class="code-title">📄 ch4_mv.py</div><pre><code class="language-python">import numpy as np
+import cvxpy as cp
+
+# 4 个虚构资产的“假设”年化预期收益、波动率和相关系数(教学用,非真实市场数据)
+names = [&quot;股票A&quot;, &quot;股票B&quot;, &quot;债券C&quot;, &quot;商品D&quot;]
+mu = np.array([0.08, 0.10, 0.03, 0.06])
+vol = np.array([0.20, 0.25, 0.05, 0.18])
+corr = np.array([[1.0, 0.6, 0.1, 0.3],
+                 [0.6, 1.0, 0.0, 0.3],
+                 [0.1, 0.0, 1.0, 0.0],
+                 [0.3, 0.3, 0.0, 1.0]])
+Sigma = np.outer(vol, vol) * corr                  # 协方差 = σ_i σ_j ρ_ij
+ones = np.ones(len(mu))
+Si = np.linalg.inv(Sigma)                           # Σ^{-1}
+rf = 0.02                                           # 无风险利率
+
+# 1) 全局最小方差组合(允许做空):w = Σ^{-1}1 / (1ᵀΣ^{-1}1)
+w_gmv = Si @ ones / (ones @ Si @ ones)
+# 2) 切点组合 / 最大夏普(允许做空):w ∝ Σ^{-1}(μ − rf)
+w_tan = Si @ (mu - rf); w_tan /= w_tan.sum()
+
+def show(name, w):
+    r, s = w @ mu, np.sqrt(w @ Sigma @ w)
+    print(f&quot;{name:10s} 权重=&quot; + &quot; &quot;.join(f&quot;{n}:{x:6.1%}&quot; for n, x in zip(names, w)) +
+          f&quot; | 收益={r:.2%} 波动={s:.2%} 夏普={(r-rf)/s:.2f}&quot;)
+show(&quot;最小方差&quot;, w_gmv)
+show(&quot;最大夏普&quot;, w_tan)
+show(&quot;等权&quot;, ones / 4)
+
+# 3) 只做多 + 单资产不超过 50% 的最大夏普:用 cvxpy 求“给定收益下最小方差”,在收益网格上扫描
+w = cp.Variable(4)
+target = cp.Parameter()
+prob = cp.Problem(cp.Minimize(cp.quad_form(w, Sigma)),
+                  [cp.sum(w) == 1, w &gt;= 0, w &lt;= 0.5, mu @ w &gt;= target])
+best = None
+for tr in np.linspace(0.03, 0.09, 61):              # 有效前沿:每个目标收益求一次
+    target.value = tr
+    prob.solve()
+    if w.value is None:                              # 目标收益不可达时跳过
+        continue
+    wv = np.clip(w.value, 0, None); wv /= wv.sum()
+    sr = (wv @ mu - rf) / np.sqrt(wv @ Sigma @ wv)
+    if best is None or sr &gt; best[0]:
+        best = (sr, wv)
+show(&quot;约束最大夏普&quot;, best[1])</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">最小方差       权重=股票A:  0.0% 股票B:  2.3% 债券C: 91.5% 商品D:  6.1% | 收益=3.35% 波动=4.78% 夏普=0.28
+最大夏普       权重=股票A:  9.9% 股票B: 14.5% 债券C: 64.0% 商品D: 11.6% | 收益=4.86% 波动=6.97% 夏普=0.41
+等权         权重=股票A: 25.0% 股票B: 25.0% 债券C: 25.0% 商品D: 25.0% | 收益=6.75% 波动=12.45% 夏普=0.38
+约束最大夏普     权重=股票A: 15.3% 股票B: 17.4% 债券C: 50.0% 商品D: 17.3% | 收益=5.50% 波动=8.69% 夏普=0.40</code></pre>
+  <p><b>解读</b>:最小方差组合几乎全部压在低波动的债券上(91.5%);最大夏普组合同样以债券为主(64%),但加入了其它资产来提高收益。等权组合的收益最高但波动也高,夏普反而不差(0.38)。加上“只做多 + 单资产不超过 50%”的约束后,最大夏普组合的债券仓位被限制在 50%,夏普略降(0.40 vs 0.41)——<b>约束是有代价的,但代价往往不大</b>。代码里用 cvxpy 在一串目标收益上求解,这正是“画有效前沿”的数值方法。</p>
+
+  <h2>4.3 估计误差:优化器是“误差放大器”</h2>
+  <h3>直觉</h3>
+  <p>上一节的公式假设我们<b>知道</b>真实的 \(\mu\) 和 \(\Sigma\)。现实中它们都要从有限的历史数据中估计,而估计有误差。问题在于:优化器会<b>系统性地偏爱那些“被高估了收益、被低估了风险”的资产</b>——因为在它看来这些资产最“划算”。于是,样本内看起来最优的组合,样本外往往表现令人失望。这个现象常被称为“误差最大化”(Michaud 1989 的说法)。</p>
+  <ul>
+    <li><b>预期收益最难估</b>:年化波动 20% 的资产,用 10 年数据估计年化均值,标准误约 \(20\%/\sqrt{10}\approx6.3\%\)——和均值本身一个量级。</li>
+    <li><b>协方差相对好估,但维数高时也会出问题</b>:\(N\) 个资产有 \(N(N+1)/2\) 个参数。50 只股票就是 1275 个参数;如果只有 60 个月的数据,样本协方差矩阵会严重<span class="term">病态 <span class="en">(ill-conditioned)</span></span>:最大与最小特征值之比(<span class="term">条件数 <span class="en">(condition number)</span></span>)非常大,求逆后的误差被放大。当 \(T&lt;N\) 时它甚至不可逆。</li>
+  </ul>
+  <h3>Ledoit-Wolf 收缩</h3>
+  <p><span class="term">收缩估计 <span class="en">(shrinkage estimator)</span></span>的思路:在“噪声大但无偏”的样本协方差 \(S\) 和“有偏但稳定”的结构化目标 \(F\)(例如对角阵、常数相关矩阵、单因子模型)之间取加权平均:</p>
+  $$\hat\Sigma_{\text{shrink}}=\delta F+(1-\delta)S,\qquad 0\le\delta\le1 .$$
+  <p>Ledoit 和 Wolf(2004)给出了使期望误差(Frobenius 范数下)最小的最优收缩强度 \(\delta^*\) 的估计公式,可以直接从数据算出,不需要调参。<code>sklearn.covariance.LedoitWolf</code> 使用的目标 \(F\) 是“对角线为平均方差的单位阵倍数”。这是典型的<span class="term">偏差-方差权衡 <span class="en">(bias-variance trade-off)</span></span>:引入一点偏差,换来方差的大幅下降。</p>
+  <div class="code-title">📄 ch4_lw.py</div><pre><code class="language-python">import numpy as np
+from sklearn.covariance import LedoitWolf
+
+rng = np.random.default_rng(6)
+N, T_train, T_test, trials = 50, 60, 250, 200   # 50 只资产,只有 60 个样本估计协方差
+# 真实协方差:单因子结构(市场 β)+ 特质波动 —— 模拟设定
+beta = rng.uniform(0.5, 1.5, N)
+Sigma_true = np.outer(beta, beta) * 0.01**2 + np.diag(rng.uniform(0.01, 0.03, N)**2)
+L = np.linalg.cholesky(Sigma_true)
+
+def gmv(S):
+    &quot;&quot;&quot;全局最小方差权重(允许做空)。&quot;&quot;&quot;
+    x = np.linalg.solve(S, np.ones(len(S)))
+    return x / x.sum()
+
+res = {&quot;样本协方差&quot;: [], &quot;Ledoit-Wolf&quot;: [], &quot;真实协方差(理想)&quot;: []}
+for _ in range(trials):
+    X = rng.standard_normal((T_train, N)) @ L.T          # 训练期收益
+    S_sample = np.cov(X, rowvar=False)
+    S_lw = LedoitWolf().fit(X).covariance_               # 收缩估计
+    for k, S in [(&quot;样本协方差&quot;, S_sample), (&quot;Ledoit-Wolf&quot;, S_lw), (&quot;真实协方差(理想)&quot;, Sigma_true)]:
+        w = gmv(S)
+        res[k].append(np.sqrt(w @ Sigma_true @ w) * np.sqrt(252))   # 组合真实的(样本外)年化波动
+
+lw = LedoitWolf().fit(rng.standard_normal((T_train, N)) @ L.T)
+print(f&quot;一次拟合中 Ledoit-Wolf 收缩强度 δ={lw.shrinkage_:.2f}&quot;)
+print(f&quot;样本协方差条件数≈{np.linalg.cond(np.cov(rng.standard_normal((T_train, N)) @ L.T, rowvar=False)):.0f}&quot;)
+for k, v in res.items():
+    print(f&quot;{k:14s} 最小方差组合的真实年化波动: 均值={np.mean(v):.2%}  最差={np.max(v):.2%}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">一次拟合中 Ledoit-Wolf 收缩强度 δ=0.30
+样本协方差条件数≈1899
+样本协方差          最小方差组合的真实年化波动: 均值=28.10%  最差=50.66%
+Ledoit-Wolf    最小方差组合的真实年化波动: 均值=14.04%  最差=15.35%
+真实协方差(理想)      最小方差组合的真实年化波动: 均值=11.09%  最差=11.09%</code></pre>
+  <p><b>解读</b>:50 个资产、60 个样本时,样本协方差的条件数约 1900,用它构造的最小方差组合<b>真实</b>年化波动平均 28%,最差 51%;Ledoit-Wolf 收缩后降到平均 14%,而且非常稳定(最差 15.4%);理想情况(知道真实协方差)是 11%。收缩没有消除所有误差,但把“灾难”变成了“可以接受”。</p>
+  <p>👉 在 <a href="#demo-frontier">互动演示:有效前沿与估计误差</a> 里调节“样本长度”和“收缩强度”,直观看到“你以为的前沿”和“真实前沿”之间的差距。</p>
+  <div class="callout">其它对抗估计误差的方法:① 不估计 \(\mu\),只用最小方差或风险平价;② 用因子模型(\(\Sigma=B\Sigma_fB^\top+D\))降低参数个数;③ 对权重加上限和换手约束;④ Black-Litterman(4.5 节);⑤ 重抽样优化(对 \(\mu,\Sigma\) 做 bootstrap,平均多次优化结果)。</div>
+
+  <h2>4.4 风险平价:让每个资产贡献同样的风险</h2>
+  <h3>直觉</h3>
+  <p>等权组合“资金”平均,但“风险”并不平均:在 4 资产的例子里,股票 B 的波动是债券的 5 倍,等权组合的风险几乎全部来自股票。<span class="term">风险平价 <span class="en">(risk parity / equal risk contribution, ERC)</span></span>的目标是让每个资产对组合总风险的贡献相等。</p>
+  <h3>风险贡献的定义</h3>
+  <p>组合波动 \(\sigma_p=\sqrt{w^\top\Sigma w}\) 是权重的一次齐次函数,由欧拉定理可以分解为</p>
+  $$\sigma_p=\sum_i \underbrace{w_i\frac{\partial\sigma_p}{\partial w_i}}_{\text{RC}_i}=\sum_i\frac{w_i(\Sigma w)_i}{\sigma_p}.$$
+  <p>其中 \((\Sigma w)_i\) 是向量 \(\Sigma w\) 的第 \(i\) 个元素,\(\partial\sigma_p/\partial w_i\) 叫<span class="term">边际风险贡献 <span class="en">(marginal risk contribution)</span></span>。\(\text{RC}_i\) 是资产 \(i\) 的<span class="term">风险贡献 <span class="en">(risk contribution)</span></span>,所有 \(\text{RC}_i\) 加起来正好等于 \(\sigma_p\)。风险平价要求 \(\text{RC}_1=\text{RC}_2=\dots=\text{RC}_N\)。</p>
+  <div class="callout example"><b>手算特例</b>:两个<b>不相关</b>的资产,波动 20% 和 5%。此时 \(\text{RC}_i\propto w_i^2\sigma_i^2\),相等要求 \(w_1\sigma_1=w_2\sigma_2\),即权重与波动成反比:\(w_1=\dfrac{1/0.20}{1/0.20+1/0.05}=20\%\),\(w_2=80\%\)。所以“反波动率加权”是风险平价在资产不相关时的特例;有相关性时需要数值求解。</div>
+  <div class="code-title">📄 ch4_rp.py</div><pre><code class="language-python">import numpy as np
+from scipy.optimize import minimize
+
+vol = np.array([0.20, 0.25, 0.05, 0.18])            # 与 ch4_mv.py 同一组假设
+corr = np.array([[1.0, 0.6, 0.1, 0.3], [0.6, 1.0, 0.0, 0.3],
+                 [0.1, 0.0, 1.0, 0.0], [0.3, 0.3, 0.0, 1.0]])
+Sigma = np.outer(vol, vol) * corr
+
+def risk_contrib(w, S):
+    &quot;&quot;&quot;风险贡献 RC_i = w_i (Σw)_i / σ_p,各项之和等于组合波动 σ_p。&quot;&quot;&quot;
+    sigma_p = np.sqrt(w @ S @ w)
+    return w * (S @ w) / sigma_p
+
+def rp_objective(w, S):
+    rc = risk_contrib(w, S)
+    return np.sum((rc - rc.mean())**2)               # 让每个资产的风险贡献尽量相等
+
+n = len(vol)
+res = minimize(rp_objective, np.ones(n) / n, args=(Sigma,), method=&quot;SLSQP&quot;,
+               bounds=[(0, 1)] * n, constraints=[{&quot;type&quot;: &quot;eq&quot;, &quot;fun&quot;: lambda w: w.sum() - 1}],
+               options={&quot;ftol&quot;: 1e-14})
+w_rp = res.x
+for name, w in [(&quot;等权&quot;, np.ones(n) / n), (&quot;风险平价&quot;, w_rp), (&quot;反波动率&quot;, (1/vol) / (1/vol).sum())]:
+    rc = risk_contrib(w, Sigma)
+    print(f&quot;{name:6s} 权重={np.round(w, 3)}  风险贡献占比={np.round(rc / rc.sum(), 3)}  组合波动={np.sqrt(w@Sigma@w):.2%}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">等权     权重=[0.25 0.25 0.25 0.25]  风险贡献占比=[0.33  0.427 0.014 0.229]  组合波动=12.45%
+风险平价   权重=[0.114 0.096 0.641 0.149]  风险贡献占比=[0.25 0.25 0.25 0.25]  组合波动=6.63%
+反波动率   权重=[0.145 0.116 0.579 0.161]  风险贡献占比=[0.303 0.288 0.167 0.242]  组合波动=7.43%</code></pre>
+  <p><b>解读</b>:等权组合中股票 A、B 贡献了 76% 的风险,债券只贡献 1.4%;风险平价把四者的风险贡献都调成 25%,代价是债券权重高达 64%,组合波动降到 6.6%。反波动率加权介于两者之间(因为忽略了股票 A、B 之间 0.6 的相关)。实践中风险平价组合常常配合杠杆把波动提升到目标水平——这又引入了融资成本和杠杆风险。</p>
+
+  <h2>4.5 Black-Litterman:把观点和市场均衡结合起来</h2>
+  <h3>直觉</h3>
+  <p>直接用历史均值当 \(\mu\) 太不稳定。Black 和 Litterman(1992)的想法是:<b>先假设市场是对的</b>——市场当前的权重 \(w_{\text{mkt}}\) 隐含了一组“均衡”预期收益;然后只在你<b>有观点</b>的地方,按观点的信心程度去偏离它。没有观点时,结果就是市场组合本身,不会出现极端权重。</p>
+  <h3>第 1 步:反向优化求均衡收益</h3>
+  <p>若所有人都按均值-方差持有组合,风险厌恶系数为 \(\delta\),则最优权重满足 \(w=(\delta\Sigma)^{-1}\mu\)。反过来,由市场权重可推出隐含收益:</p>
+  $$\pi=\delta\,\Sigma\,w_{\text{mkt}} .$$
+  <h3>第 2 步:表达观点</h3>
+  <table class="symbols">
+    <tr><th>符号</th><th>含义</th><th>本例</th></tr>
+    <tr><td>\(P\)(\(K\times N\))</td><td>每行是一个观点涉及的资产组合</td><td>观点 1:\((-1,1,0,0)\)“B 减 A”;观点 2:\((0,0,0,1)\)“D”</td></tr>
+    <tr><td>\(Q\)(长度 \(K\))</td><td>每个观点的预期收益</td><td>\(Q=(3\%,4\%)\)</td></tr>
+    <tr><td>\(\Omega\)(\(K\times K\))</td><td>观点的不确定性(越大越没把握)</td><td>常用 \(\operatorname{diag}(P\tau\Sigma P^\top)\)</td></tr>
+    <tr><td>\(\tau\)</td><td>均衡收益本身的不确定性缩放,常取 0.01–0.1 量级</td><td>0.05</td></tr>
+  </table>
+  <h3>第 3 步:后验收益(贝叶斯融合)</h3>
+  $$\mu_{\text{BL}}=\Big[(\tau\Sigma)^{-1}+P^\top\Omega^{-1}P\Big]^{-1}\Big[(\tau\Sigma)^{-1}\pi+P^\top\Omega^{-1}Q\Big]$$
+  <p>读法:这是两个信息源的“精度加权平均”——精度就是方差的倒数。均衡 \(\pi\) 的精度是 \((\tau\Sigma)^{-1}\),观点 \(Q\) 的精度是 \(\Omega^{-1}\)。谁更确定,谁的话语权更大。</p>
+  <div class="code-title">📄 ch4_bl.py</div><pre><code class="language-python">import numpy as np
+
+names = [&quot;股票A&quot;, &quot;股票B&quot;, &quot;债券C&quot;, &quot;商品D&quot;]
+vol = np.array([0.20, 0.25, 0.05, 0.18])
+corr = np.array([[1.0, 0.6, 0.1, 0.3], [0.6, 1.0, 0.0, 0.3],
+                 [0.1, 0.0, 1.0, 0.0], [0.3, 0.3, 0.0, 1.0]])
+Sigma = np.outer(vol, vol) * corr
+w_mkt = np.array([0.35, 0.25, 0.30, 0.10])          # 假设的“市场/基准”权重
+delta = 2.5                                          # 风险厌恶系数(常见取值 2~4,这里取 2.5)
+tau = 0.05                                           # 先验不确定性缩放
+
+# 1) 反推隐含均衡收益:π = δ Σ w_mkt(“市场持有这些权重,说明它隐含了这样的预期收益”)
+pi = delta * Sigma @ w_mkt
+# 2) 观点:① 股票B 比 股票A 年化多 3%;② 商品D 年化收益 4%
+P = np.array([[-1, 1, 0, 0],
+              [0, 0, 0, 1]], dtype=float)
+Q = np.array([0.03, 0.04])
+Omega = np.diag(np.diag(P @ (tau * Sigma) @ P.T))    # 观点不确定性(He-Litterman 常用设定)
+# 3) 后验预期收益:
+#    μ_BL = [(τΣ)^{-1} + Pᵀ Ω^{-1} P]^{-1} [(τΣ)^{-1} π + Pᵀ Ω^{-1} Q]
+A = np.linalg.inv(tau * Sigma) + P.T @ np.linalg.inv(Omega) @ P
+b = np.linalg.inv(tau * Sigma) @ pi + P.T @ np.linalg.inv(Omega) @ Q
+mu_bl = np.linalg.solve(A, b)
+# 4) 用后验收益做无约束均值-方差:w = (δΣ)^{-1} μ_BL
+w_bl = np.linalg.solve(delta * Sigma, mu_bl)
+for i, n in enumerate(names):
+    print(f&quot;{n}: 均衡收益 π={pi[i]:6.2%}  后验 μ_BL={mu_bl[i]:6.2%}  市场权重={w_mkt[i]:5.1%} → BL权重={w_bl[i]:6.1%}&quot;)
+print(f&quot;BL 权重合计={w_bl.sum():.3f}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">股票A: 均衡收益 π= 5.72%  后验 μ_BL= 5.73%  市场权重=35.0% → BL权重= 26.6%
+股票B: 均衡收益 π= 6.87%  后验 μ_BL= 7.84%  市场权重=25.0% → BL权重= 33.4%
+债券C: 均衡收益 π= 0.28%  后验 μ_BL= 0.25%  市场权重=30.0% → BL权重= 30.0%
+商品D: 均衡收益 π= 2.60%  后验 μ_BL= 3.33%  市场权重=10.0% → BL权重= 18.3%
+BL 权重合计=1.083</code></pre>
+  <p><b>解读</b>:均衡收益里股票 B(6.87%)已经比 A(5.72%)高 1.15%,我们的观点是“高 3%”,所以后验把 B 上调到 7.84%(没有完全达到 3% 的差距,因为观点并非百分之百确定);商品 D 的均衡收益只有 2.6%,观点认为是 4%,后验 3.33%。权重随之从 A 移向 B 和 D,债券几乎不变——<b>没有观点的资产不会被乱动</b>,这正是 BL 比直接优化稳健的地方。最后一行权重和为 1.083,是因为这里用的是无约束优化 \(w=(\delta\Sigma)^{-1}\mu\);实际使用时通常再加上满仓等约束。</p>
+
+  <h2>4.6 HRP:不求逆矩阵的分层风险平价</h2>
+  <h3>直觉</h3>
+  <p>López de Prado(2016)提出的<span class="term">分层风险平价 <span class="en">(Hierarchical Risk Parity, HRP)</span></span>完全绕开了协方差矩阵求逆这个“误差放大器”。它的思路像整理衣柜:先把相似的资产归成一类(聚类),然后在类与类之间按风险分配资金,再逐层往下分。</p>
+  <h3>三个步骤</h3>
+  <ol class="steps">
+    <li><b>树形聚类</b>:用相关系数定义距离 \(d_{ij}=\sqrt{(1-\rho_{ij})/2}\)(\(\rho=1\) 时距离 0,\(\rho=-1\) 时距离 1),做<span class="term">层次聚类 <span class="en">(hierarchical clustering)</span></span>。</li>
+    <li><b>准对角化</b>:按聚类树的叶子顺序重排协方差矩阵,让相似资产相邻。</li>
+    <li><b>递归二分</b>:把排好序的资产列表一分为二,两半各自计算“簇方差” \(V_L, V_R\),左半分到 \(\alpha=1-\dfrac{V_L}{V_L+V_R}\) 的权重、右半分到 \(1-\alpha\);对每一半递归,直到每组只剩一个资产。</li>
+  </ol>
+  <div class="code-title">📄 ch4_hrp.py</div><pre><code class="language-python">import numpy as np
+import pandas as pd
+from scipy.cluster.hierarchy import linkage, leaves_list
+from scipy.spatial.distance import squareform
+
+rng = np.random.default_rng(8)
+# 模拟 8 个资产:两个“板块”(各 4 个),板块内相关高 —— 教学用
+T, k = 500, 4
+f1, f2 = rng.standard_normal(T), rng.standard_normal(T)
+X = np.column_stack([0.8 * f1 + 0.6 * rng.standard_normal(T) for _ in range(k)] +
+                    [0.7 * f2 + 0.7 * rng.standard_normal(T) for _ in range(k)])
+X *= np.array([0.01, 0.012, 0.015, 0.02, 0.008, 0.01, 0.006, 0.009])   # 不同波动
+ret = pd.DataFrame(X, columns=[f&quot;A{i}&quot; for i in range(8)])
+cov, corr = ret.cov(), ret.corr()
+
+# 第 1 步:树形聚类。距离 d_ij = sqrt((1 − ρ_ij)/2),相关越高距离越近
+dist = np.sqrt((1 - corr) / 2)
+link = linkage(squareform(dist.values, checks=False), method=&quot;single&quot;)
+# 第 2 步:准对角化 —— 按聚类树的叶子顺序重排资产,相似资产排在一起
+order = list(corr.index[leaves_list(link)])
+
+def cluster_var(cov, items):
+    &quot;&quot;&quot;一个簇的方差:簇内用反方差权重组合后的方差。&quot;&quot;&quot;
+    c = cov.loc[items, items]
+    ivp = 1 / np.diag(c); ivp /= ivp.sum()
+    return ivp @ c.values @ ivp
+
+# 第 3 步:递归二分 —— 每次把列表劈成两半,按两半的风险反比分配权重
+w = pd.Series(1.0, index=order)
+clusters = [order]
+while clusters:
+    clusters = [c[j:k] for c in clusters for j, k in ((0, len(c)//2), (len(c)//2, len(c))) if len(c) &gt; 1]
+    for i in range(0, len(clusters), 2):
+        left, right = clusters[i], clusters[i + 1]
+        vl, vr = cluster_var(cov, left), cluster_var(cov, right)
+        a = 1 - vl / (vl + vr)                       # 风险小的那半拿更多权重
+        w[left] *= a
+        w[right] *= 1 - a
+print(&quot;聚类后的资产顺序:&quot;, order)
+print(&quot;HRP 权重:&quot;, w.reindex(ret.columns).round(3).to_dict())
+print(&quot;权重合计:&quot;, round(w.sum(), 6))</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">聚类后的资产顺序: [&#x27;A3&#x27;, &#x27;A1&#x27;, &#x27;A0&#x27;, &#x27;A2&#x27;, &#x27;A5&#x27;, &#x27;A7&#x27;, &#x27;A4&#x27;, &#x27;A6&#x27;]
+HRP 权重: {&#x27;A0&#x27;: 0.102, &#x27;A1&#x27;: 0.067, &#x27;A2&#x27;: 0.039, &#x27;A3&#x27;: 0.025, &#x27;A4&#x27;: 0.174, &#x27;A5&#x27;: 0.108, &#x27;A6&#x27;: 0.353, &#x27;A7&#x27;: 0.132}
+权重合计: 1.0</code></pre>
+  <p><b>解读</b>:聚类正确地把 A0–A3 和 A4–A7 两个“板块”分开了。由于第二个板块的资产整体波动更低,它们拿到了更多权重;板块内波动最低的 A6 权重最高(35%),波动最高的 A3 最低(2.5%)。整个过程只用到协方差的对角线和聚类结构,<b>从不求逆</b>,所以对估计误差不敏感。代价是它没有用到预期收益信息,也不保证任何意义上的“最优”。</p>
+
+  <h2>4.7 带约束的优化:cvxpy 实战</h2>
+  <h3>为什么需要通用求解器</h3>
+  <p>真实组合几乎总有约束:只做多、单票上限、行业偏离、换手上限、跟踪误差……加上这些后就没有解析解了。好消息是,大多数这类问题都是<span class="term">凸优化 <span class="en">(convex optimization)</span></span>问题:目标函数是凸的(例如方差),约束构成凸集(线性约束、范数约束)。凸问题有两个优点:局部最优就是全局最优;有成熟的求解器。<span class="term">cvxpy</span> 让你用接近数学公式的方式写问题,自动转换后交给求解器。</p>
+  <h3>一个接近实战的问题</h3>
+  $$\max_w\ \alpha^\top w-\lambda\,(w-w_b)^\top\Sigma(w-w_b)-c\,\|w-w_0\|_1$$
+  <table class="symbols">
+    <tr><th>项</th><th>含义</th></tr>
+    <tr><td>\(\alpha^\top w\)</td><td>模型给出的预期超额收益(来自第 2 章因子或第 5 章模型)</td></tr>
+    <tr><td>\((w-w_b)^\top\Sigma(w-w_b)\)</td><td>相对基准 \(w_b\) 的<span class="term">跟踪误差 <span class="en">(tracking error)</span></span>方差;\(w-w_b\) 叫主动权重</td></tr>
+    <tr><td>\(\|w-w_0\|_1=\sum_i|w_i-w_{0,i}|\)</td><td>相对上期持仓 \(w_0\) 的双边换手,乘以成本 \(c\)</td></tr>
+    <tr><td>约束</td><td>满仓、只做多、单票 ≤ 8%、换手 ≤ 40%、每个行业偏离基准 ≤ ±5%</td></tr>
+  </table>
+  <div class="code-title">📄 ch4_cvx.py</div><pre><code class="language-python">import numpy as np
+import cvxpy as cp
+
+rng = np.random.default_rng(9)
+N = 30                                              # 30 只虚构股票
+alpha = rng.normal(0, 0.02, N)                      # 模型给出的预期超额收益(模拟)
+B = rng.normal(1, 0.3, (N, 1))                      # 单因子暴露
+Sigma = B @ B.T * 0.15**2 + np.diag(rng.uniform(0.2, 0.4, N)**2)   # 年化协方差
+industry = rng.integers(0, 3, N)                    # 3 个行业
+w_bench = np.ones(N) / N                            # 基准:等权
+w_prev = w_bench.copy()                             # 上期持仓
+lam, tc = 5.0, 0.002                                # 风险厌恶、单边成本
+
+w = cp.Variable(N)
+active = w - w_bench                                # 主动权重
+objective = cp.Maximize(alpha @ w
+                        - lam * cp.quad_form(active, Sigma)        # 跟踪误差惩罚
+                        - tc * cp.norm1(w - w_prev))               # 交易成本惩罚(换手)
+cons = [cp.sum(w) == 1, w &gt;= 0, w &lt;= 0.08,                         # 满仓、只做多、个股上限 8%
+        cp.norm1(w - w_prev) &lt;= 0.4]                               # 单期双边换手 ≤ 40%
+for g in range(3):                                                 # 行业偏离基准不超过 ±5%
+    m = (industry == g).astype(float)
+    cons += [cp.abs(m @ active) &lt;= 0.05]
+prob = cp.Problem(objective, cons)
+prob.solve()
+wv = w.value
+te = np.sqrt((wv - w_bench) @ Sigma @ (wv - w_bench))
+print(f&quot;求解状态: {prob.status}&quot;)
+print(f&quot;持股数(权重&gt;0.1%): {(wv &gt; 1e-3).sum()}  最大权重: {wv.max():.2%}  换手: {np.abs(wv - w_prev).sum():.2%}&quot;)
+print(f&quot;预期超额收益: {alpha @ (wv - w_bench):.2%}  年化跟踪误差: {te:.2%}&quot;)
+print(&quot;行业偏离:&quot;, [round(float(((industry == g) * (wv - w_bench)).sum()), 4) for g in range(3)])</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">求解状态: optimal
+持股数(权重&gt;0.1%): 29  最大权重: 8.00%  换手: 40.01%
+预期超额收益: 1.15%  年化跟踪误差: 2.94%
+行业偏离: [-0.0098, -0.0057, 0.0155]</code></pre>
+  <p><b>解读</b>:求解成功(<code>optimal</code>);单票上限 8% 和换手上限 40% 都是“紧”约束(刚好用满),说明如果放松它们,优化器还想更激进——这时要问自己:是信号真的强,还是 \(\alpha\) 估计过于自信?行业偏离都在 ±5% 以内。实际工作中,\(\alpha\) 的尺度(和 \(\lambda\) 的配合)需要校准,否则优化结果会过度集中。</p>
+
+  <h2>4.8 方法对比:我该用哪一个</h2>
+  <table>
+    <tr><th>方法</th><th>需要 \(\mu\)?</th><th>需要 \(\Sigma^{-1}\)?</th><th>优点</th><th>缺点</th></tr>
+    <tr><td>等权</td><td>否</td><td>否</td><td>最简单、最稳健,常是很难打败的基准</td><td>忽略风险差异</td></tr>
+    <tr><td>最小方差</td><td>否</td><td>是</td><td>不受收益估计误差影响</td><td>集中于低波动资产</td></tr>
+    <tr><td>均值-方差 / 最大夏普</td><td>是</td><td>是</td><td>理论最优</td><td>对输入极其敏感</td></tr>
+    <tr><td>风险平价</td><td>否</td><td>否(需 \(\Sigma\))</td><td>风险分散均衡</td><td>低波动资产权重大,可能需要杠杆</td></tr>
+    <tr><td>Black-Litterman</td><td>以观点形式</td><td>是</td><td>权重稳定、可融入主观或模型观点</td><td>参数(\(\tau,\Omega,\delta\))需要设定</td></tr>
+    <tr><td>HRP</td><td>否</td><td>否</td><td>对估计误差稳健,适合资产多、样本少</td><td>无最优性保证</td></tr>
+    <tr><td>带约束优化(cvxpy)</td><td>是</td><td>隐含</td><td>能表达真实世界约束和成本</td><td>需要校准 \(\alpha\) 和风险模型</td></tr>
+  </table>
+
+  <h2>4.9 常见错误</h2>
+  <ul class="mistakes">
+    <li>❌ 用历史平均收益直接作为 \(\mu\) 做无约束优化 → 极端权重,样本外很差。</li>
+    <li>❌ 资产数接近或超过样本数时仍用样本协方差 → 矩阵病态甚至不可逆。✅ 收缩估计或因子模型。</li>
+    <li>❌ 用 <code>np.linalg.inv</code> 显式求逆 → 数值不稳定。✅ 用 <code>np.linalg.solve</code>。</li>
+    <li>❌ 用全样本估计 \(\Sigma\) 再回测历史组合 → 未来函数。✅ 每个调仓日只用当时之前的数据估计。</li>
+    <li>❌ 忽略换手成本,每期都重新“从零优化” → 频繁大幅调仓。✅ 在目标函数中加入换手惩罚或约束。</li>
+    <li>❌ 把“风险平价”和“等权”混为一谈。</li>
+  </ul>
+
+  <h2>4.10 本章小结</h2>
+  <div class="card summary"><ul>
+    <li>组合方差 \(w^\top\Sigma w\);资产多时协方差项主导,分散化来自 \(\rho&lt;1\)。</li>
+    <li>GMV:\(\Sigma^{-1}\mathbf1\) 归一化;切点组合:\(\Sigma^{-1}(\mu-r_f\mathbf1)\) 归一化。</li>
+    <li>估计误差让优化器偏爱被高估的资产;Ledoit-Wolf 收缩 \(\delta F+(1-\delta)S\) 是简单有效的补救。</li>
+    <li>风险平价:\(\text{RC}_i=w_i(\Sigma w)_i/\sigma_p\) 相等;不相关时退化为反波动率加权。</li>
+    <li>BL 用“精度加权”融合均衡收益与观点;HRP 用聚类 + 递归二分,完全不求逆。</li>
+    <li>真实组合用凸优化(cvxpy)表达约束和成本。</li>
+  </ul></div>
+  <div class="quiz" data-quiz="ch4"></div>
+</section>
+
+<!-- ================= CH5 ================= -->
+<section class="page" id="ch5" data-chapter>
+  <h1>第 5 章 · 机器学习与量化</h1>
+  <p class="lead">机器学习能从大量特征中发现非线性关系,但金融数据噪声极大、样本相互重叠、规律还会变化——这让它比在图像或文本上<b>更容易自欺欺人</b>。本章重点不在“更复杂的模型”,而在“正确地评估模型”。</p>
+  <div class="callout bridge">🔗 <b>承上启下</b>:入门站 <a href="../#ch1">第 1 章</a> 提到“机器学习强大但更容易过拟合”,<a href="../#ch6">第 6 章</a> 讲了样本外和滚动前向验证。本章把这些原则落实到机器学习流程中:特征只用过去数据(第 1 章的 PIT 思想)、模型输出可以看作一个“合成因子”(第 2 章)、最终仍要变成组合权重(第 4 章)。</div>
+  <div class="card objectives"><b>🎯 学完本章你将能够</b>
+    <ul>
+      <li>说出金融机器学习与“普通”机器学习的三个关键差异;</li>
+      <li>构造无前视偏差的特征,并用三重障碍法设计标签;</li>
+      <li>解释普通 K 折交叉验证为什么在金融数据上会严重高估效果,并实现 Purged K-Fold + Embargo;</li>
+      <li>训练 LightGBM 模型,知道哪些超参数控制过拟合;</li>
+      <li>区分 split/gain 重要性与置换重要性,避免被“假重要特征”误导。</li>
+    </ul>
+    <p class="disclaimer" style="margin:6px 0 0">⏱ 预计 3–4 小时。代码依赖:numpy、pandas、scikit-learn、lightgbm。</p>
+  </div>
+
+  <h2>5.1 金融机器学习难在哪里</h2>
+  <table>
+    <tr><th>差异</th><th>图像识别等典型任务</th><th>金融预测</th><th>后果</th></tr>
+    <tr><td><span class="term">信噪比 <span class="en">(signal-to-noise ratio)</span></span></td><td>高:猫就是猫</td><td>极低:可预测部分远小于随机波动(回顾第 3 章 ARIMA 的预测区间)</td><td>模型很容易去拟合噪声</td></tr>
+    <tr><td>样本独立性</td><td>样本基本独立</td><td>相邻样本高度相关;标签在时间上重叠</td><td>普通交叉验证会“泄漏”</td></tr>
+    <tr><td>稳定性</td><td>规律不变</td><td>市场结构、参与者在变;规律被发现后会被套利掉</td><td>历史表现不保证未来</td></tr>
+    <tr><td>样本量</td><td>可以继续采集</td><td>历史只有一条,日频十年也只有约 2500 天</td><td>可用于验证的独立样本很少</td></tr>
+  </table>
+  <p>结论:在金融里,<b>评估方法的正确性比模型的复杂度重要得多</b>。一个用错误方法评估的深度模型,远不如一个用正确方法评估的线性模型有价值。</p>
+
+  <h2>5.2 特征工程</h2>
+  <h3>三条原则</h3>
+  <ol>
+    <li><b>只用当时可得的信息</b>:每个特征在 \(t\) 时刻的值,只能依赖 \(t\) 时刻及以前的数据(<code>rolling</code>、<code>pct_change</code> 默认满足;<code>shift(-1)</code>、全样本标准化、<code>bfill</code> 不满足)。</li>
+    <li><b>尽量平稳</b>:用收益、比率、z-score 代替价格水平。价格水平从 10 涨到 100,模型在训练期没见过 100,树模型就只能“外推”成训练集的边界值。</li>
+    <li><b>有经济含义</b>:动量、波动、流动性、估值、情绪……每个特征最好能说出“为什么可能有用”。无意义特征越多,碰巧有效的假特征也越多。</li>
+  </ol>
+  <h3>常见特征族</h3>
+  <table>
+    <tr><th>族</th><th>例子</th></tr>
+    <tr><td>价格动量 / 反转</td><td>过去 5、20、60 日收益;价格相对均线的偏离</td></tr>
+    <tr><td>波动与风险</td><td>滚动波动率、GARCH 波动预测(第 3 章)、下行波动、最大回撤</td></tr>
+    <tr><td>流动性</td><td>换手率、成交额、Amihud 非流动性(|收益| ÷ 成交额)</td></tr>
+    <tr><td>基本面</td><td>第 2 章的价值、质量因子(PIT!)</td></tr>
+    <tr><td>截面相对值</td><td>每个特征在当日截面上的排名或 z-score(把时间序列问题转成截面问题)</td></tr>
+  </table>
+  <div class="callout">进阶话题:López de Prado(2018)提出<span class="term">分数阶差分 <span class="en">(fractional differentiation)</span></span>,在“保持平稳”和“保留价格记忆”之间折中——一阶差分(收益率)平稳但丢掉了全部长期记忆,分数阶差分(例如 0.4 阶)可以保留一部分。</div>
+
+  <h2>5.3 标签设计:三重障碍法</h2>
+  <h3>固定期限标签的问题</h3>
+  <p>最简单的标签是“未来 \(h\) 天收益的符号”。它有两个问题:① 忽略了路径——一笔交易可能先跌 15% 触发止损,最后才涨回来,固定期限标签却记为“赚钱”;② 同样的阈值在高波动和低波动时期含义不同。</p>
+  <h3>三重障碍法</h3>
+  <p><span class="term">三重障碍法 <span class="en">(triple-barrier method)</span></span>(López de Prado, 2018)为每个样本设置三条“障碍”,标签由<b>最先被碰到的那条</b>决定:</p>
+  <table class="symbols">
+    <tr><th>障碍</th><th>位置</th><th>碰到后的标签</th></tr>
+    <tr><td>上障碍(止盈)</td><td>\(P_{t_0}(1+k\,\sigma_{t_0})\)</td><td>+1</td></tr>
+    <tr><td>下障碍(止损)</td><td>\(P_{t_0}(1-k\,\sigma_{t_0})\)</td><td>−1</td></tr>
+    <tr><td>垂直障碍(到期)</td><td>\(t_0+h\)</td><td>到期收益的符号(或 0)</td></tr>
+  </table>
+  <p>其中 \(\sigma_{t_0}\) 是入场时用<b>过去</b>数据估计的波动率,\(k\) 是宽度倍数。这样障碍宽度自动适应波动环境。每个样本还记录了<b>标签结束时间</b> \(t_1\)——它在下一节的交叉验证里至关重要。</p>
+  <div class="callout example"><b>例子</b>:入场价 100 元,过去 20 日日波动 1.5%,\(k=2\),\(h=10\)。上障碍 103 元,下障碍 97 元。如果第 4 天收盘 97.2、第 5 天收盘 96.8,则第 5 天先碰到下障碍:标签 −1,\(t_1\)=第 5 天。如果 10 天内一直在 97–103 之间、第 10 天收盘 101,则标签 +1,\(t_1\)=第 10 天。</div>
+  <div class="code-title">📄 ch5_labels.py</div><pre><code class="language-python">import numpy as np
+import pandas as pd
+
+def make_prices(n=2500, seed=11):
+    &quot;&quot;&quot;模拟日收盘价:带随机波动聚集的随机游走(没有可预测的规律)。&quot;&quot;&quot;
+    rng = np.random.default_rng(seed)
+    vol = np.empty(n); vol[0] = 0.015
+    for t in range(1, n):                       # 让波动率慢慢变化,更像真实行情
+        vol[t] = np.clip(vol[t-1] * np.exp(0.05 * rng.standard_normal()), 0.005, 0.05)
+    ret = vol * rng.standard_normal(n)
+    idx = pd.bdate_range(&quot;2015-01-01&quot;, periods=n)
+    return pd.Series(100 * np.exp(np.cumsum(ret)), index=idx, name=&quot;close&quot;)
+
+def triple_barrier(close, horizon=10, k=2.0, vol_win=20):
+    &quot;&quot;&quot;三重障碍标签:
+       上障碍 = 入场价 × (1 + k·σ),下障碍 = 入场价 × (1 − k·σ),垂直障碍 = horizon 天后。
+       先碰上障碍 → +1;先碰下障碍 → −1;都没碰到 → 用到期时收益的符号。
+       返回标签和每个样本“标签结束时间” t1(后面做 purging 要用)。&quot;&quot;&quot;
+    sigma = close.pct_change().rolling(vol_win).std()      # 用过去 20 天波动率设定障碍宽度
+    labels, t1 = pd.Series(np.nan, index=close.index), pd.Series(pd.NaT, index=close.index)
+    for i in range(vol_win, len(close) - horizon):
+        p0, s = close.iloc[i], sigma.iloc[i]
+        path = close.iloc[i + 1:i + 1 + horizon] / p0 - 1  # 未来 horizon 天的累计收益路径
+        up = path[path &gt;= k * s].index.min()               # 第一次触及上障碍的日期(没有则 NaT)
+        dn = path[path &lt;= -k * s].index.min()
+        first = min([d for d in [up, dn] if pd.notna(d)], default=pd.NaT)
+        if pd.isna(first):                                 # 两条水平障碍都没碰到
+            labels.iloc[i], t1.iloc[i] = np.sign(path.iloc[-1]), path.index[-1]
+        else:
+            labels.iloc[i], t1.iloc[i] = (1 if first == up else -1), first
+    return labels, t1
+
+if __name__ == &quot;__main__&quot;:
+    close = make_prices()
+    y, t1 = triple_barrier(close)
+    ok = y.dropna()
+    print(&quot;标签分布:&quot;, ok.value_counts().sort_index().to_dict())
+    end_pos = close.index.get_indexer(t1.dropna())          # 标签结束日在序列中的位置
+    start_pos = close.index.get_indexer(t1.dropna().index)   # 入场日的位置
+    hold = end_pos - start_pos                                # 持有了多少个交易日
+    print(f&quot;平均持有 {hold.mean():.1f} 个交易日;  碰到垂直障碍(持满 10 天)的比例: {(hold == 10).mean():.0%}&quot;)
+    print(ok.head(3).to_string())</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">标签分布: {-1.0: 1219, 1.0: 1251}
+平均持有 5.5 个交易日;  碰到垂直障碍(持满 10 天)的比例: 21%
+2015-01-29   -1.0
+2015-01-30    1.0
+2015-02-02    1.0
+Freq: B</code></pre>
+  <p><b>解读</b>:标签大致平衡(−1 与 +1 各约一半,因为模拟数据没有趋势);平均持有约 5.5 个交易日,约 21% 的样本持满 10 天碰到垂直障碍。注意每个样本的标签跨越多天,<b>相邻样本的标签区间高度重叠</b>——第 \(t\) 天和第 \(t+1\) 天的标签几乎由同一段价格路径决定。</p>
+  <div class="callout">相关技巧:<span class="term">元标签 <span class="en">(meta-labeling)</span></span>——先用一个简单规则(例如均线交叉)决定方向,再训练一个模型判断“这次信号是否值得做、仓位该多大”。它把“方向”和“置信度”两个问题分开,常常比直接预测方向更容易。</div>
+
+  <h2>5.4 交叉验证:为什么普通 K 折会骗你</h2>
+  <h3>直觉</h3>
+  <p><span class="term">K 折交叉验证 <span class="en">(K-fold cross-validation)</span></span>把数据分成 K 份,轮流用 1 份测试、其余训练。默认实现常常<b>打乱顺序</b>。在金融数据上,打乱意味着:测试集里第 500 天的样本,它的“邻居”第 499 天和第 501 天就在训练集里。邻居的特征几乎一样(滚动窗口只差一天),标签也几乎一样(价格路径重叠)。模型只要“记住邻居”就能答对——这叫<span class="term">数据泄漏 <span class="en">(data leakage)</span></span>。</p>
+  <h3>Purging 与 Embargo</h3>
+  <p>即使按时间顺序切块,块的<b>边界</b>上仍有泄漏。两种修补:</p>
+  <ul>
+    <li><span class="term">清洗 <span class="en">(purging)</span></span>:从训练集中删除所有<b>标签区间</b> \([t_0,t_1]\) 与测试集时间范围重叠的样本。形式化地,测试集覆盖 \([T_a,T_b]\),则训练样本 \(i\) 被删除当且仅当 \(t_{0,i}\le T_b\) 且 \(t_{1,i}\ge T_a\)。</li>
+    <li><span class="term">禁运期 <span class="en">(embargo)</span></span>:测试集<b>之后</b>紧邻的一小段样本也从训练集删除。原因是它们的特征(如 20 日滚动波动率)是用测试期内的数据计算的,与测试样本的标签相关。</li>
+  </ul>
+  <div class="callout example"><b>例子</b>:标签最长 10 天,测试块为第 100–149 天(\(t_1\) 最晚到第 159 天)。训练样本第 95 天的标签区间是 [95, 105],与测试区间重叠 → 删除;第 90 天的区间 [90, 100] 也碰到了第 100 天 → 删除;第 85 天的 [85, 95] 不重叠 → 保留。测试块之后,第 150–159 天的样本标签区间与测试区间重叠 → 删除;再往后取 1% 样本(约 24 天)作为禁运期 → 删除。</div>
+  <div class="code-title">📄 ch5_cv.py</div><pre><code class="language-python">import numpy as np
+import pandas as pd
+import lightgbm as lgb
+from sklearn.model_selection import KFold
+from sklearn.metrics import accuracy_score
+from ch5_labels import make_prices, triple_barrier
+
+close = make_prices()
+y, t1 = triple_barrier(close)
+
+# ---- 特征工程:全部只用“当天及以前”的数据 ----
+r = np.log(close).diff()
+X = pd.DataFrame({
+    &quot;ret_5&quot;:   close.pct_change(5),                 # 过去 5 日收益
+    &quot;ret_20&quot;:  close.pct_change(20),                # 过去 20 日收益(动量)
+    &quot;vol_20&quot;:  r.rolling(20).std(),                 # 过去 20 日波动率
+    &quot;vol_60&quot;:  r.rolling(60).std(),
+    &quot;ma_gap&quot;:  close / close.rolling(60).mean() - 1,  # 价格偏离 60 日均线
+    &quot;z_20&quot;:    (close - close.rolling(20).mean()) / close.rolling(20).std(),
+})
+data = X.assign(y=y, t1=t1).dropna()
+Xv, yv, t1v = data[X.columns], (data[&quot;y&quot;] &gt; 0).astype(int), data[&quot;t1&quot;]
+print(f&quot;样本数={len(data)}  正类比例={yv.mean():.1%}&quot;)
+
+def purged_kfold(index, t1, n_splits=5, embargo=0.01):
+    &quot;&quot;&quot;Purged K-Fold:按时间顺序切块;从训练集中删掉
+       (a) 标签区间 [t, t1] 与测试集区间重叠的样本(purge),
+       (b) 紧跟测试集之后一小段的样本(embargo)。&quot;&quot;&quot;
+    n = len(index); emb = int(n * embargo)
+    for test_idx in np.array_split(np.arange(n), n_splits):
+        t0, t_end = index[test_idx[0]], t1.iloc[test_idx].max()   # 测试集覆盖的时间范围
+        train_mask = np.ones(n, bool)
+        train_mask[test_idx] = False
+        overlap = (index &lt;= t_end) &amp; (t1.values &gt;= t0)             # 标签区间与测试区间重叠
+        train_mask &amp;= ~overlap
+        after = np.arange(test_idx[-1] + 1, min(n, test_idx[-1] + 1 + emb))
+        train_mask[after] = False                                   # embargo:测试集之后再空出一段
+        yield np.where(train_mask)[0], test_idx
+
+def cv_score(splits):
+    accs = []
+    for tr, te in splits:
+        model = lgb.LGBMClassifier(n_estimators=200, learning_rate=0.05, num_leaves=15,
+                                   min_child_samples=20, subsample=0.8, subsample_freq=1,
+                                   colsample_bytree=0.8, random_state=0, verbose=-1)
+        model.fit(Xv.iloc[tr], yv.iloc[tr])
+        accs.append(accuracy_score(yv.iloc[te], model.predict(Xv.iloc[te])))
+    return np.mean(accs), np.std(accs)
+
+naive = KFold(n_splits=5, shuffle=True, random_state=0).split(Xv)      # ❌ 打乱顺序的普通 K 折
+plain = KFold(n_splits=5, shuffle=False).split(Xv)                     # 按时间切块,但不 purge
+purged = purged_kfold(Xv.index, t1v, n_splits=5, embargo=0.01)         # ✅ purge + embargo
+print(&quot;打乱的普通 KFold     准确率=%.3f ± %.3f&quot; % cv_score(naive))
+print(&quot;按时间切块(未purge) 准确率=%.3f ± %.3f&quot; % cv_score(plain))
+print(&quot;Purged + Embargo     准确率=%.3f ± %.3f&quot; % cv_score(purged))
+print(&quot;(数据是无规律的模拟随机游走,真实可达的准确率约等于“总猜多数类”的水平:%.3f)&quot; % max(yv.mean(), 1 - yv.mean()))</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">样本数=2430  正类比例=50.5%
+打乱的普通 KFold     准确率=0.730 ± 0.022
+按时间切块(未purge) 准确率=0.497 ± 0.035
+Purged + Embargo     准确率=0.495 ± 0.033
+(数据是无规律的模拟随机游走,真实可达的准确率约等于“总猜多数类”的水平:0.505)</code></pre>
+  <p><b>这是本章最重要的输出</b>。数据是<b>没有任何可预测规律</b>的模拟随机游走,正确的准确率应该在 50% 左右。</p>
+  <ul>
+    <li><b>打乱的普通 K 折:73%</b>——完全是泄漏造成的幻觉。如果你在真实数据上看到这样的数字,很可能会以为发现了“圣杯”。</li>
+    <li><b>按时间切块:约 50%</b>——切块消除了绝大部分泄漏。</li>
+    <li><b>Purge + Embargo:约 50%</b>——在这个例子里和单纯切块差别不大,因为 5 折只有 4 条内部边界,边界泄漏的样本很少。但当折数多、标签期限长(例如 60 天)、或使用组合式交叉验证时,边界效应会显著变大,purge 是必须的。</li>
+  </ul>
+  <div class="callout warn">任何在金融时间序列上使用 <code>train_test_split(shuffle=True)</code>、<code>KFold(shuffle=True)</code> 或 <code>cross_val_score</code> 默认设置的结果,都应该被怀疑。scikit-learn 自带的 <code>TimeSeriesSplit</code> 按时间顺序切分(并支持 <code>gap</code> 参数),是一个更好的起点。</div>
+
+  <h2>5.5 树模型与 LightGBM</h2>
+  <h3>直觉</h3>
+  <p><span class="term">决策树 <span class="en">(decision tree)</span></span>就是一串“如果……就……”的规则:例如“如果 20 日动量 > 5% 且波动率 < 2%,则预测上涨”。单棵树容易过拟合。<span class="term">梯度提升 <span class="en">(gradient boosting)</span></span>的做法是:先训练一棵小树,看它哪里错了,再训练下一棵小树专门修正这些错误,如此反复,最终预测是所有树的加权和。<span class="term">LightGBM</span>(Ke 等, 2017)是一个高效的梯度提升实现,对表格数据效果好、速度快,是量化中最常用的非线性模型之一。</p>
+  <h3>控制过拟合的关键超参数</h3>
+  <table>
+    <tr><th>参数</th><th>作用</th><th>金融数据上的建议方向</th></tr>
+    <tr><td><code>num_leaves</code> / <code>max_depth</code></td><td>每棵树的复杂度</td><td>偏小(如 7–31),信噪比低时简单的树更稳</td></tr>
+    <tr><td><code>min_child_samples</code></td><td>叶子节点最少样本数</td><td>偏大,避免为少数样本建规则</td></tr>
+    <tr><td><code>learning_rate</code> + <code>n_estimators</code></td><td>每棵树的步长与树的数量</td><td>小步长 + 用时间顺序的验证集做早停</td></tr>
+    <tr><td><code>subsample</code>、<code>colsample_bytree</code></td><td>每棵树随机抽样本/特征</td><td>0.5–0.9,增加随机性、降低方差</td></tr>
+    <tr><td><code>reg_lambda</code>、<code>reg_alpha</code></td><td>L2 / L1 正则</td><td>适度加大</td></tr>
+  </table>
+  <div class="callout warn"><b>早停也会泄漏</b>:<span class="term">早停 <span class="en">(early stopping)</span></span>是在验证集表现不再提升时停止加树。如果用来早停的验证集就是最终报告成绩的测试集,等于在测试集上调参。正确做法是在训练集内部再按时间切出一段验证集。</div>
+
+  <h2>5.6 特征重要性:别被“假重要”骗了</h2>
+  <h3>两类方法</h3>
+  <ul>
+    <li><b>split / gain 重要性</b>(树内部统计,也叫 <span class="term">MDI <span class="en">(Mean Decrease Impurity)</span></span>):某特征被用来分裂多少次、带来多少训练集上的增益。计算快,但有已知偏差:<b>可切分点多的连续特征</b>(包括纯噪声)更容易被选中,而且它只反映训练集。</li>
+    <li><span class="term">置换重要性 <span class="en">(permutation importance / MDA)</span></span>:在<b>测试集</b>上把某个特征的值随机打乱,看模型表现下降多少。下降多 = 模型真的依赖它、而且这种依赖在样本外成立。</li>
+  </ul>
+  <div class="code-title">📄 ch5_importance.py</div><pre><code class="language-python">import numpy as np
+import pandas as pd
+import lightgbm as lgb
+from sklearn.inspection import permutation_importance
+from sklearn.metrics import roc_auc_score
+
+rng = np.random.default_rng(12)
+n = 4000
+# 模拟特征表:只有 f_signal1、f_signal2 真正有用,其余是纯噪声 —— 教学用
+X = pd.DataFrame({
+    &quot;f_signal1&quot;: rng.standard_normal(n),
+    &quot;f_signal2&quot;: rng.standard_normal(n),
+    &quot;noise_cont&quot;: rng.standard_normal(n),            # 连续噪声:可切分点很多
+    &quot;noise_bin&quot;: rng.integers(0, 2, n).astype(float),  # 二值噪声:只有一个切分点
+})
+logit = 0.6 * X[&quot;f_signal1&quot;] - 0.4 * X[&quot;f_signal2&quot;]
+y = (rng.random(n) &lt; 1 / (1 + np.exp(-logit))).astype(int)
+
+split = int(n * 0.7)                                  # 前 70% 训练、后 30% 测试(按顺序,不打乱)
+Xtr, Xte, ytr, yte = X.iloc[:split], X.iloc[split:], y.iloc[:split], y.iloc[split:]
+model = lgb.LGBMClassifier(n_estimators=150, learning_rate=0.05, num_leaves=7, min_child_samples=50,
+                           random_state=0, verbose=-1).fit(Xtr, ytr)
+
+split_imp = pd.Series(model.booster_.feature_importance(&quot;split&quot;), index=X.columns)   # 被用来分裂的次数
+gain_imp = pd.Series(model.booster_.feature_importance(&quot;gain&quot;), index=X.columns)     # 分裂带来的总增益
+perm = permutation_importance(model, Xte, yte, n_repeats=20, random_state=0, scoring=&quot;roc_auc&quot;)
+out = pd.DataFrame({&quot;split次数&quot;: split_imp, &quot;gain占比&quot;: gain_imp / gain_imp.sum(),
+                    &quot;置换重要性(测试集AUC下降)&quot;: perm.importances_mean,
+                    &quot;置换重要性标准差&quot;: perm.importances_std})
+print(out.round(4).to_string())
+print(f&quot;\n测试集 AUC = {roc_auc_score(yte, model.predict_proba(Xte)[:, 1]):.3f}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">            split次数  gain占比  置换重要性(测试集AUC下降)  置换重要性标准差
+f_signal1       308  0.5661           0.1301    0.0163
+f_signal2       277  0.2536           0.0456    0.0071
+noise_cont      270  0.1443           0.0039    0.0060
+noise_bin        45  0.0360           0.0001    0.0019
+
+测试集 AUC = 0.680</code></pre>
+  <p><b>解读</b>:纯噪声 <code>noise_cont</code> 的 split 次数(270)几乎和真实信号 <code>f_signal2</code>(277)一样多,gain 也占了 14%——如果只看这两个指标,会以为它是重要特征。置换重要性则显示它的 AUC 下降(0.004)不到一个标准差(0.006),与 0 无法区分;而两个真实信号的下降都远大于各自的标准差。二值噪声 <code>noise_bin</code> 只有一个切分点,所以 split 次数少,看起来“不重要”——这恰好说明 split 计数反映的是“可切分性”,而不是“有用性”。</p>
+  <div class="callout">另一种常用方法是 <span class="term">SHAP 值 <span class="en">(SHapley Additive exPlanations)</span></span>,它把每个预测分解为各特征的贡献,适合解释单个预测。但它解释的是“模型怎么用特征”,同样不能证明这种用法在样本外有效。</div>
+
+  <h2>5.7 从预测到策略</h2>
+  <ol>
+    <li><b>评估指标要贴近用途</b>:准确率、AUC 衡量分类能力,但策略关心的是“预测分数高的股票是否真的涨得多”。把模型输出当作一个因子,用第 2 章的 RankIC、分层回测去评估,往往更有意义。</li>
+    <li><b>滚动训练</b>:按时间滚动——用过去 \(N\) 年训练,预测下一个月,再往前滚。这模拟了实盘中“定期重新训练”的真实流程。</li>
+    <li><b>预测 → 权重</b>:把预测分数转成第 4 章组合优化的 \(\alpha\) 输入,并加入换手和成本约束。</li>
+    <li><b>与简单基准对比</b>:模型必须明显胜过“等权合成的线性因子”,否则复杂度不值得。</li>
+  </ol>
+
+  <h2>5.8 常见陷阱</h2>
+  <ul class="mistakes">
+    <li>❌ 打乱顺序的交叉验证 / 随机划分训练测试集 → 严重高估(本章示例:73% vs 50%)。</li>
+    <li>❌ 在整个数据集上做标准化、PCA、特征选择,然后才划分训练/测试 → 测试集信息泄漏进训练。✅ 所有预处理只在训练集上拟合。</li>
+    <li>❌ 标签重叠却不 purge,样本之间不独立却当作独立 → 置信度虚高。</li>
+    <li>❌ 用测试集早停、调参、挑特征 → 测试集变成了训练集的一部分。</li>
+    <li>❌ 只看 split/gain 重要性下结论。</li>
+    <li>❌ 用价格水平等非平稳特征 → 模型在新价格区间失效。</li>
+    <li>❌ 反复修改模型直到测试集好看 → 这就是第 7 章的多重检验问题,最终需要一段“从未碰过”的保留数据。</li>
+  </ul>
+
+  <h2>5.9 本章小结</h2>
+  <div class="card summary"><ul>
+    <li>金融 ML 的三大难点:低信噪比、样本不独立(标签重叠)、规律不稳定。</li>
+    <li>特征只用过去信息、尽量平稳、有经济含义;三重障碍法按“先碰到哪条障碍”打标签,并记录结束时间 \(t_1\)。</li>
+    <li>交叉验证必须按时间切块;用 purging 删除标签区间重叠的训练样本,用 embargo 删除测试集之后的一小段。</li>
+    <li>LightGBM 用小树、大叶子样本数、子采样、正则和<b>时间顺序</b>的早停来控制过拟合。</li>
+    <li>用测试集上的置换重要性判断特征是否真正有用;split/gain 偏爱连续特征。</li>
+  </ul></div>
+  <div class="quiz" data-quiz="ch5"></div>
+</section>
+
+<!-- ================= CH6 ================= -->
+<section class="page" id="ch6" data-chapter>
+  <h1>第 6 章 · 事件驱动回测引擎实战</h1>
+  <p class="lead">用框架之前,先自己写一个。约 200 行 Python,你会真正理解回测框架内部在做什么、哪里可能出错、成本是怎样一点点吃掉收益的。</p>
+  <div class="callout bridge">🔗 <b>承上启下</b>:入门站 <a href="../#ch4">第 4 章</a> 比较了向量化回测(vectorbt)和事件驱动回测(backtrader),<a href="../#ch6">第 6 章</a> 讲了未来函数和成本。那时我们<b>用</b>框架;现在我们<b>造</b>一个。第 1 章的可交易性规则(涨跌停、停牌)、A 股整手交易、印花税都会在这里落地成代码。</div>
+  <div class="card objectives"><b>🎯 学完本章你将能够</b>
+    <ul>
+      <li>画出事件驱动回测的架构图,说清每个模块的职责和它们之间传递的事件;</li>
+      <li>从结构上杜绝未来函数(而不是靠“记得 shift(1)”);</li>
+      <li>实现包含佣金、最低佣金、印花税、滑点、涨跌停拒单的撮合模块;</li>
+      <li>用一致性检查和对照测试验证引擎的正确性;</li>
+      <li>知道从教学引擎到生产级框架还缺哪些东西。</li>
+    </ul>
+    <p class="disclaimer" style="margin:6px 0 0">⏱ 预计 3 小时。完整代码:<a href="code/ch6_engine.py" target="_blank" rel="noopener">ch6_engine.py</a>(只依赖 numpy、pandas)。费率等参数为示意值,不代表任何券商的真实费率。</p>
+  </div>
+
+  <h2>6.1 为什么需要事件驱动</h2>
+  <p><span class="term">向量化回测 <span class="en">(vectorized backtest)</span></span>一次性对整列数据做运算(例如 <code>pos.shift(1) * ret</code>),快、简洁,适合研究阶段筛选想法。但它有几个天然的弱点:</p>
+  <ul>
+    <li><b>防未来函数靠自觉</b>:整列数据都在内存里,写错一个 <code>shift</code> 就偷看了未来。</li>
+    <li><b>难以表达路径依赖</b>:订单被拒后怎么办?资金不足时买多少?止损在盘中哪个价格触发?这些都依赖“之前发生了什么”。</li>
+    <li><b>和实盘代码是两套</b>:研究时一套向量化代码,实盘时又要重写成逐笔处理的逻辑,两者不一致是常见的偏差来源。</li>
+  </ul>
+  <p><span class="term">事件驱动回测 <span class="en">(event-driven backtest)</span></span>模拟真实世界的时间流:数据一根一根到来,每到一根就触发一串“事件”,各模块响应事件。它慢一些,但更真实,而且<b>同一套策略代码可以直接接实盘数据源和交易接口</b>。</p>
+
+  <h2>6.2 架构总览</h2>
+  <div class="flow">
+    <span class="step">DataHandler</span><span class="arrow">—MarketEvent→</span><span class="step">Strategy</span><span class="arrow">—SignalEvent→</span><span class="step">Portfolio</span><span class="arrow">—OrderEvent→</span><span class="step">Execution</span><span class="arrow">—FillEvent→</span><span class="step">Portfolio</span>
+  </div>
+  <table>
+    <tr><th>模块</th><th>职责</th><th>它<b>不</b>该做的事</th></tr>
+    <tr><td>DataHandler(数据)</td><td>按时间顺序推送数据;只提供“截至现在”的历史</td><td>让任何人看到未来数据</td></tr>
+    <tr><td>Strategy(策略)</td><td>根据数据产生<b>意图</b>(目标仓位)</td><td>关心资金、股数、成本</td></tr>
+    <tr><td>Portfolio(组合)</td><td>记账(现金、持仓、净值);把意图变成具体订单(股数)</td><td>决定成交价</td></tr>
+    <tr><td>Execution(撮合)</td><td>模拟交易所/券商:决定能否成交、成交价、费用</td><td>改变策略意图</td></tr>
+  </table>
+  <p>模块之间只通过<span class="term">事件队列 <span class="en">(event queue)</span></span>通信:谁产生事件就放进队列,主循环按先进先出顺序把事件分发给对应模块。这种<b>解耦</b>的好处是:换一个策略只改 Strategy;换成实盘只把 DataHandler 换成实时行情、Execution 换成券商接口。</p>
+
+  <h2>6.3 事件:模块之间的“信件”</h2>
+  <div class="code-title">📄 ch6_engine.py(节选)</div><pre><code class="language-python">&quot;&quot;&quot;ch6_engine.py —— 一个约 200 行的教学用事件驱动回测引擎。
+结构:DataHandler → Strategy → Portfolio → ExecutionHandler,模块之间只通过“事件”通信。&quot;&quot;&quot;
+from collections import deque
+from dataclasses import dataclass
+import numpy as np
+import pandas as pd
+
+@dataclass
+class MarketEvent:            # 新的一根 K 线到了
+    date: pd.Timestamp
+
+@dataclass
+class SignalEvent:            # 策略说:我想把某只股票的目标仓位调到 target(0~1,占总资产比例)
+    date: pd.Timestamp
+    symbol: str
+    target: float
+
+@dataclass
+class OrderEvent:             # 组合说:请买/卖多少股
+    date: pd.Timestamp
+    symbol: str
+    qty: int                  # 正数买入、负数卖出
+
+@dataclass
+class FillEvent:              # 撮合说:实际成交了多少、什么价、花了多少成本
+    date: pd.Timestamp
+    symbol: str
+    qty: int
+    price: float
+    cost: float</code></pre>
+  <p><code>@dataclass</code> 自动生成构造函数,让事件定义一目了然。注意 <code>SignalEvent</code> 只说“我想要 30% 仓位”,不说股数——这是策略和组合之间的职责边界。</p>
+
+  <h2>6.4 DataHandler:从结构上杜绝未来函数</h2>
+  <div class="code-title">📄 ch6_engine.py(节选)</div><pre><code class="language-python">class DataHandler:
+    &quot;&quot;&quot;按日期逐根推送 K 线。关键:策略只能通过 history() 拿到“当前及以前”的数据。&quot;&quot;&quot;
+    def __init__(self, bars: dict):                 # bars: {symbol: DataFrame[open, close, pre_close, volume]}
+        self.bars = bars
+        self.dates = sorted(set().union(*[df.index for df in bars.values()]))
+        self.i = -1
+    def update(self):
+        self.i += 1
+        return self.i &lt; len(self.dates)             # 还有数据就返回 True
+    @property
+    def now(self):
+        return self.dates[self.i]
+    def history(self, symbol, field, n):
+        df = self.bars[symbol]
+        return df.loc[:self.now, field].iloc[-n:]   # 截至“现在”的最近 n 个值,杜绝未来函数
+    def next_bar(self, symbol):
+        &quot;&quot;&quot;下一根 K 线(只给撮合模块用,用来模拟“次日开盘成交”)。&quot;&quot;&quot;
+        df = self.bars[symbol]
+        pos = df.index.searchsorted(self.now, side=&quot;right&quot;)
+        return df.iloc[pos] if pos &lt; len(df) else None</code></pre>
+  <ul>
+    <li><code>history()</code> 用 <code>df.loc[:self.now]</code> 截断到“现在”,策略<b>无论怎么写</b>都拿不到未来数据。这比“记得 shift(1)”可靠得多。</li>
+    <li><code>next_bar()</code> 是唯一能看到“下一根”的接口,只给撮合模块使用,用来模拟“今天收盘发信号、明天开盘成交”。这是一种<b>受控的</b>向前看:它代表的是“时间流逝到明天之后真实发生的成交”,而不是策略偷看。</li>
+  </ul>
+
+  <h2>6.5 Strategy:只表达意图</h2>
+  <div class="code-title">📄 ch6_engine.py(节选)</div><pre><code class="language-python">class MACrossStrategy:
+    &quot;&quot;&quot;双均线:短均线 &gt; 长均线 → 目标仓位 = 1/股票数,否则 0。只在信号变化时发 SignalEvent。&quot;&quot;&quot;
+    def __init__(self, data, events, symbols, fast=10, slow=40):
+        self.data, self.events, self.symbols = data, events, symbols
+        self.fast, self.slow = fast, slow
+        self.state = {s: 0.0 for s in symbols}
+    def on_market(self, ev):
+        for s in self.symbols:
+            closes = self.data.history(s, &quot;close&quot;, self.slow)
+            if len(closes) &lt; self.slow:              # 数据不够计算长均线,先不动
+                continue
+            want = 1.0 / len(self.symbols) if closes.iloc[-self.fast:].mean() &gt; closes.mean() else 0.0
+            if want != self.state[s]:
+                self.state[s] = want
+                self.events.append(SignalEvent(ev.date, s, want))</code></pre>
+  <p>和入门站的均线策略逻辑相同。两个细节:① 数据不足 <code>slow</code> 根时什么都不做(避免用不完整的窗口);② 只在目标<b>变化</b>时发信号,避免每天重复下单。</p>
+
+  <h2>6.6 Portfolio:记账与下单数量</h2>
+  <div class="code-title">📄 ch6_engine.py(节选)</div><pre><code class="language-python">class Portfolio:
+    &quot;&quot;&quot;记账:现金、持仓、每日净值;把“目标仓位”翻译成“股数”(A 股按 100 股一手取整)。&quot;&quot;&quot;
+    def __init__(self, data, events, cash=1_000_000):
+        self.data, self.events = data, events
+        self.cash, self.pos = cash, {}
+        self.equity_curve, self.trades = [], []
+    def total_value(self):
+        mv = sum(q * self.data.history(s, &quot;close&quot;, 1).iloc[-1] for s, q in self.pos.items())
+        return self.cash + mv
+    def on_signal(self, ev):
+        price = self.data.history(ev.symbol, &quot;close&quot;, 1).iloc[-1]       # 用今天收盘价估算股数
+        target_qty = int(self.total_value() * ev.target / price // 100 * 100)
+        qty = target_qty - self.pos.get(ev.symbol, 0)
+        if qty != 0:
+            self.events.append(OrderEvent(ev.date, ev.symbol, qty))
+    def on_fill(self, ev):
+        self.pos[ev.symbol] = self.pos.get(ev.symbol, 0) + ev.qty
+        self.cash -= ev.qty * ev.price + ev.cost                         # 买入花钱、卖出收钱,成本总是扣
+        self.trades.append(ev)
+    def mark_to_market(self):
+        self.equity_curve.append((self.data.now, self.total_value()))</code></pre>
+  <ul>
+    <li><b>目标股数</b> = 总资产 × 目标仓位 ÷ 价格,再<b>向下取整到 100 股</b>(A 股买入以 100 股为一手,示意规则)。</li>
+    <li>股数用当天收盘价估算,但成交在明天开盘——两者之间的差价意味着实际仓位不会精确等于目标,这是真实存在的误差。</li>
+    <li><code>on_fill</code> 里现金的变化是 \(-(\text{股数}\times\text{成交价}+\text{费用})\):买入时股数为正,现金减少;卖出时股数为负,现金增加;费用总是减少现金。</li>
+    <li>持仓以<b>成交回报</b>为准更新,而不是以“发出的订单”为准——订单可能被拒(下一节)。</li>
+  </ul>
+
+  <h2>6.7 Execution:成本模型与拒单</h2>
+  <h3>成本模型</h3>
+  <p>设成交股数 \(q\)(买为正),参考价 \(P^{\text{open}}\),滑点 \(s\)(以比例计),佣金率 \(c\),最低佣金 \(m\),卖出印花税率 \(\tau\):</p>
+  $$P^{\text{fill}}=P^{\text{open}}\,(1+s\cdot\operatorname{sign}(q)),\qquad N=|q|\,P^{\text{fill}}$$
+  $$\text{费用}=\max(N c,\ m)+\mathbb 1[q&lt;0]\cdot N\tau$$
+  <p><span class="term">滑点 <span class="en">(slippage)</span></span>总是对自己不利:买入价更高、卖出价更低。\(\mathbb 1[q&lt;0]\) 是指示函数,卖出时为 1——A 股印花税只在卖出时收取(示意规则,以现行规定为准)。</p>
+  <div class="callout example"><b>手算一个来回</b>(参数同代码默认值:滑点 5bp,佣金 0.025%,最低 5 元,卖出印花税 0.05%):
+    <ol>
+      <li><b>买入</b> 10,000 股,开盘 10.00 元 → 成交价 10.005,金额 100,050 元;佣金 \(\max(25.01, 5)=25.01\) 元;滑点损失 \(10{,}000\times0.005=50\) 元。</li>
+      <li><b>卖出</b> 10,000 股,开盘 10.00 元 → 成交价 9.995,金额 99,950 元;佣金 24.99 元;印花税 49.98 元;滑点损失 50 元。</li>
+      <li>一个来回总成本 ≈ 50 + 25.01 + 50 + 24.99 + 49.98 ≈ <b>200 元,约为本金的 0.2%</b>。一年来回 30 次,就是约 6% 的收益被成本吃掉。</li>
+      <li>如果只买 100 股(1,000 元),佣金按最低 5 元收取,单边就是 0.5%——<b>小资金频繁交易时,最低佣金是很重的负担</b>。</li>
+    </ol>
+  </div>
+  <div class="code-title">📄 ch6_engine.py(节选)</div><pre><code class="language-python">class SimExecution:
+    &quot;&quot;&quot;模拟撮合:次日开盘价成交 + 滑点;佣金(有最低 5 元)+ 卖出印花税;涨跌停/停牌不能成交。
+    费率为示意参数,请按你券商和交易所的实际规则修改。&quot;&quot;&quot;
+    def __init__(self, data, events, slippage_bps=5, commission=0.00025, min_comm=5.0,
+                 stamp_tax=0.0005, limit=0.10):
+        self.data, self.events = data, events
+        self.slip, self.comm, self.min_comm = slippage_bps / 1e4, commission, min_comm
+        self.tax, self.limit = stamp_tax, limit
+        self.rejected = 0
+    def on_order(self, ev):
+        bar = self.data.next_bar(ev.symbol)
+        if bar is None or bar[&quot;volume&quot;] &lt;= 0:                           # 没有下一根或停牌
+            self.rejected += 1; return
+        up, down = bar[&quot;pre_close&quot;] * (1 + self.limit), bar[&quot;pre_close&quot;] * (1 - self.limit)
+        if (ev.qty &gt; 0 and bar[&quot;open&quot;] &gt;= up - 1e-9) or (ev.qty &lt; 0 and bar[&quot;open&quot;] &lt;= down + 1e-9):
+            self.rejected += 1; return                                  # 开盘涨停买不进 / 跌停卖不出
+        px = bar[&quot;open&quot;] * (1 + self.slip * np.sign(ev.qty))            # 滑点总是对自己不利
+        notional = abs(ev.qty) * px
+        cost = max(notional * self.comm, self.min_comm) + (notional * self.tax if ev.qty &lt; 0 else 0)
+        self.events.append(FillEvent(bar.name, ev.symbol, ev.qty, px, cost))</code></pre>
+  <p><b>拒单逻辑</b>:下一根 K 线停牌(成交量为 0)时任何方向都拒绝;开盘价已在涨停价时拒绝买入,已在跌停价时拒绝卖出。这是第 1 章“保守规则”的代码版本。被拒的订单在这个教学引擎里直接丢弃——更完善的做法是让策略在下一根 K 线重新评估(见 6.10)。</p>
+
+  <h2>6.8 主循环与运行结果</h2>
+  <div class="code-title">📄 ch6_engine.py(节选)</div><pre><code class="language-python">def run_backtest(bars, **exec_kw):
+    events = deque()
+    data = DataHandler(bars)
+    strat = MACrossStrategy(data, events, list(bars))
+    port = Portfolio(data, events)
+    exe = SimExecution(data, events, **exec_kw)
+    while data.update():                         # 外层循环:时间前进一天
+        events.append(MarketEvent(data.now))
+        while events:                            # 内层循环:把今天产生的事件处理完
+            ev = events.popleft()
+            if isinstance(ev, MarketEvent):  strat.on_market(ev)
+            elif isinstance(ev, SignalEvent): port.on_signal(ev)
+            elif isinstance(ev, OrderEvent):  exe.on_order(ev)
+            elif isinstance(ev, FillEvent):   port.on_fill(ev)
+        port.mark_to_market()                    # 收盘后记录净值
+    eq = pd.Series(dict(port.equity_curve))
+    return eq, port, exe
+
+def summary(eq):
+    r = eq.pct_change().dropna()
+    dd = eq / eq.cummax() - 1
+    return {&quot;总收益&quot;: f&quot;{eq.iloc[-1]/eq.iloc[0]-1:.2%}&quot;,
+            &quot;年化波动&quot;: f&quot;{r.std()*np.sqrt(252):.2%}&quot;,
+            &quot;夏普&quot;: f&quot;{r.mean()/r.std()*np.sqrt(252):.2f}&quot;,
+            &quot;最大回撤&quot;: f&quot;{dd.min():.2%}&quot;}</code></pre>
+  <p>两层循环是事件驱动引擎的核心:<b>外层</b>推进时间,<b>内层</b>把当天产生的所有事件处理完。一个 MarketEvent 可能引出 SignalEvent → OrderEvent → FillEvent 一整串,它们都在同一个内层循环中依次处理。</p>
+  <div class="code-title">📄 ch6_engine.py(节选)</div><pre><code class="language-python">def make_bars(seed, n=750, mu=0.0003, sigma=0.02, p_suspend=0.01, limit=0.10):
+    &quot;&quot;&quot;模拟日 K 线(open/close/pre_close/volume):涨跌幅截断在 ±10%,约 1% 的交易日停牌。
+    纯教学用模拟数据,不对应任何真实股票。&quot;&quot;&quot;
+    rng = np.random.default_rng(seed)
+    idx = pd.bdate_range(&quot;2021-01-04&quot;, periods=n)
+    rows, prev = [], 20.0
+    for t in range(n):
+        if rng.random() &lt; p_suspend:                                   # 停牌:无成交,价格不变
+            rows.append((prev, prev, prev, 0)); continue
+        close = prev * np.exp(mu + sigma * rng.standard_normal())
+        close = min(max(close, prev * (1 - limit)), prev * (1 + limit))   # 涨跌停截断
+        opn = min(max(prev * (1 + 0.005 * rng.standard_normal()), prev * (1 - limit)), prev * (1 + limit))
+        rows.append((opn, close, prev, int(rng.integers(100_000, 1_000_000))))
+        prev = close
+    return pd.DataFrame(rows, columns=[&quot;open&quot;, &quot;close&quot;, &quot;pre_close&quot;, &quot;volume&quot;], index=idx)
+
+if __name__ == &quot;__main__&quot;:
+    bars = {f&quot;S{i}&quot;: make_bars(seed=100 + i) for i in range(3)}
+    for name, kw in [(&quot;无成本&quot;, dict(slippage_bps=0, commission=0, min_comm=0, stamp_tax=0)),
+                     (&quot;默认成本&quot;, {}),
+                     (&quot;高滑点 30bp&quot;, dict(slippage_bps=30))]:
+        eq, port, exe = run_backtest(bars, **kw)
+        fees = sum(f.cost for f in port.trades)                  # 显式费用:佣金 + 印花税(滑点已含在成交价里)
+        print(f&quot;{name:10s}&quot;, summary(eq), f&quot;成交={len(port.trades)} 拒单={exe.rejected} 佣金+税={fees:,.0f} 元&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">无成本        {&#x27;总收益&#x27;: &#x27;5.26%&#x27;, &#x27;年化波动&#x27;: &#x27;13.73%&#x27;, &#x27;夏普&#x27;: &#x27;0.19&#x27;, &#x27;最大回撤&#x27;: &#x27;-18.63%&#x27;} 成交=61 拒单=0 佣金+税=0 元
+默认成本       {&#x27;总收益&#x27;: &#x27;3.11%&#x27;, &#x27;年化波动&#x27;: &#x27;13.74%&#x27;, &#x27;夏普&#x27;: &#x27;0.14&#x27;, &#x27;最大回撤&#x27;: &#x27;-18.98%&#x27;} 成交=61 拒单=0 佣金+税=10,421 元
+高滑点 30bp   {&#x27;总收益&#x27;: &#x27;-1.98%&#x27;, &#x27;年化波动&#x27;: &#x27;13.79%&#x27;, &#x27;夏普&#x27;: &#x27;0.02&#x27;, &#x27;最大回撤&#x27;: &#x27;-19.83%&#x27;} 成交=61 拒单=0 佣金+税=10,172 元</code></pre>
+  <p><b>解读</b>:</p>
+  <ul>
+    <li>同一个策略、同样 61 笔成交,<b>无成本</b>时总收益 5.26%,<b>默认成本</b>下降到 3.11%,<b>滑点提高到 30bp</b> 后变成 −1.98%。策略本身没变,结论却从“小赚”变成“亏损”——成本假设对结论的影响可以大过策略逻辑本身。</li>
+    <li>“佣金+税”两种成本情形几乎相同(约 1 万元),差别全部来自滑点——滑点已经体现在成交价里,不在“显式费用”中,所以要单独评估它。</li>
+    <li>这组模拟数据里没有发生拒单(停牌日只占约 1%,而信号又不频繁,两者恰好没有碰上)。换随机种子或提高停牌概率,就能看到拒单。</li>
+    <li>数据是随机生成的,这些收益数字<b>没有任何“策略好坏”的含义</b>,只用来展示成本的影响。</li>
+  </ul>
+
+  <h2>6.9 怎样验证引擎是对的</h2>
+  <p>回测引擎本身的 bug 是最危险的,因为它会影响所有策略的结论。建议至少做这几类检查:</p>
+  <ol>
+    <li><b>守恒检查</b>:每天 现金 + Σ(持仓 × 收盘价) 应等于记录的净值;所有成交的现金流 + 费用之和应等于现金的变化。</li>
+    <li><b>零成本对照</b>:关掉所有成本和整手限制,在不发生拒单的数据上,引擎结果应与一个正确的向量化实现(信号滞后、开盘成交)基本一致。</li>
+    <li><b>已知答案测试</b>:构造一个“第 3 天买入、第 5 天卖出”的确定性策略和手算好的价格,检查每一笔成交价、费用、净值都与手算一致。</li>
+    <li><b>未来函数测试</b>:把第 \(t\) 天之后的数据全部替换成随机数,第 \(t\) 天及以前的信号不应有任何变化。</li>
+    <li><b>边界情况</b>:停牌、涨跌停、资金不足、最后一天发出的订单(没有下一根 K 线)。</li>
+  </ol>
+
+  <h2>6.10 从教学引擎到生产级框架</h2>
+  <table>
+    <tr><th>缺少的功能</th><th>为什么重要</th></tr>
+    <tr><td>限价单、部分成交、撤单</td><td>市价单假设对低流动性股票不现实</td></tr>
+    <tr><td>成交量约束(参与率上限)</td><td>订单不能超过当日成交量的一定比例(第 8 章)</td></tr>
+    <tr><td>T+1 与可卖数量</td><td>本引擎“收盘信号、次日开盘成交”的设计天然满足 T+1;若改为盘中交易,需要单独追踪“今日买入不可卖”</td></tr>
+    <tr><td>被拒订单的重试逻辑</td><td>现在被拒就丢弃,策略状态与实际持仓可能不一致</td></tr>
+    <tr><td>公司行为</td><td>分红到账、送股增加持仓(本引擎假设直接用复权价,简化了这一点)</td></tr>
+    <tr><td>多频率、多资产类别、保证金</td><td>期货、融资融券需要保证金和逐日盯市</td></tr>
+    <tr><td>性能</td><td>逐日 <code>df.loc</code> 很慢;生产框架会预处理成数组并缓存</td></tr>
+  </table>
+  <p>理解了这些,再去看 backtrader、vn.py、zipline-reloaded 等框架(第 9 章)的源码,会发现它们的结构和我们的教学引擎惊人地相似。</p>
+
+  <h2>6.11 常见错误</h2>
+  <ul class="mistakes">
+    <li>❌ 用当天收盘价生成信号<b>并</b>以当天收盘价成交 → 隐含未来函数(收盘价出来时已经收盘了)。✅ 次日开盘成交,或明确假设“收盘前几分钟用近似收盘价成交”并加大滑点。</li>
+    <li>❌ 持仓按订单而不是按成交更新 → 拒单后账实不符。</li>
+    <li>❌ 忽略最低佣金和整手限制 → 小资金回测严重失真。</li>
+    <li>❌ 滑点设为 0 → 高换手策略的结论可能完全相反(本章示例:5.26% → −1.98%)。</li>
+    <li>❌ 不对引擎本身做测试 → 引擎 bug 污染所有研究结论。</li>
+  </ul>
+
+  <h2>6.12 本章小结</h2>
+  <div class="card summary"><ul>
+    <li>事件驱动 = 数据逐根到来 + 事件队列 + 解耦的模块(数据 / 策略 / 组合 / 撮合)。</li>
+    <li>DataHandler 只提供截至现在的数据,从结构上杜绝未来函数。</li>
+    <li>成本 = 滑点(含在成交价中)+ \(\max(\text{佣金},\text{最低佣金})\) + 卖出印花税;一个来回约 0.2% 时,年 30 次来回 ≈ 6%。</li>
+    <li>用守恒检查、零成本对照、已知答案测试、未来函数测试验证引擎。</li>
+    <li>下一章:回测跑出来了,怎么判断结果是真本事还是运气?</li>
+  </ul></div>
+  <div class="quiz" data-quiz="ch6"></div>
+</section>
+
+<!-- ================= CH7 ================= -->
+<section class="page" id="ch7" data-chapter>
+  <h1>第 7 章 · 策略评估与稳健性</h1>
+  <p class="lead">回测跑出夏普 1.5,这到底说明了什么?本章教你像审稿人一样“拷问”一个回测:收益从哪来、换个参数还在不在、有多大可能只是运气、你一共试了多少次。</p>
+  <div class="callout bridge">🔗 <b>承上启下</b>:入门站 <a href="../#ch3">第 3 章</a> 定义了夏普和最大回撤,<a href="../#ch6">第 6 章</a> 介绍了过拟合、样本外和滚动前向分析。这一章把“过拟合”从一个需要警惕的概念,变成可以<b>量化</b>的数字:夏普的置信区间、PSR、Deflated Sharpe、多重检验校正、回测过拟合概率 PBO。第 2 章的 IC t 值、第 5 章的交叉验证,在这里都会被重新审视。</div>
+  <div class="card objectives"><b>🎯 学完本章你将能够</b>
+    <ul>
+      <li>用因子回归做收益归因,区分真 alpha 与“因子暴露”;</li>
+      <li>做参数敏感性分析和滚动前向检验,识别“尖峰型”参数;</li>
+      <li>计算夏普比率的标准误和 bootstrap 置信区间;</li>
+      <li>理解并计算 PSR、Deflated Sharpe Ratio;</li>
+      <li>用 Bonferroni、BH 做多重检验校正,并用 CSCV 估计 PBO。</li>
+    </ul>
+    <p class="disclaimer" style="margin:6px 0 0">⏱ 预计 3–4 小时。代码依赖:numpy、pandas、scipy、statsmodels。</p>
+  </div>
+
+  <h2>7.1 拷问回测的五个问题</h2>
+  <ol>
+    <li><b>收益从哪里来?</b>是独特的 alpha,还是承担了市场、规模等已知风险?(7.2)</li>
+    <li><b>换一组参数还成立吗?</b>好结果是一片“高原”,还是一根孤零零的“尖峰”?(7.3)</li>
+    <li><b>统计上有多确定?</b>夏普 1.5 的置信区间有多宽?(7.4、7.5)</li>
+    <li><b>一共试了多少次?</b>从 200 个尝试里挑出的最好结果,要打多大折扣?(7.6)</li>
+    <li><b>样本外会怎样?</b>样本内最优的选择,样本外排名如何?(7.7)</li>
+  </ol>
+
+  <h2>7.2 收益归因:真 alpha 还是因子暴露</h2>
+  <h3>直觉</h3>
+  <p>一个策略年化 14%,听起来不错。但如果市场同期涨了 10%,而策略的市场贝塔是 0.9,那么大部分收益只是“跟着市场走”。<span class="term">收益归因 <span class="en">(performance attribution)</span></span>回答的就是“收益中有多少是可以被已知因素解释的”。</p>
+  <h3>因子回归</h3>
+  $$r_{p,t}-r_{f,t}=\alpha+\beta_{\text{MKT}}\,\text{MKT}_t+\beta_{\text{SMB}}\,\text{SMB}_t+\beta_{\text{MOM}}\,\text{MOM}_t+\varepsilon_t$$
+  <table class="symbols">
+    <tr><th>符号</th><th>含义</th></tr>
+    <tr><td>\(r_{p,t}-r_{f,t}\)</td><td>策略在第 \(t\) 期的超额收益</td></tr>
+    <tr><td>\(\text{MKT},\text{SMB},\text{MOM}\)</td><td>市场超额收益、规模因子(小盘减大盘)、动量因子的收益序列(入门站第 5 章介绍的 Fama-French / Carhart 因子)</td></tr>
+    <tr><td>\(\beta\)</td><td>策略对各因子的<span class="term">暴露 <span class="en">(exposure / loading)</span></span></td></tr>
+    <tr><td>\(\alpha\)</td><td>截距:因子解释不了的平均收益——“真本事”的候选</td></tr>
+  </table>
+  <p>两边取平均,就得到收益分解:\(\overline{r_p-r_f}=\hat\alpha+\sum_k\hat\beta_k\,\overline{F_k}\)。</p>
+  <div class="code-title">📄 ch7_attribution.py</div><pre><code class="language-python">import numpy as np
+import statsmodels.api as sm
+
+rng = np.random.default_rng(25)
+T = 120                                                 # 10 年月度数据(全部为模拟)
+mkt = 0.006 + 0.045 * rng.standard_normal(T)            # 市场超额收益
+smb = 0.002 + 0.030 * rng.standard_normal(T)            # 规模因子(小盘 − 大盘)
+mom = 0.004 + 0.035 * rng.standard_normal(T)            # 动量因子
+# “策略”的真实构成:0.9 倍市场 + 0.6 倍规模 + 很小的真实 alpha(每月 0.1%)+ 特质噪声
+strat = 0.001 + 0.9 * mkt + 0.6 * smb + 0.0 * mom + 0.015 * rng.standard_normal(T)
+
+print(f&quot;策略月均超额收益 = {strat.mean():.2%},年化 ≈ {strat.mean()*12:.1%}&quot;)
+# 只对市场回归(CAPM):alpha 包含了规模暴露带来的收益
+capm = sm.OLS(strat, sm.add_constant(mkt)).fit()
+print(f&quot;CAPM:      alpha = {capm.params[0]:.2%}/月 (t = {capm.tvalues[0]:.2f}),  β_mkt = {capm.params[1]:.2f}&quot;)
+# 多因子回归:把规模、动量也放进来
+X = sm.add_constant(np.column_stack([mkt, smb, mom]))
+ff = sm.OLS(strat, X).fit()
+a, b_mkt, b_smb, b_mom = ff.params
+print(f&quot;三因子:    alpha = {a:.2%}/月 (t = {ff.tvalues[0]:.2f}),  β_mkt = {b_mkt:.2f}, β_smb = {b_smb:.2f}, β_mom = {b_mom:.2f}&quot;)
+print(f&quot;R² = {ff.rsquared:.2f}  —— 收益的大部分可以被已知因子解释&quot;)
+# 收益分解:平均收益 = alpha + Σ β × 因子平均收益
+parts = {&quot;alpha&quot;: a, &quot;市场&quot;: b_mkt * mkt.mean(), &quot;规模&quot;: b_smb * smb.mean(), &quot;动量&quot;: b_mom * mom.mean()}
+print(&quot;月均收益分解:&quot;, {k: f&quot;{v:.3%}&quot; for k, v in parts.items()}, &quot; 合计:&quot;, f&quot;{sum(parts.values()):.3%}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">策略月均超额收益 = 1.16%,年化 ≈ 13.9%
+CAPM:      alpha = 0.39%/月 (t = 1.68),  β_mkt = 0.79
+三因子:    alpha = 0.19%/月 (t = 1.24),  β_mkt = 0.84, β_smb = 0.59, β_mom = 0.08
+R² = 0.86  —— 收益的大部分可以被已知因子解释
+月均收益分解: {&#x27;alpha&#x27;: &#x27;0.188%&#x27;, &#x27;市场&#x27;: &#x27;0.819%&#x27;, &#x27;规模&#x27;: &#x27;0.131%&#x27;, &#x27;动量&#x27;: &#x27;0.024%&#x27;}  合计: 1.162%</code></pre>
+  <p><b>解读</b>:策略月均 1.16%,只对市场回归时 alpha 为 0.39%/月(t=1.68)——看起来接近显著;但加入规模因子后,alpha 降到 0.19%/月(t=1.24),原因是策略有 0.59 的规模暴露,这部分收益被 CAPM 错算进了 alpha。月均收益中约 0.82% 来自市场、0.13% 来自规模,真正“无法解释”的只有 0.19%。<b>alpha 是否显著,取决于你用哪些因子做对照</b>;对照的因子越全面,结论越可信。</p>
+  <div class="callout">对于主动管理的股票组合,还有一类按“行业配置 vs 个股选择”分解的方法——<span class="term">Brinson 归因 <span class="en">(Brinson attribution)</span></span>,它比较组合与基准在每个行业的权重差和收益差,适合与基准对比的场景。</div>
+
+  <h2>7.3 参数敏感性与滚动前向</h2>
+  <h3>直觉</h3>
+  <p>如果均线参数 (10, 200) 夏普 1.4,而 (10, 190) 和 (12, 200) 都只有 0.3,那么 (10, 200) 很可能是噪声中的一个尖峰,而不是真实规律。真实的效应通常是“一片高原”:附近参数都不错。</p>
+  <h3>滚动前向分析</h3>
+  <p><span class="term">滚动前向分析 <span class="en">(walk-forward analysis)</span></span>模拟“定期用过去数据重新选参数,然后用到未来”的真实流程:训练窗口选出最优参数 → 在紧随其后的测试窗口上评估 → 窗口整体向前滚动 → 把所有测试窗口的收益拼接起来,得到一条完全由样本外构成的收益曲线。</p>
+  <div class="code-title">📄 ch7_walkforward.py</div><pre><code class="language-python">import numpy as np
+import pandas as pd
+
+rng = np.random.default_rng(24)
+n = 252 * 8
+# 模拟价格:前半段有趋势性(收益正自相关),后半段没有 —— 模拟“市场环境变化”
+eps = rng.standard_normal(n) * 0.012
+r = np.zeros(n)
+for t in range(1, n):
+    phi = 0.08 if t &lt; n // 2 else 0.0
+    r[t] = phi * r[t - 1] + eps[t]
+close = pd.Series(100 * np.exp(np.cumsum(r)), index=pd.bdate_range(&quot;2016-01-01&quot;, periods=n))
+ret = close.pct_change().fillna(0)
+
+def strat_returns(fast, slow, cost=0.0005):
+    &quot;&quot;&quot;均线策略日收益(信号滞后一天,扣单边成本)。&quot;&quot;&quot;
+    pos = (close.rolling(fast).mean() &gt; close.rolling(slow).mean()).astype(float).shift(1).fillna(0)
+    return pos * ret - pos.diff().abs().fillna(0) * cost
+
+def sharpe(x):
+    return x.mean() / x.std() * np.sqrt(252) if x.std() &gt; 0 else 0.0
+
+grid = [(f, s) for f in [5, 10, 20, 40] for s in [60, 120, 200] if f &lt; s]
+# ---- 参数敏感性:全样本上每组参数的夏普(注意:这一步只用来“看地形”,不用来挑参数)----
+table = pd.Series({g: sharpe(strat_returns(*g)) for g in grid}).unstack()
+print(&quot;全样本夏普(行=短均线,列=长均线):&quot;); print(table.round(2).to_string())
+
+# ---- 滚动前向:每次用过去 3 年选参数,在接下来 1 年上测试,然后整体往前滚 1 年 ----
+all_r = {g: strat_returns(*g) for g in grid}
+years = sorted(set(close.index.year))
+oos = []
+for k in range(3, len(years)):
+    train = close.index.year.isin(years[k - 3:k]); test = close.index.year == years[k]
+    best = max(grid, key=lambda g: sharpe(all_r[g][train]))
+    oos.append(all_r[best][test])
+    print(f&quot;训练 {years[k-3]}-{years[k-1]} → 选中 {best},  样本内夏普={sharpe(all_r[best][train]):.2f},  &quot;
+          f&quot;{years[k]} 年样本外夏普={sharpe(all_r[best][test]):.2f}&quot;)
+print(f&quot;拼接后的样本外夏普 = {sharpe(pd.concat(oos)):.2f}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">全样本夏普(行=短均线,列=长均线):
+     60    120   200
+5   0.54  0.91  0.89
+10  0.59  0.91  0.95
+20  0.78  0.85  0.80
+40  0.71  0.80  0.70
+训练 2016-2018 → 选中 (10, 200),  样本内夏普=1.44,  2019 年样本外夏普=-1.02
+训练 2017-2019 → 选中 (5, 120),  样本内夏普=0.95,  2020 年样本外夏普=1.70
+训练 2018-2020 → 选中 (10, 120),  样本内夏普=0.94,  2021 年样本外夏普=-0.88
+训练 2019-2021 → 选中 (5, 120),  样本内夏普=0.53,  2022 年样本外夏普=0.86
+训练 2020-2022 → 选中 (20, 60),  样本内夏普=0.99,  2023 年样本外夏普=2.42
+拼接后的样本外夏普 = 0.64</code></pre>
+  <p><b>解读</b>:</p>
+  <ul>
+    <li><b>敏感性表</b>:夏普在 0.54–0.95 之间,长均线 120–200 一带比较平坦(大多在 0.7–0.95 之间),这比单个参数的数字更有信息量。注意这张表是在全样本上算的,<b>只用来看“地形”,不能用来挑参数</b>。</li>
+    <li><b>滚动前向</b>:每次被选中的参数都不一样;样本内夏普和紧接着一年的样本外夏普之间几乎没有关系(样本内 1.44 的那次,样本外 −1.02)。</li>
+    <li>拼接后的样本外夏普 0.64,低于全样本表中的任何一个“最好值”。<b>样本外结果才是对“这套选参数流程”的诚实评估。</b></li>
+  </ul>
+
+  <h2>7.4 夏普比率本身的不确定性</h2>
+  <h3>标准误</h3>
+  <p>夏普比率是从样本估计出来的,本身就有误差。在收益独立同分布(且近似正态)时,Lo(2002)给出了每期夏普 \(\widehat{SR}\) 的近似标准误:</p>
+  $$\operatorname{SE}(\widehat{SR})\approx\sqrt{\frac{1+\tfrac12\widehat{SR}^2}{T}}$$
+  <p>其中 \(T\) 是样本期数,\(\widehat{SR}\) 是每期(未年化)夏普。对日频数据,\(\widehat{SR}\) 很小,所以年化夏普的标准误近似为 \(\sqrt{1/\text{年数}}\)。</p>
+  <div class="callout example"><b>数值例子</b>:3 年日频数据,年化夏普 1.0。标准误 ≈ \(\sqrt{1/3}\approx0.58\),95% 置信区间 ≈ \(1.0\pm1.96\times0.58=[-0.13,\ 2.13]\)——<b>包含 0</b>。也就是说,3 年夏普 1.0 在统计上并不能排除“真实夏普为 0”。要把标准误压到 0.25,需要约 16 年的数据。</div>
+  <h3>Bootstrap 置信区间</h3>
+  <p>当收益有肥尾、自相关时,上面的公式不够准确。<span class="term">Bootstrap(自助法)<span class="en">(bootstrap)</span></span>用“从样本中有放回地重抽样”来模拟“如果历史重演一次会怎样”。为了保留收益的短期相关性,不逐日抽样,而是一次抽一整块连续的日子——<span class="term">块 bootstrap <span class="en">(block bootstrap)</span></span>。</p>
+
+  <h2>7.5 PSR 与 Deflated Sharpe Ratio</h2>
+  <h3>PSR:真实夏普超过某个门槛的概率</h3>
+  <p>Bailey 和 López de Prado 提出的<span class="term">概率夏普比率 <span class="en">(Probabilistic Sharpe Ratio, PSR)</span></span>把样本长度、偏度、峰度都考虑进来:</p>
+  $$\text{PSR}(SR^*)=\Phi\!\left(\frac{(\widehat{SR}-SR^*)\sqrt{T-1}}{\sqrt{1-\hat\gamma_3\widehat{SR}+\frac{\hat\gamma_4-1}{4}\widehat{SR}^2}}\right)$$
+  <table class="symbols">
+    <tr><th>符号</th><th>含义</th></tr>
+    <tr><td>\(\widehat{SR}\)、\(SR^*\)</td><td>样本夏普、比较的门槛(都用每期口径,不年化)</td></tr>
+    <tr><td>\(T\)</td><td>样本期数</td></tr>
+    <tr><td>\(\hat\gamma_3\)</td><td><span class="term">偏度 <span class="en">(skewness)</span></span>:负偏(左尾长,偶尔大亏)会降低 PSR</td></tr>
+    <tr><td>\(\hat\gamma_4\)</td><td><span class="term">峰度 <span class="en">(kurtosis)</span></span>(正态为 3):肥尾会降低 PSR</td></tr>
+    <tr><td>\(\Phi\)</td><td>标准正态分布的累积分布函数</td></tr>
+  </table>
+  <h3>Deflated Sharpe:把“试了多少次”算进去</h3>
+  <p>如果你试了 \(N\) 个策略,即使它们的真实夏普都是 0,挑出来的最大样本夏普也会明显大于 0。在各次尝试的夏普方差为 \(V\) 时,这个“纯靠运气的最大值”的期望近似为</p>
+  $$E[\max\widehat{SR}]\approx\sqrt V\Big[(1-\gamma)\,\Phi^{-1}\!\big(1-\tfrac1N\big)+\gamma\,\Phi^{-1}\!\big(1-\tfrac1{Ne}\big)\Big]$$
+  <p>其中 \(\gamma\approx0.5772\) 是欧拉-马歇罗尼常数,\(e\) 是自然常数。<span class="term">Deflated Sharpe Ratio <span class="en">(DSR)</span></span>(Bailey & López de Prado, 2014)就是把这个期望值作为门槛的 PSR:\(\text{DSR}=\text{PSR}\big(E[\max\widehat{SR}]\big)\)。DSR 高(如 > 0.95)才说明“即使考虑到挑选,它仍大概率好于运气”。</p>
+  <div class="code-title">📄 ch7_sharpe_stats.py</div><pre><code class="language-python">import numpy as np
+from scipy import stats
+
+def psr(returns, sr_benchmark=0.0):
+    &quot;&quot;&quot;Probabilistic Sharpe Ratio(Bailey &amp; López de Prado):
+    在考虑样本长度、偏度、峰度后,真实夏普 &gt; sr_benchmark 的概率。夏普用“每期”口径(不年化)。&quot;&quot;&quot;
+    r = np.asarray(returns)
+    T = len(r)
+    sr = r.mean() / r.std(ddof=1)
+    g3 = stats.skew(r)                              # 偏度
+    g4 = stats.kurtosis(r, fisher=False)            # 峰度(正态 = 3)
+    denom = np.sqrt(1 - g3 * sr + (g4 - 1) / 4 * sr**2)
+    return stats.norm.cdf((sr - sr_benchmark) * np.sqrt(T - 1) / denom)
+
+def expected_max_sr(n_trials, var_sr):
+    &quot;&quot;&quot;在 n_trials 个“真实夏普都为 0”的策略中,样本夏普最大值的近似期望。&quot;&quot;&quot;
+    g = 0.5772156649                                # 欧拉-马歇罗尼常数
+    z1 = stats.norm.ppf(1 - 1 / n_trials)
+    z2 = stats.norm.ppf(1 - 1 / (n_trials * np.e))
+    return np.sqrt(var_sr) * ((1 - g) * z1 + g * z2)
+
+def block_bootstrap_sharpe(r, block=20, n_boot=5000, seed=0):
+    &quot;&quot;&quot;移动块 bootstrap:整块(连续 block 天)地重抽样,保留收益的短期相关性。返回年化夏普的分布。&quot;&quot;&quot;
+    rng = np.random.default_rng(seed)
+    r = np.asarray(r); T = len(r)
+    n_blocks = int(np.ceil(T / block))
+    out = np.empty(n_boot)
+    for b in range(n_boot):
+        starts = rng.integers(0, T - block + 1, n_blocks)
+        sample = np.concatenate([r[s:s + block] for s in starts])[:T]
+        out[b] = sample.mean() / sample.std(ddof=1) * np.sqrt(252)
+    return out
+
+if __name__ == &quot;__main__&quot;:
+    rng = np.random.default_rng(21)
+    T = 756                                                  # 3 年日度
+    r = 0.0004 + 0.01 * rng.standard_t(df=4, size=T) / np.sqrt(2)   # 模拟:带肥尾的日收益(t 分布)
+    sr_ann = r.mean() / r.std(ddof=1) * np.sqrt(252)
+    print(f&quot;样本年化夏普 = {sr_ann:.2f}&quot;)
+    print(f&quot;偏度 = {stats.skew(r):.2f},  峰度 = {stats.kurtosis(r, fisher=False):.2f}(正态为 3)&quot;)
+    boots = block_bootstrap_sharpe(r)
+    lo, hi = np.percentile(boots, [2.5, 97.5])
+    print(f&quot;块 bootstrap 95% 区间: [{lo:.2f}, {hi:.2f}],  夏普 ≤ 0 的 bootstrap 比例: {(boots &lt;= 0).mean():.1%}&quot;)
+    print(f&quot;PSR(基准 0) = {psr(r):.3f}&quot;)
+    # 假设这个策略是从 100 个尝试里挑出来的最好的那个,各次尝试的(日度)夏普方差取 (0.5/√252)^2 —— 示意值
+    sr0 = expected_max_sr(100, (0.5 / np.sqrt(252))**2)
+    print(f&quot;100 次尝试下,纯靠运气的最大年化夏普期望 ≈ {sr0*np.sqrt(252):.2f}&quot;)
+    print(f&quot;Deflated Sharpe Ratio = PSR(基准 = 该期望) = {psr(r, sr0):.3f}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">样本年化夏普 = 1.45
+偏度 = -0.42,  峰度 = 7.47(正态为 3)
+块 bootstrap 95% 区间: [0.38, 2.65],  夏普 ≤ 0 的 bootstrap 比例: 0.3%
+PSR(基准 0) = 0.993
+100 次尝试下,纯靠运气的最大年化夏普期望 ≈ 1.27
+Deflated Sharpe Ratio = PSR(基准 = 该期望) = 0.621</code></pre>
+  <p><b>解读</b>:</p>
+  <ul>
+    <li>样本年化夏普 1.45,收益有负偏(−0.42)和明显肥尾(峰度 7.5),这是用 t 分布模拟的效果。</li>
+    <li>块 bootstrap 95% 区间 [0.38, 2.65]——很宽,但不含 0;PSR(0)=0.993:如果这是你<b>唯一</b>测试过的策略,有较强证据表明真实夏普 > 0。</li>
+    <li>但如果它是 100 次尝试中最好的一个(假设各次尝试的年化夏普标准差约 0.5),纯运气的最大夏普期望就有 1.27,DSR 降到 0.62——<b>证据强度大幅下降</b>。同一条收益曲线,结论取决于你试了多少次。</li>
+  </ul>
+  <div class="callout warn"><b>N 应该是多少?</b>N 是你在得到这个结果之前<b>真正尝试过</b>的独立配置数——包括改过的参数、换过的股票池、调过的止损、放弃的想法。它往往远大于你记得的数量。这正是建议<b>把每一次回测都记录下来</b>的原因。</div>
+
+  <h2>7.6 多重检验:试了 200 次之后</h2>
+  <h3>直觉</h3>
+  <p>如果每次检验都用 5% 的显著性水平,那么检验 200 个毫无用处的策略,平均会有 10 个“显著”。这就是<span class="term">多重检验 <span class="en">(multiple testing)</span></span>问题,也叫<span class="term">数据窥探 <span class="en">(data snooping)</span></span>。</p>
+  <h3>两种校正</h3>
+  <table>
+    <tr><th>方法</th><th>控制什么</th><th>规则</th><th>特点</th></tr>
+    <tr><td>Bonferroni</td><td><span class="term">族错误率 <span class="en">(FWER)</span></span>:至少有一个假阳性的概率</td><td>p 值 < α / N 才算显著</td><td>非常保守</td></tr>
+    <tr><td>Benjamini-Hochberg(BH)</td><td><span class="term">错误发现率 <span class="en">(FDR)</span></span>:显著结果中假阳性的比例</td><td>p 值从小到大排序,找最大的 \(k\) 使 \(p_{(k)}\le\alpha k/N\),前 \(k\) 个显著</td><td>较宽松,适合“筛选候选”</td></tr>
+  </table>
+  <div class="code-title">📄 ch7_multiple.py</div><pre><code class="language-python">import numpy as np
+from scipy import stats
+from ch7_sharpe_stats import psr, expected_max_sr
+
+rng = np.random.default_rng(22)
+N, T = 200, 756                                   # 200 个策略,每个 3 年日度
+R = 0.01 * rng.standard_normal((T, N))            # 全部是纯噪声:真实夏普 = 0(模拟)
+sr = R.mean(0) / R.std(0, ddof=1)                 # 每期(日度)夏普
+sr_ann = sr * np.sqrt(252)
+best = np.argmax(sr)
+print(f&quot;最好的那个“策略”年化夏普 = {sr_ann[best]:.2f}  (而所有策略的真实夏普都是 0)&quot;)
+print(f&quot;年化夏普 &gt; 1 的策略个数: {(sr_ann &gt; 1).sum()} / {N}&quot;)
+
+# 单个策略的 t 检验 p 值:H0 “均值收益 = 0”
+t = sr * np.sqrt(T)
+p = 2 * (1 - stats.norm.cdf(np.abs(t)))
+print(f&quot;未校正时 p&lt;0.05 的个数: {(p &lt; 0.05).sum()}  (理论上约 5% × {N} = {0.05*N:.0f} 个是“假阳性”)&quot;)
+print(f&quot;Bonferroni 校正 (p &lt; 0.05/{N}) 后显著的个数: {(p &lt; 0.05 / N).sum()}&quot;)
+# Benjamini-Hochberg:控制错误发现率 FDR
+order = np.argsort(p); k = np.arange(1, N + 1)
+passed = p[order] &lt;= 0.05 * k / N
+n_bh = k[passed].max() if passed.any() else 0
+print(f&quot;BH(FDR=5%)显著的个数: {n_bh}&quot;)
+# Deflated Sharpe:把“挑了 200 次”考虑进去
+sr0 = expected_max_sr(N, sr.var(ddof=1))
+print(f&quot;200 次尝试下最大夏普的期望(年化)≈ {sr0*np.sqrt(252):.2f};  最好策略的 PSR(0)={psr(R[:, best]):.3f}  DSR={psr(R[:, best], sr0):.3f}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">最好的那个“策略”年化夏普 = 1.82  (而所有策略的真实夏普都是 0)
+年化夏普 &gt; 1 的策略个数: 12 / 200
+未校正时 p&lt;0.05 的个数: 14  (理论上约 5% × 200 = 10 个是“假阳性”)
+Bonferroni 校正 (p &lt; 0.05/200) 后显著的个数: 0
+BH(FDR=5%)显著的个数: 0
+200 次尝试下最大夏普的期望(年化)≈ 1.66;  最好策略的 PSR(0)=0.999  DSR=0.612</code></pre>
+  <p><b>解读</b>:200 个纯噪声策略中,最好的年化夏普 1.82,有 12 个超过 1;未校正时 14 个 p<0.05。经过 Bonferroni 或 BH 校正后,一个都不显著——正确!最好策略的 PSR(0) 高达 0.999,看起来“几乎确定有效”,而考虑到挑选的 DSR 只有 0.61。</p>
+  <div class="callout">学术界对此有过系统讨论:Harvey、Liu 和 Zhu(2016)回顾了大量已发表的因子,认为考虑到整个领域的多重检验,新因子的 t 值门槛应提高到 3 左右,而不是传统的 2。White(2000)的 Reality Check 等方法则专门用于“从很多策略中挑最好的”这一场景。</div>
+  <p>👉 在 <a href="#demo-multi">互动演示:多重检验与运气</a> 里把策略数调到 1000,看看运气能“造”出多高的夏普。</p>
+
+  <h2>7.7 PBO:回测过拟合的概率</h2>
+  <h3>直觉</h3>
+  <p>你有 \(N\) 个候选配置(比如 50 组参数),按样本内表现挑出最好的那个。<span class="term">回测过拟合概率 <span class="en">(Probability of Backtest Overfitting, PBO)</span></span>(Bailey, Borwein, López de Prado, Zhu, 2017)问的是:<b>样本内最好的那个,在样本外排名落到中位数以下的概率有多大?</b>如果挑选过程有价值,它在样本外也应该排名靠前。</p>
+  <h3>CSCV 算法</h3>
+  <ol class="steps">
+    <li>把 \(T\times N\) 的收益矩阵按时间切成 \(S\) 块(如 16 块)。</li>
+    <li>枚举所有“选 \(S/2\) 块做样本内、其余做样本外”的组合,共 \(\binom{S}{S/2}\) 种(\(\binom{16}{8}=12870\))。这叫<span class="term">组合对称交叉验证 <span class="en">(Combinatorially Symmetric Cross-Validation, CSCV)</span></span>。</li>
+    <li>每种组合下:找出样本内夏普最高的配置 \(n^*\);计算它在样本外的相对排名 \(\omega\in(0,1)\);记录 \(\lambda=\ln\frac{\omega}{1-\omega}\)。</li>
+    <li>PBO = \(\lambda\le0\)(即样本外排名在中位数及以下)的组合所占比例。</li>
+  </ol>
+  <div class="code-title">📄 ch7_pbo.py</div><pre><code class="language-python">import numpy as np
+from itertools import combinations
+
+def pbo_cscv(R, S=16):
+    &quot;&quot;&quot;CSCV 估计回测过拟合概率 PBO(Bailey, Borwein, López de Prado, Zhu)。
+    R: T×N 收益矩阵(N 个参数组合/策略)。把时间切成 S 块,枚举所有“一半块做样本内、另一半做样本外”的组合。&quot;&quot;&quot;
+    T, N = R.shape
+    blocks = np.array_split(np.arange(T), S)
+    logits = []
+    for is_idx in combinations(range(S), S // 2):
+        oos_idx = [b for b in range(S) if b not in is_idx]
+        IS = np.concatenate([blocks[b] for b in is_idx]); OOS = np.concatenate([blocks[b] for b in oos_idx])
+        sr_is = R[IS].mean(0) / R[IS].std(0)
+        sr_oos = R[OOS].mean(0) / R[OOS].std(0)
+        n_star = np.argmax(sr_is)                               # 样本内最好的那个
+        rank = (sr_oos &lt; sr_oos[n_star]).sum() + 1              # 它在样本外的名次(1=最差)
+        w = rank / (N + 1)                                      # 相对名次 ∈ (0,1)
+        logits.append(np.log(w / (1 - w)))
+    logits = np.array(logits)
+    return (logits &lt;= 0).mean(), len(logits)                    # 样本外跌到中位数以下的比例
+
+rng = np.random.default_rng(23)
+T, N = 1000, 50
+noise = 0.01 * rng.standard_normal((T, N))                      # 情形 1:50 个纯噪声策略
+pbo1, n_comb = pbo_cscv(noise)
+skill = noise.copy(); skill[:, :5] += 0.0015                     # 情形 2:其中 5 个有真实正收益(模拟)
+pbo2, _ = pbo_cscv(skill)
+print(f&quot;组合数 C(16,8) = {n_comb}&quot;)
+print(f&quot;纯噪声策略库:   PBO = {pbo1:.2f}&quot;)
+print(f&quot;含真实信号策略库: PBO = {pbo2:.2f}&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">组合数 C(16,8) = 12870
+纯噪声策略库:   PBO = 0.37
+含真实信号策略库: PBO = 0.00</code></pre>
+  <p><b>解读</b>:50 个纯噪声策略时 PBO = 0.37——样本内最好的那个,超过三分之一的情况下样本外排名落到中位数以下(理论上纯噪声时 PBO 应在 0.5 附近,有限样本下会有波动);当其中 5 个策略含有真实的正收益时,PBO 降到 0——样本内最好的总是那几个真有信号的,它们在样本外也排名靠前。<b>PBO 衡量的是“挑选流程”是否可信,而不是某一个策略。</b></p>
+
+  <h2>7.8 一份稳健性检查清单</h2>
+  <table>
+    <tr><th>检查</th><th>方法</th><th>警报信号</th></tr>
+    <tr><td>收益来源</td><td>多因子回归、Brinson 归因</td><td>加入常见因子后 alpha 消失</td></tr>
+    <tr><td>参数稳健性</td><td>参数网格热力图</td><td>孤立尖峰;最优参数在网格边界</td></tr>
+    <tr><td>时间稳健性</td><td>分年度、分市场环境表现;滚动前向</td><td>收益集中在少数几个月</td></tr>
+    <tr><td>成本敏感性</td><td>成本 × 2、× 3 重新回测(第 6 章)</td><td>成本翻倍后收益消失</td></tr>
+    <tr><td>统计显著性</td><td>夏普 SE、bootstrap、PSR</td><td>置信区间包含 0</td></tr>
+    <tr><td>多重检验</td><td>记录尝试次数 N;DSR;BH 校正</td><td>DSR 远低于 0.95</td></tr>
+    <tr><td>挑选流程</td><td>PBO(CSCV)</td><td>PBO 接近或超过 0.5</td></tr>
+    <tr><td>最终保留集</td><td>研究开始前就封存一段数据,最后只用一次</td><td>保留集表现大幅低于开发集</td></tr>
+  </table>
+
+  <h2>7.9 常见错误</h2>
+  <ul class="mistakes">
+    <li>❌ 只和“0”或“买入持有”比较 → 把因子暴露当成 alpha。</li>
+    <li>❌ 用全样本敏感性表挑参数,再报告这组参数的全样本表现 → 双重使用数据。</li>
+    <li>❌ 3 年回测夏普 1 就认为“统计显著”。</li>
+    <li>❌ 不记录尝试次数 → 无法计算 DSR,也无法诚实评估。</li>
+    <li>❌ 反复使用“保留集”→ 保留集变成了开发集。</li>
+    <li>❌ 对 bootstrap 用逐日重抽样 → 破坏了收益自相关,置信区间偏窄。</li>
+  </ul>
+
+  <h2>7.10 本章小结</h2>
+  <div class="card summary"><ul>
+    <li>收益归因:alpha 是否存在取决于对照因子;加入规模等因子后 alpha 可能大幅缩水。</li>
+    <li>好参数应在“高原”上;滚动前向给出“选参数流程”的样本外评估。</li>
+    <li>年化夏普标准误 ≈ \(\sqrt{1/\text{年数}}\);3 年夏普 1 的置信区间包含 0。</li>
+    <li>PSR 考虑样本长度、偏度、峰度;DSR 进一步把“尝试次数 N”折算进门槛。</li>
+    <li>Bonferroni 控制 FWER、BH 控制 FDR;PBO 用 CSCV 衡量“样本内最优在样本外是否仍好”。</li>
+  </ul></div>
+  <div class="quiz" data-quiz="ch7"></div>
+</section>
+
+<!-- ================= CH8 ================= -->
+<section class="page" id="ch8" data-chapter>
+  <h1>第 8 章 · 交易执行与市场微观结构</h1>
+  <p class="lead">回测里一行“以开盘价买入”,在现实中是一连串决定:挂什么单、分几次下、什么时候下。这些决定的成本,往往就是回测收益和实盘收益之间的差距。</p>
+  <div class="callout bridge">🔗 <b>承上启下</b>:入门站 <a href="../#ch6">第 6 章</a> 列出了买卖价差、滑点、市场冲击这些成本;第 6 章的引擎用一个固定的“滑点 bp”来近似它们。本章打开这个黑箱:价差从哪来、冲击为什么随下单量增长、怎样拆单能降低成本、怎么事后评估执行质量。</div>
+  <div class="card objectives"><b>🎯 学完本章你将能够</b>
+    <ul>
+      <li>读懂限价订单簿,解释价格-时间优先和订单簿深度;</li>
+      <li>计算报价价差、有效价差,以及市价单“吃”多档时的真实成本;</li>
+      <li>用平方根冲击模型估算大单的冲击成本量级;</li>
+      <li>理解 TWAP、VWAP、POV 和执行落差(IS)算法的思路与取舍;</li>
+      <li>用执行落差分解做交易成本分析(TCA)。</li>
+    </ul>
+    <p class="disclaimer" style="margin:6px 0 0">⏱ 预计 2–3 小时。代码依赖:numpy。本章订单簿和成交量分布均为虚构示例。</p>
+  </div>
+
+  <h2>8.1 为什么执行很重要</h2>
+  <p>Perold(1988)提出了<span class="term">执行落差 <span class="en">(implementation shortfall, IS)</span></span>的概念:<b>“纸面组合”</b>(决策时刻以当时价格瞬间、免费成交)与<b>真实组合</b>之间的收益差。它包括所有显性成本(佣金、税)和隐性成本(价差、冲击、价格在执行过程中的不利变动、没成交的机会成本)。对于高换手策略和资金规模较大的策略,执行成本常常决定了策略能否盈利、能承载多少资金。</p>
+
+  <h2>8.2 限价订单簿</h2>
+  <h3>基本概念</h3>
+  <ul>
+    <li><span class="term">限价单 <span class="en">(limit order)</span></span>:指定价格,“不高于 X 买”或“不低于 X 卖”。不能立即成交的部分会挂在订单簿上等待,为市场<b>提供流动性</b>。</li>
+    <li><span class="term">市价单 <span class="en">(market order)</span></span>:不指定价格,以当前最优价立即成交,<b>消耗流动性</b>。(A 股的市价委托有多种类型和保护机制,以交易所规则为准。)</li>
+    <li><span class="term">限价订单簿 <span class="en">(limit order book, LOB)</span></span>:所有未成交限价单的集合,按价格排列。买方最高价叫<b>买一</b>(best bid),卖方最低价叫<b>卖一</b>(best ask)。</li>
+    <li><span class="term">价格-时间优先 <span class="en">(price-time priority)</span></span>:价格更优的单子先成交;同价位先到先成交。所以同价位排队的位置很重要。</li>
+    <li><span class="term">市场深度 <span class="en">(market depth)</span></span>:各价位上挂单的数量。深度越大,大单对价格的影响越小。</li>
+  </ul>
+  <div class="callout">A 股常见的 Level-1 行情提供买卖各 5 档;开盘和收盘时段有<span class="term">集合竞价 <span class="en">(call auction)</span></span>,在一个时点集中撮合出单一价格,其余时间为连续竞价。具体时段和规则以交易所规定为准。</div>
+
+  <h2>8.3 价差:最直接的流动性成本</h2>
+  <h3>定义</h3>
+  <table class="symbols">
+    <tr><th>指标</th><th>公式</th><th>含义</th></tr>
+    <tr><td>中间价</td><td>\(m=(P^{\text{bid}}+P^{\text{ask}})/2\)</td><td>“公允价格”的常用近似</td></tr>
+    <tr><td><span class="term">报价价差 <span class="en">(quoted spread)</span></span></td><td>\(P^{\text{ask}}-P^{\text{bid}}\),相对值 \(/m\)</td><td>立即买入再立即卖出的往返成本</td></tr>
+    <tr><td><span class="term">有效价差 <span class="en">(effective spread)</span></span></td><td>\(2\,|P^{\text{fill}}-m|/m\)</td><td>按真实成交价衡量的成本(包含吃多档的影响)</td></tr>
+  </table>
+  <p>用市价单买入,单边成本约为<b>半个价差</b>(从中间价到卖一)。如果订单量超过卖一的挂单量,就会继续“吃”卖二、卖三……成本随之上升。</p>
+  <div class="callout example"><b>例子</b>:买一 10.00、卖一 10.02。中间价 10.01,报价价差 0.02 元 ≈ 20bp。市价买 200 股(卖一有 300 股):全部在 10.02 成交,相对中间价的成本 = (10.02−10.01)/10.01 ≈ 10bp,即半个价差。注意:对于 10 元的股票,最小报价单位 0.01 元本身就意味着至少约 10bp 的价差——<b>低价股的相对价差往往更大</b>。</div>
+  <div class="code-title">📄 ch8_orderbook.py</div><pre><code class="language-python"># 一个极简的限价订单簿(Limit Order Book)—— 数字均为虚构示例
+asks = [(10.02, 300), (10.03, 500), (10.04, 800), (10.05, 1200), (10.06, 2000)]   # 卖一 ~ 卖五 (价格, 股数)
+bids = [(10.00, 400), (9.99, 600), (9.98, 900), (9.97, 1500), (9.96, 2500)]       # 买一 ~ 买五
+
+best_ask, best_bid = asks[0][0], bids[0][0]
+mid = (best_ask + best_bid) / 2                         # 中间价
+spread = best_ask - best_bid                            # 绝对价差
+print(f&quot;买一={best_bid} 卖一={best_ask} 中间价={mid:.3f} 价差={spread:.2f} 元 = {spread/mid*1e4:.1f} bp&quot;)
+
+def market_buy(book, qty):
+    &quot;&quot;&quot;市价买入 qty 股:从卖一开始逐档“吃掉”挂单,直到买够。返回成交均价和成交明细。&quot;&quot;&quot;
+    left, cost, fills = qty, 0.0, []
+    for price, size in book:
+        take = min(left, size)
+        fills.append((price, take)); cost += price * take; left -= take
+        if left == 0:
+            break
+    if left &gt; 0:
+        raise ValueError(&quot;五档深度不够,剩余 %d 股无法成交&quot; % left)
+    return cost / qty, fills
+
+for q in [200, 1000, 3000]:
+    avg, fills = market_buy(asks, q)
+    slip_bp = (avg - mid) / mid * 1e4                   # 相对中间价的成本(bp)
+    print(f&quot;市价买 {q:5d} 股: 成交均价={avg:.4f}  相对中间价成本={slip_bp:5.1f} bp  吃到 {len(fills)} 档&quot;)
+
+# 订单簿不平衡度:买一量与卖一量的相对大小,常被用作极短期价格方向的特征
+imb = (bids[0][1] - asks[0][1]) / (bids[0][1] + asks[0][1])
+print(f&quot;一档不平衡度 = {imb:.2f}  (&gt;0 表示买盘相对更厚)&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">买一=10.0 卖一=10.02 中间价=10.010 价差=0.02 元 = 20.0 bp
+市价买   200 股: 成交均价=10.0200  相对中间价成本= 10.0 bp  吃到 1 档
+市价买  1000 股: 成交均价=10.0290  相对中间价成本= 19.0 bp  吃到 3 档
+市价买  3000 股: 成交均价=10.0417  相对中间价成本= 31.6 bp  吃到 5 档
+一档不平衡度 = 0.14  (&gt;0 表示买盘相对更厚)</code></pre>
+  <p><b>解读</b>:200 股只吃 1 档,成本是半个价差 10bp;1000 股吃到 3 档,成本 19bp;3000 股吃到 5 档,成本 31.6bp。<b>成本随订单规模非线性增长</b>——这就是要拆单的原因。订单簿不平衡度(买一量与卖一量的相对差)是高频研究中常用的短期特征,但它的预测期很短,且挂单可以随时撤销。</p>
+
+  <h2>8.4 市场冲击</h2>
+  <h3>直觉</h3>
+  <p>大单不只是吃掉现有挂单。持续买入会让卖方意识到“有大买家”,从而撤单、抬价;做市商也会因为库存风险而调整报价。<span class="term">市场冲击 <span class="en">(market impact)</span></span>分两部分:</p>
+  <ul>
+    <li><span class="term">临时冲击 <span class="en">(temporary impact)</span></span>:交易时价格被推开,交易结束后部分回落。它主要取决于<b>交易速度</b>。</li>
+    <li><span class="term">永久冲击 <span class="en">(permanent impact)</span></span>:交易传递了信息,价格永久移动。它主要取决于<b>交易总量</b>。</li>
+  </ul>
+  <h3>平方根定律</h3>
+  <p>大量实证研究发现,元订单(一个大单拆成的所有子单)的平均冲击与订单量的<b>平方根</b>近似成正比:</p>
+  $$I\approx Y\,\sigma_{\text{日}}\sqrt{\frac{Q}{V_{\text{日}}}}$$
+  <table class="symbols">
+    <tr><th>符号</th><th>含义</th></tr>
+    <tr><td>\(I\)</td><td>冲击成本(相对价格的比例)</td></tr>
+    <tr><td>\(\sigma_{\text{日}}\)</td><td>该股票日波动率</td></tr>
+    <tr><td>\(Q/V_{\text{日}}\)</td><td>订单量占日成交量的比例</td></tr>
+    <tr><td>\(Y\)</td><td>经验系数,需要用自己的成交数据校准</td></tr>
+  </table>
+  <div class="callout example"><b>量级估算</b>(取 \(Y=1\) 仅作示意):日波动 2%,订单占日成交量 5% → \(I\approx0.02\times\sqrt{0.05}\approx0.45\%=45\text{bp}\)。订单量翻 4 倍(到 20%),冲击只翻 2 倍(到约 89bp)。<b>平方根意味着:规模越大,单位成本越高</b>——这决定了一个策略的<span class="term">容量 <span class="en">(capacity)</span></span>。</div>
+  <p>理论上,Kyle(1985)的模型用一个参数 \(\lambda\)(价格对订单流的敏感度,常称 Kyle's lambda)刻画永久冲击;Almgren 和 Chriss(2000)把执行问题表述为“冲击成本”与“等待期间价格波动风险”之间的权衡:下得快,冲击大但风险小;下得慢,冲击小但价格可能跑掉。</p>
+
+  <h2>8.5 执行算法:TWAP、VWAP、POV、IS</h2>
+  <table>
+    <tr><th>算法</th><th>规则</th><th>优点</th><th>缺点</th></tr>
+    <tr><td><span class="term">TWAP <span class="en">(Time-Weighted Average Price)</span></span></td><td>把母单在时间上均匀切分:每个区间下 \(Q/K\)</td><td>最简单、可预测</td><td>成交量小的时段参与率过高,冲击大</td></tr>
+    <tr><td><span class="term">VWAP <span class="en">(Volume-Weighted Average Price)</span></span></td><td>按<b>预测的</b>日内成交量分布切分:区间 \(k\) 下 \(Q\cdot v_k\)(\(v_k\) 为该区间成交量占比)</td><td>参与率均匀,目标是贴近市场 VWAP</td><td>依赖成交量预测;不关心价格走势</td></tr>
+    <tr><td><span class="term">POV <span class="en">(Percentage of Volume)</span></span></td><td>实时跟随市场成交量,保持固定参与率(如 10%)</td><td>自动适应流动性</td><td>完成时间不确定</td></tr>
+    <tr><td>IS / 到达价算法</td><td>在冲击和风险之间优化(Almgren-Chriss 框架),通常前段下得更多</td><td>直接以执行落差为目标</td><td>需要冲击和风险模型</td></tr>
+  </table>
+  <p>A 股连续竞价大约 4 小时,日内成交量通常呈“开盘和收盘高、中间低”的 U 形(下面代码中的分布是示意性的人造曲线)。</p>
+  <div class="code-title">📄 ch8_execution.py</div><pre><code class="language-python">import numpy as np
+
+rng = np.random.default_rng(31)
+# ---- 1) 模拟一天的成交量分布:A 股连续竞价共 4 小时 = 240 分钟,这里按 48 个 5 分钟区间 ----
+k = np.arange(48)
+profile = 1.0 + 1.5 * np.exp(-k / 4) + 1.2 * np.exp(-(47 - k) / 4)   # 早盘、尾盘量大的 U 形(示意)
+profile[24:] *= 0.9                                                  # 下午略低(示意)
+profile /= profile.sum()
+day_volume = 5_000_000                                               # 当天总成交量(股,假设)
+market_vol = rng.multinomial(day_volume, profile)                    # 每个区间的成交量(模拟)
+# 模拟价格:随机游走 + 我们自己的买单造成的临时冲击
+sigma_5m = 0.0015
+price = 10 * np.exp(np.cumsum(sigma_5m * rng.standard_normal(48)))
+
+parent_qty = 250_000                                                 # 母单:要买 25 万股(占日成交 5%)
+twap = np.full(48, parent_qty / 48)                                  # TWAP:时间均匀切分
+vwap = parent_qty * profile                                          # VWAP:按预测的成交量分布切分
+
+def execute(schedule, eta=0.1):
+    &quot;&quot;&quot;临时冲击模型:每个区间的成交价 = 市场价 × (1 + η·σ·√(子单量/该区间成交量))。&quot;&quot;&quot;
+    part = schedule / market_vol                                     # 参与率
+    fill_px = price * (1 + eta * sigma_5m * 10 * np.sqrt(part))      # 系数为示意值
+    avg = (fill_px * schedule).sum() / schedule.sum()
+    return avg, part.max()
+
+arrival = price[0]                                                   # 决策时(到达)价格
+mkt_vwap = (price * market_vol).sum() / market_vol.sum()             # 全市场当日 VWAP
+for name, sch in [(&quot;TWAP&quot;, twap), (&quot;VWAP&quot;, vwap)]:
+    avg, pmax = execute(sch)
+    is_bp = (avg - arrival) / arrival * 1e4                          # 执行落差 Implementation Shortfall
+    vs_vwap = (avg - mkt_vwap) / mkt_vwap * 1e4
+    print(f&quot;{name}: 成交均价={avg:.4f}  执行落差={is_bp:6.1f} bp  相对市场VWAP={vs_vwap:5.1f} bp  最大参与率={pmax:.1%}&quot;)
+
+# ---- 2) 平方根冲击模型的“量级估算”:成本 ≈ Y · σ_日 · √(Q / V_日) ----
+Y, sigma_d = 1.0, 0.02                                               # Y 为经验系数(需用自己的成交数据校准)
+for q_frac in [0.01, 0.05, 0.20]:
+    print(f&quot;下单量=日成交量的 {q_frac:4.0%}: 估算冲击 ≈ {Y*sigma_d*np.sqrt(q_frac)*1e4:5.1f} bp&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">TWAP: 成交均价=10.0131  执行落差=  15.7 bp  相对市场VWAP=  4.3 bp  最大参与率=6.6%
+VWAP: 成交均价=10.0121  执行落差=  14.7 bp  相对市场VWAP=  3.4 bp  最大参与率=5.0%
+下单量=日成交量的   1%: 估算冲击 ≈  20.0 bp
+下单量=日成交量的   5%: 估算冲击 ≈  44.7 bp
+下单量=日成交量的  20%: 估算冲击 ≈  89.4 bp</code></pre>
+  <p><b>解读</b>:</p>
+  <ul>
+    <li>两种算法都要买 25 万股(日成交量的 5%)。VWAP 的最大参与率正好 5%(处处按量分配),TWAP 在成交量低的时段参与率升到 6.6%,所以冲击略大。</li>
+    <li>执行落差约 15bp,其中大部分来自这一天模拟价格本身的上涨(相对市场 VWAP 只有 3–4bp)。<b>执行落差同时包含“执行得好不好”和“运气”(价格走势)</b>,评估执行质量时要分开看。</li>
+    <li>平方根模型给出的量级说明:同一个策略,资金规模扩大后成本会以非线性方式上升。</li>
+  </ul>
+
+  <h2>8.6 限价单还是市价单</h2>
+  <table>
+    <tr><th></th><th>市价单(吃单)</th><th>限价单(挂单)</th></tr>
+    <tr><td>成交确定性</td><td>高</td><td>不确定,可能不成交</td></tr>
+    <tr><td>价格</td><td>支付价差 + 冲击</td><td>可能赚到价差</td></tr>
+    <tr><td>主要风险</td><td>成本</td><td><b>逆向选择</b>与<b>机会成本</b></td></tr>
+  </table>
+  <p><span class="term">逆向选择 <span class="en">(adverse selection)</span></span>:你的限价买单最容易在“价格要继续下跌”的时候被成交(因为知情的卖家愿意卖给你),而在“价格要上涨”的时候成交不了。所以挂单看似省了价差,但成交的那些往往是“不太好的”成交。<span class="term">机会成本 <span class="en">(opportunity cost)</span></span>:没成交的部分,价格跑掉了。对于信号衰减快的策略(第 2 章),机会成本可能比价差更贵。</p>
+
+  <h2>8.7 交易成本分析(TCA)</h2>
+  <p><span class="term">交易成本分析 <span class="en">(Transaction Cost Analysis, TCA)</span></span>事后评估执行质量。核心是选对基准:</p>
+  <table>
+    <tr><th>基准</th><th>衡量什么</th></tr>
+    <tr><td>决策价 / 到达价</td><td>完整的执行落差,与策略最相关</td></tr>
+    <tr><td>区间 VWAP</td><td>执行是否“随大流”;容易被自己的大单影响</td></tr>
+    <tr><td>收盘价</td><td>适用于以收盘价为目标的策略</td></tr>
+  </table>
+  <div class="callout example"><b>执行落差分解例子</b>:决策时价格 10.00 元,计划买 10,000 股。实际买到 8,000 股,均价 10.05;剩下 2,000 股没买到,收盘 10.20;佣金 20 元。
+    <ul>
+      <li>执行成本 = 8,000 × (10.05 − 10.00) = 400 元</li>
+      <li>机会成本 = 2,000 × (10.20 − 10.00) = 400 元</li>
+      <li>显性费用 = 20 元</li>
+      <li>总执行落差 = 820 元,占纸面组合 10 万元的 <b>0.82%(82bp)</b>。</li>
+    </ul>
+    如果只看“成交均价相对 VWAP”,可能觉得执行不错,却忽略了一半的成本来自没成交的部分。
+  </div>
+  <p><b>把 TCA 结果反馈给回测</b>:用真实成交数据校准第 6 章引擎的滑点参数和本章的冲击系数 \(Y\),回测才会越来越接近实盘。</p>
+
+  <h2>8.8 常见错误</h2>
+  <ul class="mistakes">
+    <li>❌ 回测用固定很小的滑点,不随订单规模变化 → 高估策略容量。</li>
+    <li>❌ 假设限价单在价格“碰到”时一定成交 → 忽略排队和逆向选择。</li>
+    <li>❌ 只用 VWAP 评估执行 → 忽略机会成本和价格漂移。</li>
+    <li>❌ 在成交量很小的时段(或低流动性股票上)下大单。</li>
+    <li>❌ 用成交量预测时用到了当天的真实成交量(未来函数)。</li>
+  </ul>
+
+  <h2>8.9 本章小结</h2>
+  <div class="card summary"><ul>
+    <li>订单簿按价格-时间优先撮合;市价单消耗流动性,限价单提供流动性。</li>
+    <li>单边吃单成本 ≈ 半个价差;订单越大、吃的档位越多,成本非线性上升。</li>
+    <li>平方根冲击:\(I\approx Y\sigma\sqrt{Q/V}\),决定策略容量。</li>
+    <li>TWAP 按时间切、VWAP 按成交量切、POV 跟随成交量、IS 权衡冲击与风险。</li>
+    <li>执行落差 = 执行成本 + 机会成本 + 显性费用;用 TCA 校准回测参数。</li>
+  </ul></div>
+  <div class="quiz" data-quiz="ch8"></div>
+</section>
+
+<!-- ================= CH9 ================= -->
+<section class="page" id="ch9" data-chapter>
+  <h1>第 9 章 · 从回测到实盘</h1>
+  <p class="lead">回测是在模拟器里开飞机,实盘是真的起飞。这一章讲怎样一步步上线、怎样建风控和监控、用哪些开源工具、要注意哪些合规问题,以及学完本站之后往哪里走。</p>
+  <div class="callout bridge">🔗 <b>承上启下</b>:入门站 <a href="../#ch1">第 1 章</a> 的工作流最后一步是“实盘:先模拟盘,再小资金”,<a href="../#ch7">第 7 章</a> 讲了单笔止损和仓位上限,<a href="../#ch8">第 8 章</a> 给了入门书单。本章把这些扩展成一套<b>系统</b>:上线的关卡、事前/事中/事后风控、实盘与回测的偏差监控,以及进阶的书单与论文。前 8 章的每一项工作,都会在这里汇合。</div>
+  <div class="card objectives"><b>🎯 学完本章你将能够</b>
+    <ul>
+      <li>为一个策略设计“回测 → 模拟盘 → 小资金 → 放大”的上线关卡;</li>
+      <li>画出实盘系统的模块图,实现基本的事前风控检查;</li>
+      <li>设定监控指标和告警阈值,定位实盘与回测偏差的来源;</li>
+      <li>根据需求选择合适的开源框架;</li>
+      <li>了解程序化交易相关的合规要点,并规划下一步的学习。</li>
+    </ul>
+    <p class="disclaimer" style="margin:6px 0 0">⏱ 预计 2 小时。合规部分只是学习提示,<b>不是法律意见</b>,请以监管机构、交易所和你所在券商的最新规定为准。</p>
+  </div>
+
+  <h2>9.1 上线的四道关卡</h2>
+  <div class="flow"><span class="step">① 研究与回测</span><span class="arrow">→</span><span class="step">② 模拟盘</span><span class="arrow">→</span><span class="step">③ 小资金实盘</span><span class="arrow">→</span><span class="step">④ 逐步放大</span></div>
+  <table>
+    <tr><th>关卡</th><th>目的</th><th>通过标准(示例,需按策略设定)</th></tr>
+    <tr><td>① 研究与回测</td><td>证明想法在统计上站得住</td><td>第 7 章清单全部通过;成本 ×2 后仍盈利;DSR 足够高;保留集只用过一次</td></tr>
+    <tr><td>② <span class="term">模拟盘 <span class="en">(paper trading)</span></span></td><td>检验<b>系统</b>而非策略:数据、信号、下单、记账是否正确</td><td>连续运行若干周无故障;信号与“用同期数据离线重跑回测”的信号一致</td></tr>
+    <tr><td>③ 小资金实盘</td><td>测量真实成本、成交率、延迟</td><td>实际滑点与回测假设一致;拒单/未成交比例在预期内;实盘与回测净值偏差可解释</td></tr>
+    <tr><td>④ 逐步放大</td><td>验证容量</td><td>每次放大后冲击成本按第 8 章模型预期变化;没有出现新的系统问题</td></tr>
+  </table>
+  <div class="callout warn">模拟盘<b>不能</b>验证成交:模拟撮合通常假设你的订单不影响市场、挂单一定按规则成交。它的价值在于发现“系统 bug”——比如数据延迟导致信号错误、程序重启后持仓丢失、周末/节假日处理错误。</div>
+
+  <h2>9.2 实盘系统的组成</h2>
+  <div class="flow">
+    <span class="step">行情接入</span><span class="arrow">→</span><span class="step">策略引擎</span><span class="arrow">→</span><span class="step">事前风控</span><span class="arrow">→</span><span class="step">订单管理 OMS</span><span class="arrow">→</span><span class="step">交易接口</span><span class="arrow">→</span><span class="step">券商 / 交易所</span>
+  </div>
+  <table>
+    <tr><th>模块</th><th>职责</th><th>对应本站章节</th></tr>
+    <tr><td>行情接入</td><td>实时行情、清洗、落库;断线重连</td><td>第 1 章</td></tr>
+    <tr><td>策略引擎</td><td>与回测<b>同一套</b>策略代码</td><td>第 2–6 章</td></tr>
+    <tr><td>事前风控</td><td>每笔订单发出前的硬性检查</td><td>9.3</td></tr>
+    <tr><td><span class="term">订单管理系统 <span class="en">(Order Management System, OMS)</span></span></td><td>订单状态机(已报、部成、已成、已撤、废单)、持仓与资金同步</td><td>第 6 章 Portfolio 的实盘版</td></tr>
+    <tr><td>执行 / 交易接口</td><td>拆单算法、对接券商 API</td><td>第 8 章</td></tr>
+    <tr><td>监控告警</td><td>指标采集、异常告警、日志</td><td>9.4</td></tr>
+    <tr><td>对账</td><td>每日收盘后,系统持仓/资金与券商结算单逐项核对</td><td>—</td></tr>
+  </table>
+  <p>设计原则:<b>状态以券商为准</b>(每天开盘前从券商同步持仓和资金,而不是相信本地记录);<b>所有操作可重放</b>(记录每一条行情、信号、订单、成交,出问题时可以复现);<b>故障时默认停止</b>(宁可少赚,不要失控)。</p>
+
+  <h2>9.3 风控系统:事前、事中、事后</h2>
+  <h3>三层防线</h3>
+  <table>
+    <tr><th>层次</th><th>时机</th><th>例子</th></tr>
+    <tr><td>事前 <span class="en">(pre-trade)</span></td><td>订单发出前</td><td>单笔金额上限、价格偏离上限(防“乌龙指”)、单票仓位上限、黑名单、整手检查、每日委托笔数上限</td></tr>
+    <tr><td>事中 <span class="en">(intraday)</span></td><td>交易过程中</td><td>当日亏损阈值触发停止开仓;撤单率、成交率异常;总开关(kill switch)</td></tr>
+    <tr><td>事后 <span class="en">(post-trade)</span></td><td>收盘后 / 定期</td><td>对账;回撤、风险暴露、因子暴露报告;实盘与回测偏差分析</td></tr>
+  </table>
+  <p><span class="term">总开关 <span class="en">(kill switch)</span></span>是最重要也最容易被忽视的功能:一个按钮(或一条自动规则)就能立刻停止所有新订单、撤销所有挂单。程序失控时,几分钟就可能造成巨大损失。</p>
+  <div class="code-title">📄 ch9_risk.py</div><pre><code class="language-python">from dataclasses import dataclass, field
+import numpy as np
+
+@dataclass
+class RiskLimits:                       # 风控参数:全部是示意值,请根据自己的资金规模和策略设定
+    max_order_value: float = 200_000    # 单笔委托金额上限(元)
+    max_position_pct: float = 0.10      # 单只股票持仓占总资产上限
+    max_daily_orders: int = 200         # 每日委托笔数上限(防止程序死循环狂发单)
+    max_price_dev: float = 0.03         # 委托价偏离最新价上限(防“乌龙指”)
+    daily_loss_stop: float = 0.03       # 当日亏损达到 3% 停止开新仓
+    blacklist: set = field(default_factory=lambda: {&quot;ST_XYZ&quot;})
+
+class PreTradeRisk:
+    &quot;&quot;&quot;事前风控:每一笔委托发出前都必须通过全部检查,任何一条不满足就拒绝并记录原因。&quot;&quot;&quot;
+    def __init__(self, limits: RiskLimits, equity: float):
+        self.lim, self.equity, self.start_equity = limits, equity, equity
+        self.orders_today, self.positions = 0, {}
+        self.kill_switch = False                                     # 人工或自动触发的“总开关”
+
+    def check(self, symbol, qty, price, last_price):
+        L = self.lim
+        value = abs(qty) * price
+        new_pos_value = (self.positions.get(symbol, 0) + qty) * last_price
+        rules = [
+            (self.kill_switch, &quot;总开关已关闭&quot;),
+            (symbol in L.blacklist, &quot;标的在黑名单&quot;),
+            (qty % 100 != 0 and qty &gt; 0, &quot;买入数量不是 100 股整数倍&quot;),
+            (value &gt; L.max_order_value, f&quot;单笔金额 {value:,.0f} 超过上限&quot;),
+            (abs(price / last_price - 1) &gt; L.max_price_dev, &quot;委托价偏离最新价过大&quot;),
+            (new_pos_value &gt; L.max_position_pct * self.equity, &quot;成交后单票仓位超限&quot;),
+            (self.orders_today &gt;= L.max_daily_orders, &quot;当日委托笔数已达上限&quot;),
+            (qty &gt; 0 and self.equity / self.start_equity - 1 &lt;= -L.daily_loss_stop, &quot;当日亏损触发止损,禁止开仓&quot;),
+        ]
+        for hit, reason in rules:
+            if hit:
+                return False, reason
+        self.orders_today += 1
+        return True, &quot;通过&quot;
+
+    def on_fill(self, symbol, qty):
+        &quot;&quot;&quot;成交回报到达后更新持仓 —— 持仓以成交为准,而不是以“发出的委托”为准。&quot;&quot;&quot;
+        self.positions[symbol] = self.positions.get(symbol, 0) + qty
+
+risk = PreTradeRisk(RiskLimits(), equity=1_000_000)
+tests = [(&quot;X0001&quot;, 5000, 10.00, 10.00), (&quot;X0001&quot;, 30000, 10.00, 10.00), (&quot;X0002&quot;, 1000, 10.80, 10.00),
+         (&quot;ST_XYZ&quot;, 100, 5.00, 5.00), (&quot;X0003&quot;, 150, 20.00, 20.00), (&quot;X0004&quot;, 8000, 12.00, 12.00),
+         (&quot;X0001&quot;, 6000, 10.00, 10.00)]   # 最后一笔:X0001 已持有 5000 股,再买 6000 股将超过 10% 仓位上限
+for t in tests:
+    ok, why = risk.check(*t)
+    if ok:
+        risk.on_fill(t[0], t[1])          # 演示:假设通过的委托全部成交
+    print(f&quot;{t[0]:7s} 数量={t[1]:6d} 价格={t[2]:6.2f} → {&#x27;✅&#x27; if ok else &#x27;❌&#x27;} {why}&quot;)
+
+# ---- 事后监控:实盘净值相对回测净值的跟踪偏差,超阈值就告警 ----
+rng = np.random.default_rng(41)
+bt = np.cumprod(1 + 0.0005 + 0.01 * rng.standard_normal(60))              # 回测(模拟)
+live = bt * np.cumprod(1 - 0.0004 + 0.002 * rng.standard_normal(60))      # 实盘 = 回测 × 额外损耗(模拟)
+gap = live / bt - 1
+alert_day = np.argmax(gap &lt; -0.02) if (gap &lt; -0.02).any() else None
+print(f&quot;60 天后实盘相对回测偏差: {gap[-1]:.2%};  首次跌破 −2% 告警阈值: 第 {alert_day + 1 if alert_day is not None else &#x27;—&#x27;} 天&quot;)</code></pre>
+  <div class="out-label">▶ 运行输出(模拟数据;不同版本库的数值可能有细微差异)</div><pre class="out"><code class="language-plaintext">X0001   数量=  5000 价格= 10.00 → ✅ 通过
+X0001   数量= 30000 价格= 10.00 → ❌ 单笔金额 300,000 超过上限
+X0002   数量=  1000 价格= 10.80 → ❌ 委托价偏离最新价过大
+ST_XYZ  数量=   100 价格=  5.00 → ❌ 标的在黑名单
+X0003   数量=   150 价格= 20.00 → ❌ 买入数量不是 100 股整数倍
+X0004   数量=  8000 价格= 12.00 → ✅ 通过
+X0001   数量=  6000 价格= 10.00 → ❌ 成交后单票仓位超限
+60 天后实盘相对回测偏差: -3.36%;  首次跌破 −2% 告警阈值: 第 38 天</code></pre>
+  <p><b>解读</b>:每笔订单按固定顺序过一遍所有规则,任何一条不满足就拒绝并<b>记录原因</b>。第一笔 X0001 买入 5000 股通过并成交;最后一笔再买 6000 股时,成交后持仓价值 11 万元超过总资产 10% 的上限而被拒——这说明风控必须基于<b>成交后的</b>持仓来判断,并以成交回报更新状态。最后一行模拟了事后监控:实盘净值相对回测逐渐出现系统性落后,第 38 天跌破 −2% 的阈值触发告警。</p>
+  <div class="callout warn">风控参数要<b>在上线前定好并写进配置文件</b>,不要在亏损时临时放宽。“这次情况特殊”是风控失效最常见的理由。</div>
+
+  <h2>9.4 监控与告警</h2>
+  <table>
+    <tr><th>类别</th><th>指标</th><th>告警示例</th></tr>
+    <tr><td>系统健康</td><td>行情延迟、进程存活、接口连接状态、磁盘/内存</td><td>行情超过 N 秒未更新</td></tr>
+    <tr><td>交易质量</td><td>成交率、拒单率、撤单率、实际滑点</td><td>滑点连续多日显著高于假设</td></tr>
+    <tr><td>风险</td><td>当日盈亏、回撤、杠杆、集中度、因子暴露</td><td>回撤超过回测历史最大回撤的一定比例</td></tr>
+    <tr><td>策略一致性</td><td>实盘信号 vs 离线重算信号;实盘净值 vs 回测净值</td><td>信号不一致;跟踪偏差超过阈值</td></tr>
+  </table>
+  <h3>实盘与回测偏差从哪里来</h3>
+  <table>
+    <tr><th>来源</th><th>排查方法</th></tr>
+    <tr><td>数据差异(实时数据与历史数据库不一致、复权口径)</td><td>用实盘当天录制的数据离线重跑,对比信号</td></tr>
+    <tr><td>成交差异(滑点、冲击、未成交)</td><td>TCA(第 8 章)</td></tr>
+    <tr><td>时序差异(信号计算时点、下单延迟)</td><td>检查日志中的时间戳</td></tr>
+    <tr><td>费用差异(实际费率、最低佣金)</td><td>与券商结算单核对</td></tr>
+    <tr><td>回测本身的偏差(未来函数、过拟合)</td><td>回到第 1、5、7 章重新检查——这是最坏也最常见的情况</td></tr>
+  </table>
+
+  <h2>9.5 常见开源框架</h2>
+  <p>下面是一些常用的开源项目(按用途分类)。开源项目的维护状态、接口和许可证会变化,使用前请查看各自的官方仓库和文档。</p>
+  <table>
+    <tr><th>项目</th><th>类型</th><th>适合场景</th></tr>
+    <tr><td><b>vn.py(VeighNa)</b></td><td>国内开源的 Python 量化交易平台框架,提供多种交易接口(Gateway)、策略模块和回测模块</td><td>国内期货、股票等的实盘交易系统搭建</td></tr>
+    <tr><td><b>Qlib</b>(微软开源)</td><td>面向 AI 的量化投资研究平台:数据处理、因子/特征、模型训练、回测与分析</td><td>机器学习选股研究(第 2、5 章)</td></tr>
+    <tr><td><b>backtrader</b></td><td>事件驱动回测框架,文档和社区资料多</td><td>学习事件驱动回测、中低频策略</td></tr>
+    <tr><td><b>zipline-reloaded</b></td><td>Quantopian zipline 的社区维护版,事件驱动、面向美股日频</td><td>配合 alphalens / pyfolio 生态</td></tr>
+    <tr><td><b>vectorbt</b></td><td>基于 numpy/numba 的向量化回测</td><td>大规模参数扫描(注意第 7 章的多重检验!)</td></tr>
+    <tr><td><b>alphalens-reloaded / pyfolio-reloaded</b></td><td>因子分析 / 绩效分析报告</td><td>第 2 章、第 7 章</td></tr>
+    <tr><td><b>PyPortfolioOpt / Riskfolio-Lib</b></td><td>组合优化库(均值-方差、收缩、HRP、BL 等)</td><td>第 4 章</td></tr>
+    <tr><td><b>statsmodels / arch</b></td><td>统计与计量模型;GARCH 族</td><td>第 3 章</td></tr>
+  </table>
+  <div class="callout"><b>怎么选?</b>研究阶段:pandas + 自己的工具函数往往最灵活,Qlib 适合 ML 流水线;回测阶段:用事件驱动框架(或第 6 章的引擎)做最终验证;实盘阶段:vn.py 一类框架提供了接口和订单管理。<b>无论用什么框架,第 6 章的验证方法都适用</b>——不要默认框架没有 bug,也不要默认它的默认成本参数适合你。</div>
+
+  <h2>9.6 合规提示</h2>
+  <div class="callout warn">以下仅为学习提示,不构成法律意见。规则会更新,请以中国证监会、交易所、你所在券商的最新规定和要求为准。</div>
+  <ul>
+    <li><b>程序化交易监管</b>:中国证监会于 2024 年发布了《证券市场程序化交易管理规定(试行)》,沪深北交易所也发布了相应的实施细则,对程序化交易的<b>报告</b>、高频交易的额外要求、异常交易监控等作出规定。使用程序自动下单前,应向券商了解报告义务和接入要求。</li>
+    <li><b>交易接口</b>:通过券商提供的正规接口接入;不要使用来路不明的“破解”接口或第三方转发服务,既有合规风险也有资金安全风险。</li>
+    <li><b>异常交易行为</b>:频繁申报并撤单、大量申报影响价格、在涨跌停价位大量挂撤单等,可能被交易所认定为异常交易。风控里的“撤单率上限”“每日委托笔数上限”也有这方面的作用。</li>
+    <li><b>账户与资金</b>:不要出借、借用证券账户;为他人管理资金、收费荐股等涉及持牌要求。</li>
+    <li><b>数据使用</b>:注意行情和数据的授权范围,商业数据通常不能随意再分发。</li>
+  </ul>
+
+  <h2>9.7 进阶学习路线</h2>
+  <table>
+    <tr><th>阶段</th><th>目标</th><th>建议练习</th></tr>
+    <tr><td>巩固(1–3 个月)</td><td>把本站的代码换成真实数据跑通</td><td>搭建第 1 章的数据目录;复现一个经典因子的完整报告(第 2 章);用第 6 章引擎和一个开源框架分别回测同一策略并对比</td></tr>
+    <tr><td>深入(3–12 个月)</td><td>选一个方向做深</td><td>多因子 + 组合优化;或 ML 选股(Qlib);或期货 CTA + 风险平价;为每个项目写稳健性报告(第 7 章)</td></tr>
+    <tr><td>实战(持续)</td><td>系统化与工程化</td><td>模拟盘 → 小资金实盘;建立 TCA 和监控;记录每一次尝试(为 DSR 计算 N)</td></tr>
+  </table>
+  <h3>书单(均为已出版书籍)</h3>
+  <table>
+    <tr><th>书名</th><th>作者</th><th>对应章节</th></tr>
+    <tr><td><i>Active Portfolio Management</i>(第 2 版, 1999)</td><td>Richard Grinold, Ronald Kahn</td><td>第 2、4 章:主动管理基本定律、信息比率、风险模型</td></tr>
+    <tr><td><i>Quantitative Equity Portfolio Management</i>(2007)</td><td>Edward Qian, Ronald Hua, Eric Sorensen</td><td>第 2、4 章</td></tr>
+    <tr><td>《因子投资:方法与实践》(2020)</td><td>石川、刘洋溢、连祥斌</td><td>第 2 章(中文,结合 A 股)</td></tr>
+    <tr><td><i>Expected Returns</i>(2011)</td><td>Antti Ilmanen</td><td>各类资产与因子收益来源</td></tr>
+    <tr><td><i>Analysis of Financial Time Series</i>(第 3 版, 2010)</td><td>Ruey S. Tsay</td><td>第 3 章</td></tr>
+    <tr><td><i>Advances in Financial Machine Learning</i>(2018)</td><td>Marcos López de Prado</td><td>第 5、7 章:三重障碍、purged CV、HRP、DSR、PBO</td></tr>
+    <tr><td><i>Machine Learning for Algorithmic Trading</i>(第 2 版, 2020)</td><td>Stefan Jansen</td><td>第 5 章(大量代码示例)</td></tr>
+    <tr><td><i>Algorithmic Trading: Winning Strategies and Their Rationale</i>(2013)</td><td>Ernest P. Chan</td><td>第 3 章均值回归、协整、卡尔曼滤波</td></tr>
+    <tr><td><i>Systematic Trading</i>(2015)</td><td>Robert Carver</td><td>第 4、9 章:系统化交易的仓位与风险框架</td></tr>
+    <tr><td><i>Trading and Exchanges</i>(2003)</td><td>Larry Harris</td><td>第 8 章:市场微观结构</td></tr>
+    <tr><td><i>Trades, Quotes and Prices</i>(2018)</td><td>Jean-Philippe Bouchaud, Julius Bonart, Jonathan Donier, Martin Gould</td><td>第 8 章:冲击与平方根定律</td></tr>
+  </table>
+  <h3>经典论文</h3>
+  <ul>
+    <li>Markowitz, H. (1952). Portfolio Selection. <i>Journal of Finance</i>. —— 第 4 章</li>
+    <li>Fama, E., & MacBeth, J. (1973). Risk, Return, and Equilibrium: Empirical Tests. <i>Journal of Political Economy</i>. —— 第 2 章</li>
+    <li>Engle, R. (1982). Autoregressive Conditional Heteroscedasticity… <i>Econometrica</i>;Bollerslev, T. (1986). Generalized Autoregressive Conditional Heteroskedasticity. <i>Journal of Econometrics</i>. —— 第 3 章</li>
+    <li>Engle, R., & Granger, C. (1987). Co-integration and Error Correction. <i>Econometrica</i>. —— 第 3 章</li>
+    <li>Kyle, A. (1985). Continuous Auctions and Insider Trading. <i>Econometrica</i>. —— 第 8 章</li>
+    <li>Perold, A. (1988). The Implementation Shortfall: Paper versus Reality. <i>Journal of Portfolio Management</i>. —— 第 8 章</li>
+    <li>Black, F., & Litterman, R. (1992). Global Portfolio Optimization. <i>Financial Analysts Journal</i>. —— 第 4 章</li>
+    <li>Almgren, R., & Chriss, N. (2000). Optimal Execution of Portfolio Transactions. <i>Journal of Risk</i>. —— 第 8 章</li>
+    <li>White, H. (2000). A Reality Check for Data Snooping. <i>Econometrica</i>. —— 第 7 章</li>
+    <li>Lo, A. (2002). The Statistics of Sharpe Ratios. <i>Financial Analysts Journal</i>. —— 第 7 章</li>
+    <li>Ledoit, O., & Wolf, M. (2004). A Well-Conditioned Estimator for Large-Dimensional Covariance Matrices. <i>Journal of Multivariate Analysis</i>;以及 Honey, I Shrunk the Sample Covariance Matrix. <i>Journal of Portfolio Management</i>. —— 第 4 章</li>
+    <li>Bailey, D., & López de Prado, M. (2014). The Deflated Sharpe Ratio. <i>Journal of Portfolio Management</i>. —— 第 7 章</li>
+    <li>López de Prado, M. (2016). Building Diversified Portfolios that Outperform Out of Sample. <i>Journal of Portfolio Management</i>. —— 第 4 章 HRP</li>
+    <li>Harvey, C., Liu, Y., & Zhu, H. (2016). … and the Cross-Section of Expected Returns. <i>Review of Financial Studies</i>. —— 第 7 章</li>
+    <li>Bailey, D., Borwein, J., López de Prado, M., & Zhu, Q. (2017). The Probability of Backtest Overfitting. <i>Journal of Computational Finance</i>. —— 第 7 章</li>
+    <li>Ke, G., et al. (2017). LightGBM: A Highly Efficient Gradient Boosting Decision Tree. <i>NeurIPS</i>. —— 第 5 章</li>
+  </ul>
+
+  <h2>9.8 常见错误</h2>
+  <ul class="mistakes">
+    <li>❌ 跳过模拟盘直接实盘 → 系统 bug 用真金白银去发现。</li>
+    <li>❌ 本地持仓记录与券商不对账 → 误差累积,风控基于错误状态。</li>
+    <li>❌ 没有总开关、没有每日委托上限 → 程序失控时无法止损。</li>
+    <li>❌ 亏损时临时放宽风控参数。</li>
+    <li>❌ 实盘与回测偏差扩大却不排查,只是“再等等看”。</li>
+    <li>❌ 不了解程序化交易的报告和异常交易规定。</li>
+  </ul>
+
+  <h2>9.9 本章小结与全站回顾</h2>
+  <div class="card summary"><ul>
+    <li>上线四关:回测 → 模拟盘(验系统)→ 小资金(验成本)→ 逐步放大(验容量)。</li>
+    <li>实盘系统:行情、策略、风控、OMS、交易接口、监控、对账;状态以券商为准,故障时默认停止。</li>
+    <li>风控分事前、事中、事后三层;总开关必不可少;参数上线前定好。</li>
+    <li>监控实盘与回测的偏差,并按数据、成交、时序、费用、回测偏差逐项排查。</li>
+    <li>全站主线:<b>干净的数据</b>(1)→ <b>可检验的信号</b>(2、3、5)→ <b>稳健的组合</b>(4)→ <b>真实的模拟</b>(6、8)→ <b>诚实的评估</b>(7)→ <b>可控的实盘</b>(9)。</li>
+  </ul></div>
+  <div class="callout good">🎓 恭喜你读完了全部 9 章!建议回到 <a href="#home">首页</a> 看看还有哪些章节没完成,或者去 <a href="#glossary">术语表</a> 检查一下自己是否还记得每个概念。</div>
+  <div class="quiz" data-quiz="ch9"></div>
+</section>
+
+<!-- ================= DEMO: FRONTIER ================= -->
+<section class="page" id="demo-frontier">
+  <h1>📐 互动演示:有效前沿与估计误差 <span class="sim-tag">模拟数据</span></h1>
+  <p class="lead">配合 <a href="#ch4">第 4 章</a>。我们“知道”5 个虚构资产的真实参数,然后假装只能看到 \(T\) 个月的模拟历史收益,用它估计参数并优化。比较“你以为的前沿”和“真实前沿”,感受估计误差。</p>
+  <div class="callout warn"><b>注意:</b>5 个资产的“真实”预期收益和波动率是教学用的<b>假设值</b>(大盘股票 7%/18%、小盘股票 9%/26%、国债 3%/4%、信用债 4%/6%、商品 5%/20%),不是对任何真实市场的预测。收益数据由程序按多元正态分布随机生成。</div>
+  <div class="card">
+    <div class="controls">
+      <label>股票之间的相关系数:<span class="val" id="efRhoEqV"></span><input type="range" id="efRhoEq" min="0" max="95" value="70"></label>
+      <label>股票与债券的相关系数:<span class="val" id="efRhoSBV"></span><input type="range" id="efRhoSB" min="-50" max="50" value="0"></label>
+      <label>无风险利率:<span class="val" id="efRfV"></span><input type="range" id="efRf" min="0" max="40" value="20"></label>
+      <label>估计用的样本长度:<span class="val" id="efTV"></span><input type="range" id="efT" min="24" max="360" step="12" value="60"></label>
+      <label>协方差收缩强度 δ(向对角阵):<span class="val" id="efShrinkV"></span><input type="range" id="efShrink" min="0" max="100" value="0"></label>
+      <label>随机种子:<span class="val" id="efSeedV"></span><input type="range" class="seed" id="efSeed" min="1" max="999" value="7"></label>
+      <label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="efShort"> 允许做空(无约束解析解)</label>
+    </div>
+    <button class="btn secondary reseed">🎲 换一组模拟历史</button>
+  </div>
+  <div class="stats" id="efStats"></div>
+  <h3>波动–收益平面</h3>
+  <div class="chart-box"><canvas id="efChart"></canvas></div>
+  <p class="legend-note">橙色实线 = 用估计参数算出的前沿(“你以为”);蓝色虚线 = 用真实参数算出的前沿。橙色三角是估计的最大夏普组合<b>在你眼中</b>的位置,红色三角是同一组权重<b>在真实世界中</b>的位置。</p>
+  <h3>各组合的权重与表现</h3>
+  <div id="efTable"></div>
+  <div class="chart-box small"><canvas id="efWeights"></canvas></div>
+  <h3>风险贡献:等权 vs 风险平价</h3>
+  <div class="chart-box small"><canvas id="efRC"></canvas></div>
+  <div class="card"><b>试试看</b>
+    <ul>
+      <li>把样本长度调到 24 个月,多换几次种子:估计的最大夏普组合权重会剧烈跳动,“乐观偏差”经常很大。再调到 360 个月,差距明显缩小——但即使 30 年,收益均值的估计误差仍不小。</li>
+      <li>把收缩强度调高:前沿变得“更保守”,权重更分散,真实夏普常常反而更接近最优。</li>
+      <li>勾选“允许做空”:无约束解会出现大额做空,估计误差的影响更极端。约束本身就是一种“正则化”。</li>
+      <li>对比表格中“风险平价”和“最大夏普(估计)”的<b>真实夏普</b>:不用收益估计的方法,常常比用错误收益估计的“最优”方法更好。</li>
+    </ul>
+    <p class="disclaimer">实现说明:只做多时用投影梯度法在一串风险厌恶系数上求解均值-方差问题;风险平价用乘法迭代求解;收益按月模拟后年化。</p>
+  </div>
+</section>
+
+<!-- ================= DEMO: FACTOR ================= -->
+<section class="page" id="demo-factor">
+  <h1>🧮 互动演示:因子 IC 与分层回测 <span class="sim-tag">模拟数据</span></h1>
+  <p class="lead">配合 <a href="#ch2">第 2 章</a>。我们直接设定一个因子与下月收益之间的“真实” IC,模拟一个股票池,然后做 RankIC 分析和分层回测,看看样本统计量离真实值有多远、成本会吃掉多少。</p>
+  <div class="callout warn"><b>注意:</b>所有股票、因子值和收益都是程序随机生成的<b>模拟数据</b>。模型:每月因子 \(f_t=\rho f_{t-1}+\sqrt{1-\rho^2}\,\eta_t\),下月收益 \(r=8\%\times\big(\text{IC}\cdot f+\sqrt{1-\text{IC}^2}\,\varepsilon\big)\)(月波动 8%),\(\eta,\varepsilon\) 为标准正态噪声。这里没有行业、市值等结构,也没有做空限制。</div>
+  <div class="card">
+    <div class="controls">
+      <label>股票数量:<span class="val" id="fcNV"></span><input type="range" id="fcN" min="50" max="1000" step="50" value="300"></label>
+      <label>回测月数:<span class="val" id="fcTV"></span><input type="range" id="fcT" min="24" max="180" step="12" value="84"></label>
+      <label>真实 IC:<span class="val" id="fcICV"></span><input type="range" id="fcIC" min="-5" max="15" value="3"></label>
+      <label>因子月度持续性 ρ:<span class="val" id="fcRhoV"></span><input type="range" id="fcRho" min="0" max="98" value="80"></label>
+      <label>分组数:<select id="fcQ"><option value="3">3 组</option><option value="5" selected>5 组</option><option value="10">10 组</option></select></label>
+      <label>单边交易成本:<span class="val" id="fcCostV"></span><input type="range" id="fcCost" min="0" max="60" value="15"></label>
+      <label>随机种子:<span class="val" id="fcSeedV"></span><input type="range" class="seed" id="fcSeed" min="1" max="999" value="11"></label>
+    </div>
+    <button class="btn secondary reseed">🎲 换一组模拟数据</button>
+  </div>
+  <div class="stats" id="fcStats"></div>
+  <h3>每月 RankIC 与累计 RankIC</h3>
+  <div class="chart-box small"><canvas id="fcICChart"></canvas></div>
+  <h3>各组月均收益</h3>
+  <div class="chart-box small"><canvas id="fcQbar"></canvas></div>
+  <h3>各组与多空组合的累计净值</h3>
+  <div class="chart-box"><canvas id="fcCum"></canvas></div>
+  <div class="card"><b>试试看</b>
+    <ul>
+      <li>把真实 IC 设为 0:累计 IC 仍会“走出趋势”,分组也可能看起来有序——这就是噪声。多换几次种子,看 t 值有多少次超过 2。</li>
+      <li>把 IC 设为 0.03、股票数从 50 调到 1000:截面越宽,IC 的估计越稳定(标准差下降),ICIR 上升。这是主动管理基本定律里“广度”的直观体现。</li>
+      <li>把持续性 ρ 从 0.95 降到 0:头部组换手从低位升到接近 80%(5 组时),扣成本后的多空收益明显变差——<b>信号衰减快的因子更怕成本</b>。</li>
+      <li>换成 10 组:头尾差距更大,但每组股票更少,噪声更大。</li>
+    </ul>
+    <p class="disclaimer">成本口径:每月多头、空头两条腿各自按“新进入成分的比例 × 2(卖旧买新)× 单边成本”扣除;第一个月按全部建仓计。</p>
+  </div>
+</section>
+
+<!-- ================= DEMO: MULTIPLE TESTING ================= -->
+<section class="page" id="demo-multi">
+  <h1>🎲 互动演示:多重检验与运气 <span class="sim-tag">模拟数据</span></h1>
+  <p class="lead">配合 <a href="#ch7">第 7 章</a>。生成 \(N\) 个<b>真实夏普全部为 0</b> 的“策略”,看看其中最好的那个能有多好;再放入一个真实夏普为正的策略,看它能否从运气中被分辨出来。</p>
+  <div class="callout warn"><b>注意:</b>为了让页面在浏览器里秒算,这里直接从夏普比率的近似抽样分布中抽样:年化样本夏普 ≈ 真实夏普 + \(N(0,\,1/\text{年数})\)(对应收益独立、近似正态的情形)。所有“策略”都是<b>模拟出来的</b>,不对应任何真实策略。</div>
+  <div class="card">
+    <div class="controls">
+      <label>尝试的策略数 N(全是噪声):<span class="val" id="mtNV"></span><input type="range" id="mtN" min="1" max="1000" value="200"></label>
+      <label>回测年数:<span class="val" id="mtYV"></span><input type="range" id="mtY" min="1" max="20" value="3"></label>
+      <label>另一个“真实策略”的真实年化夏普:<span class="val" id="mtSRV"></span><input type="range" id="mtSR" min="0" max="200" step="5" value="80"></label>
+      <label>随机种子:<span class="val" id="mtSeedV"></span><input type="range" class="seed" id="mtSeed" min="1" max="999" value="5"></label>
+    </div>
+    <button class="btn secondary reseed">🎲 重新抽样</button>
+  </div>
+  <div class="stats" id="mtStats"></div>
+  <h3>噪声策略的年化夏普分布</h3>
+  <div class="chart-box"><canvas id="mtHist"></canvas></div>
+  <p class="legend-note">灰色柱 = N 个噪声策略的样本夏普分布;橙色柱标出“纯运气的最大夏普期望 E[max]”所在区间;绿色柱标出那个真实策略的样本夏普所在区间。</p>
+  <div class="card"><b>试试看</b>
+    <ul>
+      <li>N=1000、3 年:最好的噪声策略夏普常常超过 1.5,但它的 Bonferroni 校正 p 值和 DSR 都不高——它们识破了“挑选”。</li>
+      <li>把回测年数调到 15 年:噪声策略的分布明显变窄,真实夏普 0.8 的策略更容易脱颖而出。<b>样本越长,运气的空间越小。</b></li>
+      <li>N=1:没有挑选,PSR 与 DSR 相同。随着 N 增大,同一个真实策略的 DSR 会下降——<b>证据强度取决于你试了多少次</b>。</li>
+    </ul>
+    <p class="disclaimer">公式:\(E[\max]\approx\sqrt V\,[(1-\gamma)\Phi^{-1}(1-1/N)+\gamma\Phi^{-1}(1-1/(Ne))]\),\(V=1/\text{年数}\);PSR/DSR 按正态收益(偏度 0、峰度 3)计算。</p>
+  </div>
+</section>
+
+<!-- ================= GLOSSARY ================= -->
+<section class="page" id="glossary">
+  <h1>📖 术语表</h1>
+  <p class="lead">本站首次出现时加粗介绍过的术语都收录在这里,标签表示首次出现的章节,点击可跳转。入门站的基础术语请查看 <a href="../#glossary">入门站术语表</a>。</p>
+  <input class="glossary-search" id="glossSearch" placeholder="搜索术语,例如:中性化、purging、DSR、冲击……">
+  <p class="disclaimer" id="glossCount"></p>
+  <dl class="gloss" id="glossList"></dl>
+</section>
+
+</main>
+</div>
+<script src="vendor/katex/katex.min.js"></script>
+<script src="vendor/katex/contrib/auto-render.min.js"></script>
+<script src="vendor/hljs/highlight.min.js"></script>
+<script src="vendor/chart.umd.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
