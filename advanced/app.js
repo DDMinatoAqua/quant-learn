@@ -2,7 +2,7 @@
   "use strict";
   const CHAPTERS = ["ch1", "ch2", "ch3", "ch4", "ch5", "ch6", "ch7", "ch8", "ch9"];
   const DEMOS = ["demo-frontier", "demo-factor", "demo-multi"];
-  const PAGES = ["home", "prereq", ...CHAPTERS, ...DEMOS, "glossary"];
+  const PAGES = ["home", "prereq", ...CHAPTERS, ...DEMOS, "arcade", "glossary"];
   const TITLES = {};
   // 与入门站(ql-*)不同的存储前缀,两个站的进度互不干扰
   const LS_PROGRESS = "qa-progress", LS_THEME = "qa-theme", LS_QUIZ = "qa-quiz";
@@ -24,6 +24,7 @@
     try { localStorage.setItem(LS_THEME, t); } catch (e) {}
     applyTheme(t);
     rerenderActiveDemo();
+    document.dispatchEvent(new CustomEvent("qa:theme"));
   });
 
   /* ---------- progress ---------- */
@@ -43,9 +44,10 @@
   function setDone(ch, v) { progress[ch] = v; if (!v) delete progress[ch]; save(LS_PROGRESS, progress); renderProgress(); }
   $("#resetProgress").addEventListener("click", e => {
     e.preventDefault();
-    if (confirm("确定要清空本站(进阶)的学习进度和测验记录吗?入门站的进度不受影响。")) {
+    if (confirm("确定要清空本站(进阶)的学习进度、测验记录、经验值和闯关记录吗?入门站的进度不受影响。")) {
       progress = {}; save(LS_PROGRESS, progress); save(LS_QUIZ, {});
-      $$(".quiz").forEach(buildQuiz); renderProgress();
+      ["qa-xp", "qa-pred", "qa-game"].forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+      location.hash = "#home"; location.reload();
     }
   });
 
@@ -195,6 +197,7 @@
     closeMenu(); const top = () => window.scrollTo({ top: 0, behavior: "instant" });
     top(); setTimeout(top, 0); requestAnimationFrame(() => requestAnimationFrame(top));
     if (DEMO_INIT[id]) DEMO_INIT[id]();
+    document.dispatchEvent(new CustomEvent("qa:page", { detail: id }));
   }
   window.addEventListener("hashchange", route);
   if ("scrollRestoration" in history) history.scrollRestoration = "manual";
