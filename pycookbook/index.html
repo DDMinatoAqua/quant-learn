@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Python Cookbook 第三版 · 中文在线阅读</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐍</text></svg>">
+<link rel="stylesheet" href="vendor/hljs/github.min.css" id="hl-light">
+<link rel="stylesheet" href="vendor/hljs/github-dark.min.css" id="hl-dark" disabled>
+<link rel="stylesheet" href="style.css">
+<script>
+(function(){try{var t=localStorage.getItem('pcb-theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t;var f=localStorage.getItem('pcb-font');if(f)document.documentElement.style.setProperty('--fs',f+'px');}catch(e){}})();
+</script>
+</head>
+<body>
+<header class="topbar">
+  <button class="icon-btn" id="btn-menu" title="目录" aria-label="目录">☰</button>
+  <a class="brand" href="#/"><span class="logo">🐍</span><span class="brand-text">Python Cookbook <small>第三版 · 中文</small></span></a>
+  <div class="search-wrap">
+    <input id="search" type="search" placeholder="全文搜索（如：字典 排序）" autocomplete="off" aria-label="全文搜索">
+    <div id="search-results" class="search-results" hidden></div>
+  </div>
+  <div class="tools">
+    <button class="icon-btn" id="btn-search-m" title="搜索" aria-label="搜索">🔍</button>
+    <button class="icon-btn" id="btn-font-dec" title="缩小字号" aria-label="缩小字号">A−</button>
+    <button class="icon-btn" id="btn-font-inc" title="放大字号" aria-label="放大字号">A+</button>
+    <button class="icon-btn" id="btn-theme" title="切换深色/浅色" aria-label="切换主题">🌓</button>
+    <button class="icon-btn" id="btn-bookmarks" title="书签" aria-label="书签">🔖<span id="bm-count" class="badge">0</span></button>
+  </div>
+</header>
+<div id="overlay" class="overlay" hidden></div>
+<nav id="sidebar" class="sidebar" aria-label="目录">
+  <div class="side-head">
+    <span>目录</span>
+    <span id="overall-progress" class="muted"></span>
+    <button class="link-btn" id="btn-expand-all">全部展开</button>
+  </div>
+  <div id="toc"></div>
+  <div class="side-foot"><a href="#/about">关于本站 · 许可证</a></div>
+</nav>
+<main id="main">
+  <div id="resume" class="resume" hidden></div>
+  <article id="article" class="article"></article>
+  <footer class="site-footer">
+    内容来自开源项目 <a href="https://github.com/yidao620c/python3-cookbook" target="_blank" rel="noopener">yidao620c/python3-cookbook</a>（熊能 译，Apache License 2.0）。
+    原书《Python Cookbook》第三版 © 2013 David Beazley、Brian K. Jones，O’Reilly Media。 <a href="#/about">详细说明</a>
+  </footer>
+</main>
+<aside id="bm-panel" class="bm-panel" aria-label="书签" hidden>
+  <div class="bm-head">
+    <strong>🔖 我的书签</strong>
+    <button class="icon-btn" id="btn-bm-close" aria-label="关闭">✕</button>
+  </div>
+  <div class="bm-actions">
+    <button class="btn small" id="btn-bm-add">＋ 收藏当前页</button>
+    <button class="btn small ghost" id="btn-bm-export">导出 JSON</button>
+    <label class="btn small ghost">导入 JSON<input type="file" id="bm-import" accept="application/json,.json" hidden></label>
+  </div>
+  <input id="bm-filter" type="search" placeholder="筛选书签…" aria-label="筛选书签">
+  <div id="bm-list" class="bm-list"></div>
+</aside>
+<div id="toast" class="toast" hidden></div>
+<button id="para-bm" class="para-bm" title="收藏这一段" aria-label="收藏这一段" hidden>🔖</button>
+<script src="vendor/hljs/highlight.min.js"></script>
+<script src="toc.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
